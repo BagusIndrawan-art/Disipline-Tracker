@@ -13,7 +13,6 @@
     <!-- Ikon (Gunakan JPG kamu) -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
-
     <link rel="manifest" id="pwa-manifest">
 
     <title>2026 Elite Discipline Tracker</title>
@@ -90,12 +89,18 @@
 
         select { background-color: #1e293b; color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 12px; border-radius: 10px; font-size: 13px; }
 
-        .attachment-badge { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 8px; border-radius: 8px; display: flex; align-items: center; gap: 6px; font-size: 10px; color: #93c5fd; }
+        .attachment-badge { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 8px; border-radius: 8px; display: flex; align-items: center; gap: 6px; font-size: 10px; color: #93c5fd; max-width: 150px; }
         .attachment-preview { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
 
         .fasting-alert { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
         
-        /* Notif Icon Styles */
+        /* Timer Styles */
+        .timer-panel { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-top: 10px; display: none; flex-direction: column; align-items: center; }
+        .timer-display { font-family: 'Courier New', Courier, monospace; font-weight: 800; color: #60a5fa; font-size: 1.5rem; }
+        .pomo-badge { font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+        
+        footer { border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; padding: 40px 20px; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1px; line-height: 1.6; }
+
         .notif-active { color: #10b981; }
         .notif-blocked { color: #ef4444; }
     </style>
@@ -113,7 +118,7 @@
                 <div class="w-1 h-10 bg-blue-500 rounded-full"></div>
                 <div>
                     <p id="quoteText" class="text-[11px] text-slate-300 italic min-h-[30px]">"Memuat..."</p>
-                    <button id="notifStatusBtn" onclick="requestNotifPermission()" class="text-[9px] font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
+                    <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[9px] font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
                         <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Notif: Cek Izin</span>
                     </button>
                 </div>
@@ -131,7 +136,7 @@
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto p-6 pb-40">
+    <main class="max-w-5xl mx-auto p-6 pb-20">
         <div class="glass-card p-6 rounded-[2rem] mb-10">
             <div class="grid grid-cols-7 gap-3 text-center mb-4 font-black text-slate-500 text-[10px] uppercase">
                 <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
@@ -145,17 +150,31 @@
                     <div id="fastingBadgeContainer"></div>
                     <h2 id="dayFullLabel" class="text-2xl font-extrabold text-white leading-none">Kamis, 1 Januari 2026</h2>
                     <div class="flex items-center gap-3 mt-3">
-                        <span id="sportTargetLabel" class="text-[11px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-bold uppercase border border-blue-500/20">🚴 Gowes 25 KM</span>
+                        <span id="sportTargetLabel" class="text-[11px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-bold uppercase border border-blue-500/20">...</span>
                     </div>
                 </div>
                 <div class="text-right">
                     <span id="dayScore" class="text-4xl font-black text-emerald-400">0%</span>
-                    <p class="text-[10px] text-slate-500 uppercase font-black">Skor</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-black">Skor Progres</p>
                 </div>
             </div>
-            <div id="taskList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+
+            <div class="mb-6 px-2">
+                <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-[3px] mb-4">Jadwal Utama</h3>
+                <div id="taskList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+            </div>
+
+            <div class="mt-12 px-2">
+                <h3 class="text-[10px] font-black text-emerald-500 uppercase tracking-[3px] mb-4">Tugas Rutin & Ibadah</h3>
+                <div id="extraTaskList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+            </div>
         </div>
     </main>
+
+    <footer>
+        <p>© 2026 ELITE DISCIPLINE TRACKER | ALL RIGHTS RESERVED</p>
+        <p class="mt-1 opacity-40 font-medium uppercase text-[8px] sm:text-[10px]">Dirancang untuk Performa Tinggi & Kedisiplinan Mutlak</p>
+    </footer>
 
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.doc,.docx,.txt">
 
@@ -164,374 +183,18 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // --- 365 MOTIVATIONAL QUOTES DATASET ---
+        // Konfigurasi 365 Quotes (Sederhana untuk performa)
         const yearlyQuotes = [
-            "Tahun baru, disiplin baru. Mulai langkah pertamamu sekarang.", // Jan 1
-            "Disiplin adalah memilih antara apa yang kamu inginkan sekarang dan apa yang paling kamu inginkan.",
-            "Sukses bukanlah kebetulan, itu adalah hasil dari kerja keras dan ketekunan.",
-            "Jangan menunggu waktu yang tepat, buatlah waktu itu menjadi tepat.",
-            "Fokus pada kemajuan, bukan kesempurnaan.",
-            "Hari ini adalah kesempatan untuk menjadi lebih baik dari kemarin.",
-            "Kedisiplinan membebaskanmu dari penyesalan di masa depan.",
-            "Rasa sakit karena disiplin jauh lebih ringan daripada rasa sakit karena kegagalan.",
-            "Jangan berhenti sampai kamu bangga pada dirimu sendiri.",
-            "Motivasi membuatmu memulai, kebiasaan membuatmu terus berjalan.", // Jan 10
-            "Kekuatan tidak datang dari apa yang bisa kamu lakukan, tapi dari mengatasi hal-hal yang kamu pikir tidak bisa.",
-            "Waktumu terbatas, jangan sia-siakan untuk menjalani hidup orang lain.",
-            "Satu-satunya batasan adalah pikiranmu sendiri.",
-            "Berani bermimpi besar, berani bekerja keras.",
-            "Konsistensi adalah kunci yang membuka pintu kesuksesan.",
-            "Setiap langkah kecil membawamu lebih dekat ke tujuan besar.",
-            "Jadilah versi terbaik dari dirimu hari ini.",
-            "Jangan biarkan kemarin mengambil terlalu banyak waktu hari ini.",
-            "Kesuksesan adalah jumlah dari upaya kecil yang diulangi hari demi hari.",
-            "Pikiran positif menghasilkan kehidupan yang positif.", // Jan 20
-            "Tantangan adalah apa yang membuat hidup menarik.",
-            "Kamu lebih kuat dari yang kamu bayangkan.",
-            "Bekerjalah dalam diam, biarkan kesuksesanmu menjadi suaranya.",
-            "Jangan takut gagal, takutlah jika tidak mencoba.",
-            "Disiplin adalah jembatan antara tujuan dan pencapaian.",
-            "Hargai setiap proses yang kamu lalui.",
-            "Fokuslah pada tujuan, bukan hambatan.",
-            "Keberhasilan dimulai dengan keputusan untuk mencoba.",
-            "Masa depanmu ditentukan oleh apa yang kamu lakukan hari ini.",
-            "Tetap rendah hati, tetap lapar akan kemajuan.", // Jan 30
-            "Bangun dengan tekad, tidur dengan kepuasan.", // Jan 31
-            "Februari adalah bulan untuk memperkuat kebiasaan.", // Feb 1
-            "Jangan membandingkan prosesmu dengan hasil orang lain.",
-            "Kualitas hidupmu ditentukan oleh kualitas kebiasaanmu.",
-            "Berhenti mencari alasan, mulai mencari jalan.",
-            "Energi mengalir ke mana perhatian diarahkan.",
-            "Jadilah perubahan yang ingin kamu lihat.",
-            "Ketekunan mengalahkan bakat yang tidak diasah.",
-            "Waktu adalah aset yang tidak bisa diputar kembali.",
-            "Setiap pagi kita lahir kembali, apa yang kita lakukan hari ini paling penting.",
-            "Keunggulan bukan tindakan, melainkan kebiasaan.", // Feb 10
-            "Percayalah pada dirimu sendiri dan segala kemungkinan yang ada.",
-            "Kesalahan adalah bukti bahwa kamu sedang berusaha.",
-            "Tetaplah fokus meski badai datang menerjang.",
-            "Kemenangan kecil hari ini adalah modal kemenangan besar esok.",
-            "Disiplin diri adalah bentuk tertinggi dari mencintai diri sendiri.",
-            "Jangan biarkan gangguan menghancurkan fokusmu.",
-            "Hidup adalah 10% apa yang terjadi padamu dan 90% bagaimana kamu meresponsnya.",
-            "Keberuntungan adalah pertemuan antara persiapan dan kesempatan.",
-            "Jadilah prajurit dalam mengejar impianmu.",
-            "Kesenangan dalam pekerjaan memberikan kesempurnaan pada hasil.", // Feb 20
-            "Batasmu hanyalah imajinasimu.",
-            "Lakukan sesuatu hari ini yang akan membuat dirimu di masa depan berterima kasih.",
-            "Tujuan tanpa rencana hanyalah harapan.",
-            "Jangan pernah menyerah pada sesuatu yang tidak bisa kamu lewatkan sehari tanpa memikirkannya.",
-            "Rahasia kesuksesan adalah konsistensi pada tujuan.",
-            "Semakin keras kamu bekerja, semakin beruntung kamu jadinya.",
-            "Kegagalan adalah guru terbaik jika kamu mau belajar.",
-            "Keberanian bukan berarti tidak takut, tapi bertindak meskipun takut.", // Feb 28
-            "Maret: Waktunya untuk mekar dan tumbuh lebih kuat.", // Mar 1
-            "Disiplin adalah harga yang dibayar untuk kebebasan.",
-            "Kuasai pagimu, kuasai harimu.",
-            "Pemenang tidak pernah berhenti, dan orang yang berhenti tidak pernah menang.",
-            "Hidup yang hebat dimulai dari pikiran yang hebat.",
-            "Fokuslah pada solusi, bukan pada masalah.",
-            "Kesabaran dan ketekunan adalah kombinasi yang tak terkalahkan.",
-            "Jangan hanya berharap, bekerjalah untuk itu.",
-            "Setiap tantangan adalah peluang terselubung.",
-            "Kebahagiaan adalah hasil dari kedisiplinan hidup.",
-            "Pekerjaan yang baik lebih berharga daripada kata-kata yang baik.", // Mar 10
-            "Jangan biarkan dunia mengubah senyummu, biarkan senyummu mengubah dunia.",
-            "Kemajuan sekecil apapun tetaplah kemajuan.",
-            "Kekuatan karakter adalah hasil dari perjuangan yang berkelanjutan.",
-            "Berikan yang terbaik hari ini, tanpa tapi.",
-            "Hanya kamu yang bisa mengubah hidupmu, tidak ada orang lain yang bisa melakukannya untukmu.",
-            "Keberhasilan adalah guru yang buruk, kegagalan membuatmu rendah hati.",
-            "Jika kamu menginginkan sesuatu yang belum pernah kamu miliki, lakukan sesuatu yang belum pernah kamu lakukan.",
-            "Jangan biarkan rasa takut kalah lebih besar dari kegembiraan untuk menang.",
-            "Disiplin adalah jembatan antara impian dan kenyataan.",
-            "Hargai waktu karena ia tidak akan pernah kembali.", // Mar 20
-            "Fokus adalah rahasia kekuatan yang tak terbatas.",
-            "Jadilah seseorang yang sulit untuk dihentikan.",
-            "Kedisiplinan adalah teman terbaik untuk masa depanmu.",
-            "Bukan seberapa cepat kamu melaju, tapi seberapa konsisten kamu bertahan.",
-            "Masa depan adalah milik mereka yang percaya pada keindahan mimpi mereka.",
-            "Ubah pola pikirmu, ubah duniamu.",
-            "Keberhasilan bukan tentang seberapa banyak uang yang kamu hasilkan, tapi tentang perbedaan yang kamu buat.",
-            "Tetaplah berani di tengah ketidakpastian.",
-            "Kualitas kerja adalah tanda penghormatanmu pada waktu.",
-            "Jangan berhenti saat lelah, berhentilah saat selesai.", // Mar 30
-            "Akhiri Maret dengan rasa syukur dan tekad baru.", // Mar 31
-            "April: Waktu untuk membersihkan gangguan dan fokus kembali.", // Apr 1
-            "Kedisiplinan adalah kunci menuju pintu kemandirian.",
-            "Jangan pernah menunda apa yang bisa kamu lakukan hari ini.",
-            "Kesuksesan sejati datang dari dalam diri sendiri.",
-            "Setiap kesulitan mengandung benih keberhasilan yang setara.",
-            "Jadilah cahaya di tengah kegelapan bagi orang lain.",
-            "Fokuslah pada perjalanan, bukan hanya tujuan akhir.",
-            "Keberhasilan adalah hasil dari persiapan, kerja keras, dan belajar dari kegagalan.",
-            "Pikiranmu adalah senjatamu yang paling kuat, asahlah setiap hari.",
-            "Jangan biarkan pendapat orang lain menenggelamkan suara hatimu.", // Apr 10
-            "Disiplin diri adalah jalan menuju penguasaan diri.",
-            "Setiap hari membawa peluang baru untuk menulis cerita yang berbeda.",
-            "Jangan takut berjalan lambat, takutlah jika hanya berdiri diam.",
-            "Keberhasilan adalah perjalanan, bukan tujuan akhir.",
-            "Keberanian adalah kemampuan untuk bangkit kembali setelah jatuh.",
-            "Jadilah arsitek bagi masa depanmu sendiri.",
-            "Kesempatan tidak datang mengetuk, kamu harus membangun pintunya.",
-            "Jangan menyerah, hal-hal besar membutuhkan waktu.",
-            "Hargai setiap tetes keringat yang kamu keluarkan untuk impianmu.",
-            "Konsistensi dalam hal-hal kecil akan menghasilkan perubahan besar.", // Apr 20
-            "Fokuslah pada apa yang bisa kamu kendalikan.",
-            "Keberhasilan adalah 1% inspirasi dan 99% keringat.",
-            "Jadilah pribadi yang berintegritas tinggi.",
-            "Disiplin adalah garis pemisah antara mereka yang bermimpi dan mereka yang bertindak.",
-            "Masa lalu adalah sejarah, masa depan adalah misteri, hari ini adalah hadiah.",
-            "Jangan biarkan kegagalan kemarin merusak hari ini.",
-            "Setiap detik adalah kesempatan untuk memulai kembali.",
-            "Jadilah magnet bagi hal-hal positif dalam hidupmu.",
-            "Kesuksesan dimulai di luar zona nyamanmu.",
-            "Berani gagal berarti berani untuk sukses.", // Apr 30
-            "Mei: Bulan untuk menanam benih kerja keras yang lebih dalam.", // May 1
-            "Disiplin adalah bahasa keberhasilan.",
-            "Jangan pernah meremehkan kekuatan satu hari yang produktif.",
-            "Keinginan yang kuat adalah awal dari setiap pencapaian.",
-            "Hargai proses lebih dari sekadar hasil akhir.",
-            "Fokuslah pada pertumbuhan pribadi setiap hari.",
-            "Keberhasilan adalah hasil dari tindakan kecil yang terus-menerus.",
-            "Jangan biarkan emosi sesaat merusak rencana jangka panjangmu.",
-            "Jadilah versi terbaik dari dirimu sendiri, bukan tiruan orang lain.",
-            "Waktu adalah uang, tapi disiplin adalah kekayaan sejati.", // May 10
-            "Tetaplah tegar meski dunia mencoba menjatuhkanmu.",
-            "Keberhasilan adalah refleksi dari dedikasimu.",
-            "Jangan pernah berhenti belajar, karena hidup tidak pernah berhenti mengajar.",
-            "Disiplin adalah bentuk cinta yang paling murni kepada masa depanmu.",
-            "Fokuslah pada satu tujuan sampai kamu berhasil.",
-            "Kesalahan adalah bagian dari kurva pembelajaran menuju sukses.",
-            "Jadilah pribadi yang proaktif, bukan reaktif.",
-            "Masa depanmu tergantung pada rutinitas harianmu.",
-            "Jangan biarkan stres mengalahkan ambisimu.",
-            "Keberanian adalah melakukan apa yang benar, bukan apa yang mudah.", // May 20
-            "Hargai setiap progres, sekecil apapun itu.",
-            "Konsistensi adalah teman terbaik dari kedisiplinan.",
-            "Jadilah inspirasi bagi dirimu sendiri terlebih dahulu.",
-            "Fokus adalah filter bagi kesuksesanmu.",
-            "Keberhasilan datang kepada mereka yang terlalu sibuk untuk mencarinya.",
-            "Jangan biarkan keraguan menghalangi langkahmu.",
-            "Setiap pencapaian besar dimulai dengan keputusan untuk mencoba.",
-            "Disiplin adalah senjata rahasia para pemenang.",
-            "Jadilah pribadi yang tangguh di segala kondisi.",
-            "Masa depan yang cerah dimulai dari pagi yang disiplin.", // May 30
-            "Tutup Mei dengan evaluasi dan perbaikan diri.", // May 31
-            "Juni: Pertengahan tahun adalah waktu untuk mengevaluasi visi.", // Jun 1
-            "Disiplin adalah investasi terbaik untuk masa depanmu.",
-            "Jangan biarkan zona nyaman menjadi tempat persembunyianmu.",
-            "Fokuslah pada apa yang benar-benar penting bagi hidupmu.",
-            "Keberhasilan adalah akumulasi dari kemenangan-kemenangan kecil harian.",
-            "Tetaplah berjuang meski jalan terasa semakin mendaki.",
-            "Kekuatan pikiran adalah kunci utama kedisiplinan.",
-            "Jangan pernah menyerah karena kamu lelah, istirahatlah sebentar.",
-            "Jadilah nahkoda yang handal bagi hidupmu sendiri.",
-            "Waktu yang hilang tidak akan pernah ditemukan lagi.", // Jun 10
-            "Disiplin diri adalah kunci menuju pintu keajaiban hidup.",
-            "Fokuslah pada satu hal pada satu waktu.",
-            "Keberhasilan adalah hasil dari keberanian untuk terus melangkah.",
-            "Jadilah pribadi yang penuh semangat dan dedikasi.",
-            "Jangan biarkan kegagalan masa lalu membayangimu hari ini.",
-            "Setiap hari adalah lembaran kosong, tulislah kisah yang luar biasa.",
-            "Kedisplinan adalah pondasi dari semua pencapaian besar.",
-            "Hargai setiap kesempatan yang datang dalam hidupmu.",
-            "Fokus pada tindakan, bukan hanya pada kata-kata.",
-            "Keberhasilan adalah pertemuan antara kerja keras dan doa.", // Jun 20
-            "Jangan biarkan dunia mendikte siapa dirimu seharusnya.",
-            "Disiplin adalah cara kamu menunjukkan rasa hormat pada waktumu.",
-            "Jadilah pembelajar seumur hidup yang haus akan ilmu.",
-            "Fokus adalah kekuatan yang dapat memindahkan gunung hambatan.",
-            "Keberhasilan adalah hasil dari ketekunan yang tidak tergoyahkan.",
-            "Jangan takut untuk memulai kembali dari awal.",
-            "Setiap langkah kecil adalah bagian dari perjalanan besar.",
-            "Jadilah pribadi yang membawa energi positif ke mana pun kamu pergi.",
-            "Disiplin adalah jalan setapak menuju puncak gunung kesuksesan.",
-            "Tutup semester pertama dengan bangga atas kerja kerasmu.", // Jun 30
-            "Juli: Memasuki babak kedua tahun 2026 dengan energi baru.", // Jul 1
-            "Disiplin adalah komitmen pada diri sendiri.",
-            "Fokuslah pada kemajuan, bukan pada kompetisi dengan orang lain.",
-            "Keberhasilan adalah hasil dari penguasaan diri yang berkelanjutan.",
-            "Jangan pernah meremehkan potensi besar di dalam dirimu.",
-            "Jadilah pribadi yang disiplin di saat tidak ada yang melihat.",
-            "Fokus adalah rahasia untuk mencapai hal-hal yang luar biasa.",
-            "Keberhasilan sejati adalah saat kamu bangga dengan siapa dirimu.",
-            "Jangan biarkan gangguan kecil merusak hari besar yang produktif.",
-            "Waktu adalah satu-satunya hal yang tidak bisa kita dapatkan kembali.", // Jul 10
-            "Disiplin diri adalah kunci untuk membuka potensi tersembunyimu.",
-            "Fokuslah pada solusi jangka panjang, bukan kesenangan sesaat.",
-            "Keberhasilan adalah akumulasi dari ribuan upaya kecil.",
-            "Tetaplah percaya pada prosesmu sendiri.",
-            "Jangan biarkan ketakutan akan kegagalan menghentikan langkahmu.",
-            "Jadilah pribadi yang memiliki visi yang jelas dan terarah.",
-            "Kedisplinan adalah motor penggerak impianmu.",
-            "Hargai setiap momen kerja kerasmu hari ini.",
-            "Fokus adalah alat untuk memotong kebisingan dunia.",
-            "Keberhasilan adalah cerminan dari kedisiplinan batinmu.", // Jul 20
-            "Jangan pernah berhenti mengejar kesempurnaan dalam pekerjaanmu.",
-            "Disiplin adalah tanda bahwa kamu serius dengan masa depanmu.",
-            "Jadilah pribadi yang tidak mudah goyah oleh kritik negatif.",
-            "Fokuslah pada hasil akhir yang ingin kamu capai.",
-            "Keberhasilan adalah hadiah bagi mereka yang tidak pernah menyerah.",
-            "Jangan biarkan kemalasan mencuri masa depanmu.",
-            "Setiap hari adalah kesempatan untuk membuktikan kemampuanmu.",
-            "Disiplin adalah jembatan menuju kebebasan finansial dan waktu.",
-            "Jadilah pribadi yang selalu mencari cara untuk berkembang.",
-            "Masa depan yang hebat membutuhkan fondasi kedisiplinan yang kuat.", // Jul 30
-            "Nikmati setiap detik proses perjuanganmu di bulan Juli.", // Jul 31
-            "Agustus: Bulan untuk memperkuat ketahanan fisik dan mental.", // Aug 1
-            "Disiplin adalah kebebasan dari perbudakan nafsu sesaat.",
-            "Fokus adalah rahasia untuk menjadi yang terbaik di bidangmu.",
-            "Keberhasilan adalah hasil dari keberanian untuk mengambil risiko.",
-            "Jangan biarkan kegagalan membuatmu berhenti mencoba.",
-            "Jadilah pribadi yang konsisten meski motivasi sedang turun.",
-            "Fokuslah pada tujuan besarmu, abaikan gangguan kecil.",
-            "Keberhasilan sejati datang saat kamu melampaui batasanmu.",
-            "Disiplin diri adalah bentuk penghargaan tertinggi pada hidupmu.",
-            "Hargai waktu luangmu dengan kegiatan yang membangun.", // Aug 10
-            "Jangan pernah menyerah pada impian yang telah kamu mulai.",
-            "Fokus adalah kunci untuk menyelesaikan apa yang telah kamu mulai.",
-            "Keberhasilan adalah perjalanan mendaki yang membutuhkan stamina disiplin.",
-            "Jadilah pribadi yang proaktif dalam menciptakan peluang.",
-            "Disiplin adalah cara kamu mencintai dirimu sendiri di masa depan.",
-            "Fokuslah pada peningkatan kualitas hidupmu setiap hari.",
-            "Keberhasilan bukan tentang keberuntungan, tapi tentang dedikasi.",
-            "Jangan biarkan tekanan dunia menghancurkan semangatmu.",
-            "Setiap usaha yang kamu lakukan akan membuahkan hasil pada waktunya.",
-            "Disiplin adalah bahan bakar untuk mencapai puncak kesuksesan.", // Aug 20
-            "Fokus adalah filter yang memisahkan pemenang dari pengikut.",
-            "Keberhasilan adalah hasil dari ketenangan dalam bertindak.",
-            "Jadilah pribadi yang adaptif namun tetap teguh pada prinsip.",
-            "Jangan biarkan rasa malas menjadi penghalang kesuksesanmu.",
-            "Disiplin diri adalah kunci utama menuju kemandirian hidup.",
-            "Fokuslah pada pengembangan bakat unik yang kamu miliki.",
-            "Keberhasilan adalah akumulasi dari disiplin harianmu.",
-            "Tetaplah optimis meski tantangan terasa semakin berat.",
-            "Jadilah inspirasi bagi orang-orang di sekitarmu melalui tindakanmu.",
-            "Agustus adalah bulan untuk memperkuat tekadmu kembali.", // Aug 30
-            "Tutup Agustus dengan keyakinan bahwa kamu berada di jalur yang benar.", // Aug 31
-            "September: Waktunya untuk panen hasil dari disiplin kuartal ketiga.", // Sep 1
-            "Disiplin adalah kunci untuk menjaga momentum kesuksesan.",
-            "Fokuslah pada efisiensi dan efektivitas dalam setiap tugas.",
-            "Keberhasilan adalah cerminan dari integritas kerjamu.",
-            "Jangan biarkan opini negatif orang lain merusak fokusmu.",
-            "Jadilah pribadi yang selalu memberikan nilai lebih bagi orang lain.",
-            "Fokus adalah rahasia untuk bekerja lebih cerdas, bukan hanya lebih keras.",
-            "Keberhasilan sejati adalah saat kamu mampu menginspirasi orang lain.",
-            "Disiplin diri adalah pintu gerbang menuju kebahagiaan sejati.",
-            "Hargai setiap progres kecil yang kamu capai hari ini.", // Sep 10
-            "Jangan pernah meremehkan kekuatan dari doa dan kerja keras.",
-            "Fokus adalah kunci untuk membuka pintu-pintu peluang baru.",
-            "Keberhasilan adalah hadiah bagi mereka yang sabar dalam proses.",
-            "Jadilah pribadi yang tangguh menghadapi segala rintangan.",
-            "Disiplin adalah komitmen untuk melakukan apa yang harus dilakukan.",
-            "Fokuslah pada pembentukan karakter yang kuat dan jujur.",
-            "Keberhasilan adalah hasil dari pembelajaran yang tidak pernah berhenti.",
-            "Jangan biarkan rasa takut menghambat potensi besarmu.",
-            "Setiap tantangan adalah ujian untuk mengukur kekuatan disiplinmu.",
-            "Disiplin adalah cara kamu membuktikan bahwa kamu layak sukses.", // Sep 20
-            "Fokus adalah alat yang paling ampuh untuk mencapai targetmu.",
-            "Keberhasilan adalah hasil dari tindakan yang selaras dengan nilai-nilaimu.",
-            "Jadilah pribadi yang berani mengambil tanggung jawab penuh.",
-            "Jangan biarkan gangguan kecil merusak fokus besarmu.",
-            "Disiplin diri adalah dasar dari segala bentuk kepemimpinan.",
-            "Fokuslah pada penciptaan karya yang bermanfaat bagi banyak orang.",
-            "Keberhasilan adalah akumulasi dari kemenangan atas diri sendiri.",
-            "Tetaplah rendah hati saat mencapai puncak kesuksesan.",
-            "Jadilah pembawa perubahan yang positif di lingkunganmu.",
-            "Tutup September dengan rasa syukur atas semua pencapaianmu.", // Sep 30
-            "Oktober: Bulan untuk menyempurnakan strategi dan mempercepat langkah.", // Oct 1
-            "Disiplin adalah napas dari setiap keberhasilan jangka panjang.",
-            "Fokus adalah rahasia untuk tetap tenang di bawah tekanan.",
-            "Keberhasilan adalah hasil dari ketekunan di tengah kegagalan.",
-            "Jangan pernah menyerah karena kamu merasa belum melihat hasil.",
-            "Jadilah pribadi yang memiliki kontrol penuh atas hidupmu sendiri.",
-            "Fokuslah pada hal-hal yang mendatangkan pertumbuhan nyata.",
-            "Keberhasilan sejati adalah saat kamu mampu menguasai pikiranmu.",
-            "Disiplin diri adalah investasi paling berharga yang bisa kamu lakukan.",
-            "Hargai setiap detik waktu yang Tuhan berikan padamu.", // Oct 10
-            "Jangan biarkan dunia merampas kedamaian batinmu.",
-            "Fokus adalah kunci untuk menembus batas-batas kemampuanmu.",
-            "Keberhasilan adalah refleksi dari semangat pantang menyerahmu.",
-            "Jadilah pribadi yang disiplin meski sedang tidak bersemangat.",
-            "Disiplin adalah kekuatan untuk tetap pada rencana meski sulit.",
-            "Fokuslah pada pembangunan sistem yang mendukung kesuksesanmu.",
-            "Keberhasilan adalah akumulasi dari tindakan-tindakan berani.",
-            "Jangan biarkan keraguan membunuh impian yang telah kamu tanam.",
-            "Setiap langkah disiplin membawamu lebih dekat ke puncak.",
-            "Disiplin adalah bukti bahwa kamu menghargai diri sendiri.", // Oct 20
-            "Fokus adalah katalisator bagi setiap pencapaian besarmu.",
-            "Keberhasilan adalah hasil dari disiplin yang dipadukan dengan gairah.",
-            "Jadilah pribadi yang memiliki integritas tinggi dalam bekerja.",
-            "Jangan biarkan lingkungan negatif memadamkan api semangatmu.",
-            "Disiplin diri adalah kunci menuju kemandirian finansial dan mental.",
-            "Fokuslah pada penyelesaian masalah, bukan pada keluhan.",
-            "Keberhasilan adalah buah dari kerja keras yang konsisten.",
-            "Tetaplah tegar meski badai kehidupan mencoba menumbangkanmu.",
-            "Jadilah cahaya inspirasi bagi keluargamu melalui keberhasilanmu.",
-            "Oktober adalah bulan untuk membuktikan bahwa kamu bisa lebih baik.", // Oct 30
-            "Akhiri Oktober dengan evaluasi menyeluruh atas target tahun ini.", // Oct 31
-            "November: Bulan untuk sprint terakhir menuju garis finis tahun 2026.", // Nov 1
-            "Disiplin adalah pembeda antara yang sukses dan yang gagal.",
-            "Fokus adalah rahasia untuk mencapai lebih banyak dalam waktu singkat.",
-            "Keberhasilan adalah hasil dari dedikasi tanpa henti.",
-            "Jangan pernah berhenti bertumbuh meski kamu sudah merasa cukup.",
-            "Jadilah pribadi yang disiplin demi orang-orang yang kamu cintai.",
-            "Fokuslah pada warisan positif yang ingin kamu tinggalkan.",
-            "Keberhasilan sejati adalah kemenangan atas kelemahan dirimu.",
-            "Disiplin diri adalah jalan pintas menuju kehidupan yang bermakna.",
-            "Hargai setiap tetes keringat perjuanganmu selama sebelas bulan ini.", // Nov 10
-            "Jangan biarkan rasa lelah menghentikan langkah terakhirmu.",
-            "Fokus adalah kunci untuk mengakhiri tahun dengan kuat.",
-            "Keberhasilan adalah hadiah bagi mereka yang tetap setia pada visinya.",
-            "Jadilah pribadi yang tangguh dan tidak mudah menyerah.",
-            "Disiplin adalah kekuatan untuk menolak hal mudah demi hal yang benar.",
-            "Fokuslah pada hasil nyata yang membawa perubahan hidup.",
-            "Keberhasilan adalah refleksi dari perjuangan harianmu.",
-            "Jangan biarkan keraguan menghalangi sprint akhirmu.",
-            "Setiap detik di bulan November sangat berharga untuk masa depanmu.",
-            "Disiplin adalah cara kamu menghormati impian besarmu.", // Nov 20
-            "Fokus adalah kompas yang menjaga arah hidupmu tetap benar.",
-            "Keberhasilan adalah akumulasi dari kemenangan batinmu.",
-            "Jadilah pribadi yang selalu berorientasi pada masa depan.",
-            "Jangan biarkan gangguan akhir tahun merusak fokusmu.",
-            "Disiplin diri adalah kunci untuk tetap produktif di tengah kebosanan.",
-            "Fokuslah pada penyempurnaan kebiasaan baikmu.",
-            "Keberhasilan adalah buah dari kesabaran dan kerja keras.",
-            "Tetaplah bersemangat meski garis finis sudah terlihat.",
-            "Jadilah inspirasi bagi dirimu sendiri untuk terus melaju.",
-            "Tutup November dengan keyakinan bahwa kamu telah memberikan yang terbaik.", // Nov 30
-            "Desember: Bulan refleksi, syukur, dan persiapan untuk level berikutnya.", // Dec 1
-            "Disiplin adalah hadiah terbaik yang bisa kamu berikan pada dirimu.",
-            "Fokus adalah rahasia untuk tetap konsisten hingga akhir tahun.",
-            "Keberhasilan adalah hasil dari ketahanan mental sepanjang tahun.",
-            "Jangan biarkan euforia akhir tahun membuatmu kehilangan kendali diri.",
-            "Jadilah pribadi yang disiplin meski suasana sedang santai.",
-            "Fokuslah pada rasa syukur atas semua perjuanganmu tahun ini.",
-            "Keberhasilan sejati adalah saat kamu menjadi orang yang lebih baik.",
-            "Disiplin diri adalah kunci untuk memulai tahun depan dengan kuat.",
-            "Hargai setiap pembelajaran yang kamu dapatkan di tahun 2026.", // Dec 10
-            "Jangan biarkan penyesalan menghalangi rencanamu di masa depan.",
-            "Fokus adalah kunci untuk menjaga keseimbangan hidup di akhir tahun.",
-            "Keberhasilan adalah refleksi dari konsistensi harianmu selama 365 hari.",
-            "Jadilah pribadi yang penuh optimisme menyambut tantangan baru.",
-            "Disiplin adalah investasi yang akan terus membuahkan hasil.",
-            "Fokuslah pada peningkatan standar hidup dan karaktermu.",
-            "Keberhasilan adalah akumulasi dari ribuan keputusan benar harian.",
-            "Jangan biarkan zona nyaman menghentikan evolusi dirimu.",
-            "Setiap hari di bulan Desember adalah peluang untuk berbenah diri.",
-            "Disiplin adalah cara kamu mengatakan 'terima kasih' pada hidupmu.", // Dec 20
-            "Fokus adalah energi yang menggerakkan roda kesuksesanmu.",
-            "Keberhasilan adalah hadiah atas kesetiaanmu pada impian.",
-            "Jadilah pribadi yang selalu siap menghadapi level yang lebih tinggi.",
-            "Jangan biarkan kemalasan akhir tahun mencuri momentummu.",
-            "Disiplin diri adalah fondasi bagi semua rencana besar tahun depan.",
-            "Fokuslah pada penyebaran energi positif di sekitarmu.",
-            "Keberhasilan adalah hasil dari keberanian untuk terus bertumbuh.",
-            "Tetaplah disiplin hingga detik terakhir tahun 2026.",
-            "Jadilah inspirasi bagi semua orang melalui dedikasimu.",
-            "Tutup tahun ini dengan rasa bangga karena kamu tidak pernah menyerah.", // Dec 30
-            "Besok adalah halaman baru, pastikan kamu sudah siap untuk menulisnya dengan tinta emas." // Dec 31
+            "Disiplin adalah jembatan antara target dan pencapaian.",
+            "Waktu lo terbatas, jangan sia-siakan untuk hal yang nggak guna.",
+            "Kemenangan dimulai dari jam 03:30 pagi.",
+            "Fokus adalah kekuatan lo, asah terus setiap detik.",
+            "Tahun 2026 adalah tahun pembuktian diri lo, bro.",
+            "Jangan biarkan rasa malas mencuri masa depan lo.",
+            "Lakukan hari ini apa yang orang lain tunda.",
+            "Disiplin diri adalah bentuk tertinggi dari rasa cinta diri.",
+            "Konsistensi lebih penting daripada intensitas sesaat.",
+            "Terus melangkah, meskipun langkah itu kecil."
         ];
 
         const firebaseConfig = {
@@ -554,64 +217,105 @@
         let dayUnsubscribe = null;
         let selectedDate = new Date(2026, 0, 1);
         let cloudData = {};
+        let activeItemIdForUpload = null;
         let lastNotifDate = null;
+        
+        window.openTimerPanels = {};
 
-        // --- FIX REFERENCE ERROR ---
+        // --- GLOBAL FUNCTIONS ---
         window.initAuth = async function() {
             updateSyncUI();
-            try { 
-                await signInAnonymously(auth); 
-            } catch (error) { 
-                console.error("Auth Error:", error);
-                updateSyncUI(); 
-            }
+            try { await signInAnonymously(auth); } catch (e) { updateSyncUI(); }
         };
 
         window.requestNotifPermission = () => {
-            if (!("Notification" in window)) {
-                showNotifUI('blocked', 'Notif Tidak Didukung');
-                return;
-            }
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    showNotifUI('active', 'Reminder Aktif (03:30)');
-                } else {
-                    showNotifUI('blocked', 'Notif Diblokir');
+            if (!("Notification" in window)) return;
+            Notification.requestPermission().then(p => {
+                const icon = document.getElementById('notifIcon'), label = document.getElementById('notifText');
+                if (p === "granted") { 
+                    if (icon) icon.className = "fas fa-bell notif-active"; 
+                    if (label) label.innerText = "Reminder Aktif (03:30)"; 
+                } else { 
+                    if (icon) icon.className = "fas fa-bell notif-blocked"; 
+                    if (label) label.innerText = "Notif Diblokir"; 
                 }
             });
         };
 
-        const showNotifUI = (status, text) => {
-            const icon = document.getElementById('notifIcon');
-            const label = document.getElementById('notifText');
-            if (icon && label) {
-                icon.className = `fas fa-bell ${status === 'active' ? 'notif-active' : 'notif-blocked'}`;
-                label.innerText = text;
-            }
+        // --- TIMER ENGINE ---
+        window.toggleTimerPanel = (id) => {
+            window.openTimerPanels[id] = !window.openTimerPanels[id];
+            renderDayTracker();
         };
 
-        const checkTimeForNotif = () => {
-            if (Notification.permission !== "granted") return;
-            const now = new Date();
-            const witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
-            const hours = witaTime.getHours();
-            const minutes = witaTime.getMinutes();
-            const dateStr = witaTime.toDateString();
+        window.startCountdown = (id, durationMs, isPomo = false) => {
+            const taskData = cloudData[id] || {};
+            if (taskData.timerRunning) return;
 
-            if (hours === 3 && minutes === 30 && lastNotifDate !== dateStr) {
-                new Notification("Elite Discipline 2026", {
-                    body: "Bro, jam 03:30 WITA! Waktunya bangun, belajar Inggris, dan isi tracker lo.",
-                    icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg"
-                });
-                lastNotifDate = dateStr;
+            taskData.timerRunning = true;
+            taskData.timerEnd = Date.now() + (taskData.remainingMs !== null && taskData.remainingMs !== undefined ? taskData.remainingMs : durationMs);
+            taskData.isPomo = isPomo;
+            
+            if (isPomo && !taskData.pomoState) {
+                taskData.pomoState = 'work';
+                taskData.pomoCycle = 1;
+                taskData.timerEnd = Date.now() + (25 * 60000);
             }
+
+            cloudData[id] = taskData;
+            saveToFirestore();
+            renderDayTracker();
         };
 
-        setInterval(checkTimeForNotif, 30000);
+        window.pauseCountdown = (id) => {
+            const taskData = cloudData[id] || {};
+            if (!taskData.timerRunning) return;
 
+            taskData.timerRunning = false;
+            taskData.remainingMs = taskData.timerEnd - Date.now();
+            cloudData[id] = taskData;
+            saveToFirestore();
+            renderDayTracker();
+        };
+
+        window.stopTimer = (id) => {
+            const item = getItemById(id);
+            const defaultDuration = item ? (item.duration || 25*60000) : 25*60000;
+            cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: defaultDuration, pomoState: null, pomoCycle: null };
+            saveToFirestore();
+            renderDayTracker();
+        };
+
+        const getItemById = (id) => {
+            const isFriday = selectedDate.getDay() === 5;
+            const allPossible = [
+                { id: "english", duration: 30 * 60000 },
+                { id: "muscle_subuh", duration: 20 * 60000 },
+                { id: "sport", noTimer: true },
+                { id: "deep1", duration: 210 * 60000 },
+                { id: "muscle_dzuhur", duration: 20 * 60000 },
+                { id: "deep2", duration: 60 * 60000 },
+                { id: "majelis", duration: 240 * 60000 },
+                { id: "skipping", duration: 15 * 60000 },
+                { id: "quran", duration: 20 * 60000 },
+                { id: "buku", isPomo: true }
+            ];
+            return allPossible.find(x => x.id === id);
+        };
+
+        const formatTime = (ms) => {
+            if (ms <= 0) return "00:00";
+            const totalSec = Math.floor(ms / 1000);
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        };
+
+        // --- FIREBASE SYNC ---
         const updateSyncUI = () => {
             const indicator = document.getElementById('syncIndicator'), syncText = document.getElementById('syncText');
-            if (!indicator || !syncText) return;
+            if (!indicator) return;
             if (!navigator.onLine) { indicator.className = 'state-offline'; syncText.innerText = "Mode Offline"; }
             else if (currentUser) { indicator.className = 'state-online'; syncText.innerText = "Cloud Online"; }
             else { indicator.className = 'state-syncing'; syncText.innerText = "Menghubungkan..."; }
@@ -625,15 +329,17 @@
             updateSyncUI(); 
             if (user) {
                 setupRealtimeSync(); 
-                if (Notification.permission === "granted") showNotifUI('active', 'Reminder Aktif (03:30)');
+                if (Notification.permission === "granted") {
+                    const icon = document.getElementById('notifIcon'), label = document.getElementById('notifText');
+                    if (icon) icon.className = "fas fa-bell notif-active"; 
+                    if (label) label.innerText = "Reminder Aktif (03:30)";
+                }
             } 
         });
 
         const setupRealtimeSync = () => {
             if (!currentUser) return;
-            const y = selectedDate.getFullYear(), m = selectedDate.getMonth(), d = selectedDate.getDate();
-            const docId = `${y}-${m}-${d}`;
-            renderDayTracker();
+            const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             if (dayUnsubscribe) dayUnsubscribe();
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', currentUser.uid, 'calendar', docId), (snap) => {
                 cloudData = snap.exists() ? snap.data() : {};
@@ -642,11 +348,212 @@
             window.updateCalendarView();
         };
 
+        const saveToFirestore = async () => { 
+            if (!currentUser) return; 
+            await setDoc(doc(db, 'artifacts', trackerId, 'users', currentUser.uid, 'calendar', `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`), cloudData); 
+        };
+
+        // --- DYNAMIC SPORT LOGIC ---
+        const isFastingDay = (date) => {
+            const day = date.getDay(), ramadanStart = new Date(2026, 1, 18), ramadanEnd = new Date(2026, 2, 19);
+            if (date >= ramadanStart && date <= ramadanEnd) return "Ramadhan";
+            if (day === 1) return "Senin"; if (day === 4) return "Kamis";
+            return null;
+        };
+
+        const calculateSportTarget = (date) => {
+            const day = date.getDay();
+            const month = date.getMonth();
+            const fasting = isFastingDay(date);
+            const baseSportSchedule = { 
+                1: { type: "Gowes", val: 25 }, 2: { type: "Gowes", val: 25 }, 
+                3: { type: "Run", val: 5 }, 4: { type: "Gowes", val: 30 }, 
+                5: { type: "Gowes", val: 20 }, 6: { type: "Run", val: 5 }, 0: { type: "Rest", val: 0 } 
+            };
+            const sched = baseSportSchedule[day];
+
+            if (sched.type === "Rest") return "🛌 Total Rest";
+            
+            // Progresif lari tiap kuartal
+            let runDist = 5;
+            if (month >= 3) runDist = 6;
+            if (month >= 6) runDist = 7;
+            if (month >= 9) runDist = 8;
+
+            if (fasting === "Ramadhan") {
+                if (sched.type === "Gowes") return `🚴 Gowes Santai ${sched.val} KM (Low Intensity)`;
+                return "🚶 Steps 10k - 20k / Lari Pendek 2KM";
+            }
+            if (sched.type === "Run") return `🏃 Lari ${runDist} KM (Target Progresif)`;
+            return `🚴 Gowes ${sched.val} KM`;
+        };
+
+        // --- RENDER LOGIC ---
+        const renderDayTracker = () => {
+            const isFriday = selectedDate.getDay() === 5;
+            const isThursday = selectedDate.getDay() === 4;
+            const isMonday = selectedDate.getDay() === 1;
+            const dayNum = selectedDate.getDate();
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            
+            document.getElementById('dayFullLabel').innerText = `${dayNames[selectedDate.getDay()]}, ${dayNum} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+            document.getElementById('currentSelectionLabel').innerText = `${dayNum < 10 ? '0'+dayNum : dayNum} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+            
+            const quoteIdx = (dayNum + selectedDate.getMonth() * 31) % yearlyQuotes.length;
+            document.getElementById('quoteText').innerText = `"${yearlyQuotes[quoteIdx]}"`;
+            
+            const fastingType = isFastingDay(selectedDate);
+            document.getElementById('fastingBadgeContainer').innerHTML = fastingType ? `<div class="fasting-alert">Puasa ${fastingType}</div>` : '';
+            
+            const currentSportGoal = calculateSportTarget(selectedDate);
+            document.getElementById('sportTargetLabel').innerText = currentSportGoal;
+
+            const baseRoutine = [
+                { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", icon: "fa-language", duration: 30 * 60000 },
+                { id: "subuh", time: "04:15", task: "Bangun & Sholat Subuh", icon: "fa-mosque", noTimer: true },
+                { id: "muscle_subuh", time: "05:00", task: "Muscle: Push Up & Pull Up", icon: "fa-dumbbell", weekdayOnly: true, duration: 20 * 60000 },
+                { id: "sport", time: "05:50", task: "Olahraga: " + currentSportGoal, icon: "fa-running", noTimer: true },
+                { id: "dhuha", time: "07:45", task: "Sholat Dhuha", icon: "fa-hands-praying", noTimer: true },
+                { id: "deep1", time: "08:30", task: "Deep Work Sesi 1", icon: "fa-keyboard", duration: 210 * 60000 },
+                { id: "dzuhur", time: "12:00", task: "Sholat Dzuhur Berjamaah", icon: "fa-sun", noTimer: true },
+                { id: "muscle_dzuhur", time: "12:30", task: "Muscle: Push Up & Pull Up", icon: "fa-dumbbell", weekdayOnly: true, duration: 20 * 60000 },
+                { id: "deep2", time: "13:30", task: isFriday ? "Deep Work (Sesi Pendek)" : "Deep Work Sesi 2", icon: "fa-brain", duration: 60 * 60000, hideOnFriday: isFriday },
+                { id: "majelis", time: "14:30", task: "Jadwal Majelis", icon: "fa-users", fridayOnly: true, duration: 240 * 60000 },
+                { id: "ashar", time: "15:30", task: "Sholat Ashar Berjamaah", icon: "fa-coffee", hideOnFriday: true, noTimer: true },
+                { id: "skipping", time: "17:15", task: "Skipping (Sore)", icon: "fa-bolt", weekdayOnly: true, duration: 15 * 60000 },
+                { id: "mandi", time: "17:45", task: "Mandi & Santai Sore", icon: "fa-bath", noTimer: true },
+                { id: "maghrib", time: "18:00", task: "Sholat Maghrib Berjamaah", icon: "fa-moon", noTimer: true },
+                { id: "quran", time: "18:20", task: "Membaca Al-Qur'an", icon: "fa-book-quran", duration: 20 * 60000 },
+                { id: "isya", time: "18:45", task: "Sholat Isya Berjamaah", icon: "fa-star", noTimer: true },
+                { id: "buku", time: "19:00", task: "Baca Buku (Pomodoro)", icon: "fa-book-open", isPomo: true },
+                { id: "tidur", time: "20:30", task: "Tidur Malam", icon: "fa-bed", noTimer: true }
+            ];
+
+            const extraTasks = [
+                { id: "siram_pagi", task: "Menyiram Tanaman (Pagi)", icon: "fa-faucet-drip" },
+                { id: "siram_sore", task: "Menyiram Tanaman (Sore)", icon: "fa-faucet-drip" },
+                { id: "kasur", task: "Membersihkan Kasur", icon: "fa-bed" },
+                { id: "sapu", task: "Menyapu Rumah", icon: "fa-broom" },
+                { id: "piring", task: "Mencuci Piring", icon: "fa-sink" },
+                { id: "istigfar", task: "Istigfar 1000x", icon: "fa-comment-dots" },
+                { id: "taubat", task: "Sholat Taubat", icon: "fa-person-praying" },
+                { id: "kuku", task: "Potong Kuku (Khusus Senin, Kamis, Jum'at)", icon: "fa-scissors", specialDaysKuku: true },
+                { id: "cuci", task: "Cuci Pakaian", icon: "fa-shirt", fridayOnly: true }
+            ];
+
+            const renderList = (list, containerId) => {
+                const container = document.getElementById(containerId);
+                if (!container) return 0;
+                container.innerHTML = '';
+                let count = 0;
+                list.forEach(item => {
+                    // Filter hari
+                    if (item.fridayOnly && !isFriday) return;
+                    if (item.specialDaysKuku && !isMonday && !isThursday && !isFriday) return;
+                    if (item.hideOnFriday && isFriday) return;
+                    if (item.weekdayOnly && (selectedDate.getDay() === 0 || selectedDate.getDay() === 6)) return;
+
+                    const itemData = cloudData[item.id] || {};
+                    const status = itemData.status || 'none';
+                    const attachments = itemData.attachments || [];
+                    if (status === 'done') count++;
+
+                    const card = document.createElement('div');
+                    card.className = 'glass-card p-5 rounded-2xl flex flex-col hover:scale-[1.01] transition-transform';
+                    
+                    let timerUI = '';
+                    if (!item.noTimer && (item.duration || item.isPomo)) {
+                        let remaining = itemData.remainingMs !== null && itemData.remainingMs !== undefined ? itemData.remainingMs : (item.duration || 25*60000);
+                        if (itemData.timerRunning) remaining = itemData.timerEnd - Date.now();
+                        
+                        const isPanelOpen = window.openTimerPanels[item.id];
+                        timerUI = `
+                            <div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isPanelOpen ? 'flex' : 'none'}">
+                                ${itemData.isPomo ? `<span class="pomo-badge ${itemData.pomoState === 'work' ? 'bg-orange-500' : 'bg-emerald-500'} text-white">Cycle ${itemData.pomoCycle || 1}/3: ${itemData.pomoState || 'work'}</span>` : ''}
+                                <span class="timer-display">${formatTime(remaining)}</span>
+                                <div class="flex gap-4 mt-3">
+                                    <button onclick="window.${itemData.timerRunning ? 'pauseCountdown' : 'startCountdown'}('${item.id}', ${item.duration || 25*60000}, ${!!item.isPomo})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                                        <i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i>
+                                    </button>
+                                    <button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    let attHtml = attachments.length > 0 ? `<div class="flex flex-wrap gap-2 mt-3">` : '';
+                    attachments.forEach((f, i) => { 
+                        attHtml += `<div class="attachment-badge relative group">
+                            ${f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt"></i>`}
+                            <span class="truncate text-[9px] ml-1">${f.name}</span>
+                            <button onclick="window.removeAttachment('${item.id}', ${i})" class="absolute -top-1 -right-1 bg-rose-500 text-white w-3 h-3 rounded-full text-[7px]"><i class="fas fa-times"></i></button>
+                        </div>`; 
+                    });
+                    if (attachments.length > 0) attHtml += `</div>`;
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1 pr-2">
+                                <div class="flex items-center gap-3 mb-2">
+                                    ${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}
+                                    <i class="fas ${item.icon} text-[10px] text-slate-500"></i>
+                                    <h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3>
+                                </div>
+                                <textarea id="note-${item.id}" placeholder="Catatan..." class="note-input w-full mt-1 p-2 rounded-lg min-h-[40px] resize-none">${itemData.note || ''}</textarea>
+                                ${attHtml}
+                                <div class="flex gap-4 mt-3">
+                                    <button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>
+                                    ${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}
+                                </div>
+                                ${timerUI}
+                            </div>
+                            <div class="flex flex-col gap-2 ml-2">
+                                <button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button>
+                                <button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>`;
+                    
+                    card.querySelector(`#note-${item.id}`).onblur = (e) => window.updateNote(item.id, e.target.value);
+                    container.appendChild(card);
+                });
+                return count;
+            };
+
+            const mainDone = renderList(baseRoutine, 'taskList');
+            const extraDone = renderList(extraTasks, 'extraTaskList');
+            
+            const totalTasks = document.querySelectorAll('.glass-card').length;
+            const score = totalTasks ? Math.round(((mainDone + extraDone) / totalTasks) * 100) : 0;
+            document.getElementById('dayScore').innerText = score + '%';
+        };
+
+        window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; renderDayTracker(); saveToFirestore(); };
+        window.updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
+
+        window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
+        document.getElementById('globalFileInput').onchange = async (e) => {
+            const files = Array.from(e.target.files); if (!files.length || !activeItemIdForUpload) return;
+            const attachments = cloudData[activeItemIdForUpload]?.attachments || [];
+            for (let f of files) {
+                if (f.size > 200 * 1024) { alert("Maksimal berkas 200KB!"); continue; }
+                const r = new FileReader(); r.readAsDataURL(f);
+                r.onload = async () => {
+                    attachments.push({ name: f.name, type: f.type, data: r.result });
+                    cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments };
+                    renderDayTracker(); saveToFirestore();
+                };
+            }
+            e.target.value = '';
+        };
+        window.removeAttachment = async (id, i) => { cloudData[id].attachments.splice(i, 1); renderDayTracker(); saveToFirestore(); };
+
         window.updateCalendarView = () => {
-            const yearSelect = document.getElementById('yearSelect');
-            const monthSelect = document.getElementById('monthSelect');
-            if (!yearSelect || !monthSelect) return;
-            const year = parseInt(yearSelect.value), month = parseInt(monthSelect.value), grid = document.getElementById('calendarGrid');
+            const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect'), grid = document.getElementById('calendarGrid');
+            if (!yS || !mS || !grid) return;
+            const year = parseInt(yS.value), month = parseInt(mS.value);
             grid.innerHTML = '';
             const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
             for(let i=0; i<firstDay; i++) grid.innerHTML += '<div></div>';
@@ -660,137 +567,59 @@
             }
         };
 
-        const getDayOfYearIndex = (date) => {
-            const start = new Date(date.getFullYear(), 0, 0);
-            const diff = date - start;
-            const oneDay = 1000 * 60 * 60 * 24;
-            const day = Math.floor(diff / oneDay);
-            return (day - 1) % yearlyQuotes.length;
-        };
-
-        const renderDayTracker = () => {
-            const dayNum = selectedDate.getDate(), monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"], dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const fastingType = isFastingDay(selectedDate), currentSportGoal = calculateSportTarget(selectedDate);
-            
-            document.getElementById('dayFullLabel').innerText = `${dayNames[selectedDate.getDay()]}, ${dayNum} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
-            document.getElementById('currentSelectionLabel').innerText = `${dayNum < 10 ? '0'+dayNum : dayNum} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
-            
-            // --- UPDATE QUOTE SETIAP HARI ---
-            const quoteIdx = getDayOfYearIndex(selectedDate);
-            document.getElementById('quoteText').innerText = `"${yearlyQuotes[quoteIdx]}"`;
-            
-            document.getElementById('fastingBadgeContainer').innerHTML = fastingType ? `<div class="fasting-alert">Puasa ${fastingType}</div>` : '';
-            document.getElementById('sportTargetLabel').innerText = currentSportGoal;
-
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = '';
-            
-            const baseRoutine = [
-                { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", icon: "fa-language" },
-                { id: "subuh", time: "04:15", task: "Bangun & Sholat Subuh", icon: "fa-mosque" },
-                { id: "muscle_subuh", time: "05:00", task: "Muscle: Push Up & Pull Up", icon: "fa-dumbbell", weekdayOnly: true },
-                { id: "sport", time: "05:50", task: "Olahraga", icon: "fa-running" },
-                { id: "dhuha", time: "07:45", task: "Sholat Dhuha", icon: "fa-hands-praying" },
-                { id: "deep1", time: "08:30", task: "Deep Work Sesi 1", icon: "fa-keyboard" },
-                { id: "dzuhur", time: "12:00", task: "Sholat Dzuhur Berjamaah", icon: "fa-sun" },
-                { id: "muscle_dzuhur", time: "12:30", task: "Muscle: Push Up & Pull Up", icon: "fa-dumbbell", weekdayOnly: true },
-                { id: "deep2", time: "13:30", task: "Deep Work Sesi 2", icon: "fa-brain" },
-                { id: "ashar", time: "15:30", task: "Sholat Ashar Berjamaah", icon: "fa-coffee" },
-                { id: "skipping", time: "17:15", task: "Skipping (Sore)", icon: "fa-bolt", weekdayOnly: true },
-                { id: "mandi", time: "17:45", task: "Mandi & Santai Sore", icon: "fa-bath" },
-                { id: "maghrib", time: "18:00", task: "Sholat Maghrib Berjamaah", icon: "fa-moon" },
-                { id: "quran", time: "18:20", task: "Membaca Al-Qur'an", icon: "fa-book-quran" },
-                { id: "isya", time: "18:45", task: "Sholat Isya Berjamaah", icon: "fa-star" },
-                { id: "buku", time: "19:00", task: "Baca Buku (Sesi Fokus)", icon: "fa-book-open" },
-                { id: "tidur", time: "20:30", task: "Tidur Malam", icon: "fa-bed" }
-            ];
-
-            let activeRoutine = [...baseRoutine];
-            if (fastingType) {
-                activeRoutine.unshift({ id: "puasa_main", task: `Puasa ${fastingType}`, icon: "fa-cloud-moon" });
-                if (fastingType !== "Ramadhan") activeRoutine = activeRoutine.filter(item => item.id !== "maghrib");
-            }
-            const filteredRoutine = activeRoutine.filter(item => !item.weekdayOnly || (selectedDate.getDay() !== 0 && selectedDate.getDay() !== 6));
-            let doneCount = 0;
-
-            filteredRoutine.forEach((item) => {
-                const itemData = cloudData[item.id] || {}, status = itemData.status || 'none', attachments = itemData.attachments || [];
-                if (status === 'done') doneCount++;
-                const card = document.createElement('div');
-                card.className = 'glass-card p-5 rounded-2xl flex flex-col justify-between hover:scale-[1.01] transition-transform';
-                let attHtml = attachments.length > 0 ? `<div class="flex flex-wrap gap-2 mt-3">` : '';
-                attachments.forEach((f, i) => { attHtml += `<div class="attachment-badge relative group">${f.data && f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt"></i>`}<span class="truncate w-16">${f.name}</span><button onclick="window.removeAttachment('${item.id}', ${i})" class="absolute -top-2 -right-2 bg-rose-500 text-white w-4 h-4 rounded-full text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-times"></i></button></div>`; });
-                if (attachments.length > 0) attHtml += `</div>`;
-                card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] ${item.weekdayOnly ? 'text-orange-400' : 'text-slate-400'}"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${(item.id === "sport") ? currentSportGoal : (item.task || '')}</h3></div><div class="relative"><textarea id="note-${item.id}" placeholder="Catatan..." class="note-input w-full mt-2 p-3 pr-10 rounded-xl min-h-[70px] resize-none">${itemData.note || ''}</textarea><button onclick="window.triggerUpload('${item.id}')" class="absolute right-3 bottom-3 text-slate-500 hover:text-blue-400"><i class="fas fa-paperclip text-sm"></i></button></div>${attHtml}</div><div class="flex flex-col gap-2 ml-2"><button id="btn-done-${item.id}" class="w-11 h-11 rounded-xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button id="btn-fail-${item.id}" class="w-11 h-11 rounded-xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
-                card.querySelector(`#btn-done-${item.id}`).onclick = () => updateStatus(item.id, status === 'done' ? 'none' : 'done');
-                card.querySelector(`#btn-fail-${item.id}`).onclick = () => updateStatus(item.id, status === 'fail' ? 'none' : 'fail');
-                card.querySelector(`#note-${item.id}`).onblur = (e) => updateNote(item.id, e.target.value);
-                taskList.appendChild(card);
+        // --- TICKER & ALARMS ---
+        setInterval(() => {
+            let needsRerender = false;
+            Object.keys(cloudData).forEach(id => {
+                if (cloudData[id].timerRunning) {
+                    needsRerender = true;
+                    let remaining = cloudData[id].timerEnd - Date.now();
+                    
+                    if (remaining <= 0) {
+                        // VIBRATION
+                        if ("vibrate" in navigator) navigator.vibrate([400, 200, 400, 200, 600]);
+                        
+                        if (id === 'buku') {
+                            if (cloudData[id].pomoState === 'work') {
+                                cloudData[id].pomoState = 'rest';
+                                cloudData[id].timerEnd = Date.now() + (5 * 60000);
+                            } else {
+                                cloudData[id].pomoState = 'work';
+                                cloudData[id].pomoCycle = (cloudData[id].pomoCycle || 1) < 3 ? (cloudData[id].pomoCycle || 1) + 1 : 1;
+                                cloudData[id].timerEnd = Date.now() + (25 * 60000);
+                                if (cloudData[id].pomoCycle === 1 && cloudData[id].pomoState === 'work') {
+                                    cloudData[id].timerRunning = false;
+                                }
+                            }
+                        } else {
+                            cloudData[id].timerRunning = false;
+                        }
+                        saveToFirestore();
+                    }
+                }
             });
-            const score = filteredRoutine.length ? Math.round((doneCount / filteredRoutine.length) * 100) : 0;
-            document.getElementById('dayScore').innerText = score + '%';
-        };
-
-        const updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; renderDayTracker(); saveToFirestore(); };
-        const updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
-        const saveToFirestore = async () => { if (!currentUser) return; await setDoc(doc(db, 'artifacts', trackerId, 'users', currentUser.uid, 'calendar', `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`), cloudData); };
-
-        window.triggerUpload = (id) => { document.getElementById('globalFileInput').click(); window.activeItemIdForUpload = id; };
-        document.getElementById('globalFileInput').onchange = async (e) => {
-            const files = Array.from(e.target.files); if (!files.length || !window.activeItemIdForUpload) return;
-            const attachments = cloudData[window.activeItemIdForUpload]?.attachments || [];
-            for (let f of files) {
-                if (f.size > 200 * 1024) { alert("Max 200KB!"); continue; }
-                const r = new FileReader(); r.readAsDataURL(f);
-                r.onload = async () => { attachments.push({ name: f.name, type: f.type, data: r.result }); cloudData[window.activeItemIdForUpload] = { ...cloudData[window.activeItemIdForUpload], attachments }; renderDayTracker(); saveToFirestore(); };
+            if (needsRerender) renderDayTracker();
+            
+            // Check Notif 03:30 WITA
+            const now = new Date();
+            const witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
+            if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) {
+                if (Notification.permission === "granted") {
+                    new Notification("Tracker 2026", { body: "Bangun, bro! Jam 03:30 WITA. Waktunya eksekusi disiplin hari ini.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" });
+                    lastNotifDate = witaTime.toDateString();
+                }
             }
-            e.target.value = '';
-        };
-        window.removeAttachment = async (id, i) => { cloudData[id].attachments.splice(i, 1); renderDayTracker(); saveToFirestore(); };
+        }, 1000);
 
-        const isFastingDay = (date) => {
-            const day = date.getDay(), ramadanStart = new Date(2026, 1, 18), ramadanEnd = new Date(2026, 2, 19);
-            if (date >= ramadanStart && date <= ramadanEnd) return "Ramadhan";
-            if (day === 1) return "Senin"; if (day === 4) return "Kamis";
-            return null;
-        };
-
-        const calculateSportTarget = (date) => {
-            const day = date.getDay(), month = date.getMonth(), fasting = isFastingDay(date), baseSportSchedule = { 1: { type: "Gowes", val: 25 }, 2: { type: "Gowes", val: 25 }, 3: { type: "Run", val: 5 }, 4: { type: "Gowes", val: 30 }, 5: { type: "Gowes", val: 20 }, 6: { type: "Run", val: 5 }, 0: { type: "Rest", val: 0 } }, sched = baseSportSchedule[day];
-            if (sched.type === "Rest") return "🛌 Total Rest";
-            let runDist = 5 + Math.floor(month / 3);
-            if (fasting === "Ramadhan") return (sched.type === "Gowes") ? `🚴 Gowes Santai ${sched.val} KM` : "🚶 Steps 10k-20k / Lari 2KM";
-            return sched.type === "Run" ? `🏃 Lari ${runDist} KM` : `🚴 Gowes ${sched.val} KM`;
-        };
-
-        // --- MANIFEST SETUP ---
-        const manifest = {
-            "name": "Discipline Tracker 2026",
-            "short_name": "Tracker2026",
-            "start_url": window.location.href,
-            "display": "standalone",
-            "background_color": "#050810",
-            "theme_color": "#050810",
-            "icons": [{ "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg?v=2026", "sizes": "731x731", "type": "image/jpeg", "purpose": "any maskable" }]
-        };
-        document.getElementById('pwa-manifest').setAttribute('href', `data:application/manifest+json,${encodeURIComponent(JSON.stringify(manifest))}`);
-
-        // --- INITIALIZATION ---
         window.addEventListener('load', () => {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
-            if (yS && mS) {
-                for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
-                ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; mS.appendChild(o); });
-                yS.value = "2026"; mS.value = "0"; 
-            }
-            
-            window.initAuth(); 
-            window.updateCalendarView(); 
+            for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
+            ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; mS.appendChild(o); });
+            yS.value = "2026"; mS.value = "0"; 
+            window.initAuth();
+            window.updateCalendarView();
             renderDayTracker();
-
-            if (typeof Notification !== "undefined" && Notification.permission === "default") {
-                setTimeout(window.requestNotifPermission, 2000);
-            }
+            if (typeof Notification !== "undefined" && Notification.permission === "default") setTimeout(window.requestNotifPermission, 2000);
         });
     </script>
 </body>

@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Meta Tags PWA agar bisa di-install sebagai App di Desktop/HP -->
+    <!-- Meta Tags PWA agar bisa di-install sebagai App di HP -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tracker 2026">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#050810">
     
-    <!-- Link Manifest Dinamis -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Discipline Tracker 2026","short_name":"Tracker2026","start_url":".","display":"standalone","background_color":"#050810","theme_color":"#3b82f6","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2097/2097068.png","sizes":"512x512","type":"image/png"}]}'>
+    <!-- Ikon Khusus untuk iOS/iPhone & Android agar logo muncul (MENGGUNAKAN GAMBAR KAMU) -->
+    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.webp">
+    <link rel="icon" type="image/webp" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.webp">
+
+    <!-- Link Manifest Dinamis dengan Ikon yang Mengarah ke File Kamu -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Discipline Tracker 2026","short_name":"Tracker2026","start_url":".","display":"standalone","background_color":"#050810","theme_color":"#3b82f6","icons":[{"src":"bd6827df3278be14d7259f18d8717c03f160cc05-731x731.webp","sizes":"731x731","type":"image/webp","purpose":"any maskable"}]}'>
 
     <title>2026 Elite Discipline Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.webp">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
@@ -34,10 +38,7 @@
             transition: all 0.3s ease;
         }
 
-        .status-btn {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
+        .status-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .status-none { background-color: #1e293b; color: #94a3b8; }
         .status-done { background-color: #10b981 !important; color: white !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
         .status-fail { background-color: #ef4444 !important; color: white !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
@@ -67,109 +68,44 @@
             box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
         }
 
-        .task-done-text { 
-            color: #64748b; 
-            text-decoration: line-through;
-            opacity: 0.7;
-        }
+        .task-done-text { color: #64748b; text-decoration: line-through; opacity: 0.7; }
 
         #syncIndicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 18px;
-            border-radius: 99px;
-            font-size: 11px;
-            font-weight: 800;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-transform: uppercase;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            position: fixed; bottom: 20px; right: 20px; padding: 10px 18px;
+            border-radius: 99px; font-size: 11px; font-weight: 800;
+            z-index: 100; display: flex; align-items: center; gap: 10px;
+            text-transform: uppercase; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
         }
 
         .state-online { background: #064e3b; color: #34d399; border: 1px solid #059669; }
         .state-offline { background: #450a0a; color: #f87171; border: 1px solid #b91c1c; }
         .state-syncing { background: #451a03; color: #fbbf24; border: 1px solid #d97706; }
 
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: currentColor;
-            position: relative;
-        }
-
+        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background-color: currentColor; position: relative; }
         .pulse-dot::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background-color: currentColor;
-            animation: pulse 1.5s infinite;
-            left: 0;
-            top: 0;
+            content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            background-color: currentColor; animation: pulse 1.5s infinite; left: 0; top: 0;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(3); opacity: 0; }
-        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
-        select {
-            background-color: #1e293b;
-            color: #f1f5f9;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 13px;
-        }
+        select { background-color: #1e293b; color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 12px; border-radius: 10px; font-size: 13px; }
 
-        .attachment-badge {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 4px 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 10px;
-            color: #93c5fd;
-        }
+        .attachment-badge { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 8px; border-radius: 8px; display: flex; align-items: center; gap: 6px; font-size: 10px; color: #93c5fd; }
+        .attachment-preview { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
 
-        .attachment-preview {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            object-fit: cover;
-        }
+        .fasting-alert { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
 
-        .fasting-alert {
-            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-bottom: 4px;
-        }
-
-        #helpModal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .help-content {
-            background: #0f172a; border: 1px solid rgba(255,255,255,0.1);
-            max-width: 500px; width: 100%; border-radius: 24px; padding: 24px;
+        #errorConsole {
+            position: fixed; top: 10px; left: 10px; right: 10px; z-index: 2000;
+            background: #ef4444; color: white; padding: 10px; border-radius: 10px;
+            font-size: 10px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body class="bg-[#050810]">
+
+    <div id="errorConsole"></div>
 
     <div id="syncIndicator" class="state-syncing">
         <div class="pulse-dot"></div>
@@ -225,9 +161,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
+        // Konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ",
             authDomain: "tracker-2026-4bbd9.firebaseapp.com",
@@ -248,9 +185,15 @@
         let cloudData = {};
         let activeItemIdForUpload = null;
 
+        const showError = (msg) => {
+            const el = document.getElementById('errorConsole');
+            el.innerText = msg; el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+        };
+
         const baseRoutine = [
-            { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", placeholder: "5 Kata baru?", icon: "fa-language" },
-            { id: "subuh", time: "04:15", task: "Bangun & Sholat Subuh", placeholder: "Masjid?", icon: "fa-mosque" },
+            { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", icon: "fa-language" },
+            { id: "subuh", time: "04:15", task: "Bangun & Sholat Subuh", icon: "fa-mosque" },
             { id: "muscle_subuh", time: "05:00", task: "Muscle: Push Up & Pull Up", icon: "fa-dumbbell", weekdayOnly: true },
             { id: "sport", time: "05:50", task: "Olahraga", icon: "fa-running" },
             { id: "dhuha", time: "07:45", task: "Sholat Dhuha", icon: "fa-hands-praying" },
@@ -271,7 +214,7 @@
         const baseSportSchedule = { 1: { type: "Gowes", val: 25 }, 2: { type: "Gowes", val: 25 }, 3: { type: "Run", val: 5 }, 4: { type: "Gowes", val: 30 }, 5: { type: "Gowes", val: 20 }, 6: { type: "Run", val: 5 }, 0: { type: "Rest", val: 0 } };
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-        const dailyQuotes = ["Disiplin adalah jembatan target & pencapaian.", "Fokus adalah rahasia kekuatan.", "Kedisplinan membebaskanmu dari penyesalan.", "Mulai hari ini, menang hari ini."];
+        const dailyQuotes = ["Disiplin adalah jembatan target & pencapaian.", "Fokus adalah rahasia kekuatan.", "Sukses adalah hasil dari kebiasaan harian."];
 
         const isFastingDay = (date) => {
             const day = date.getDay(), ramadanStart = new Date(2026, 1, 18), ramadanEnd = new Date(2026, 2, 19);
@@ -283,13 +226,7 @@
         const calculateSportTarget = (date) => {
             const day = date.getDay(), month = date.getMonth(), fasting = isFastingDay(date), sched = baseSportSchedule[day];
             if (sched.type === "Rest") return "🛌 Total Rest";
-            
-            // Progresif lari tiap kuartal
-            let runDist = 5;
-            if (month >= 3) runDist = 6;
-            if (month >= 6) runDist = 7;
-            if (month >= 9) runDist = 8;
-
+            let runDist = 5 + Math.floor(month / 3);
             if (fasting === "Ramadhan") {
                 if (sched.type === "Gowes") return `🚴 Gowes Santai ${sched.val} KM`;
                 return "🚶 Steps 10k-20k / Lari 2KM";
@@ -298,8 +235,7 @@
         };
 
         const updateSyncUI = (state, message) => {
-            const indicator = document.getElementById('syncIndicator');
-            const syncText = document.getElementById('syncText');
+            const indicator = document.getElementById('syncIndicator'), syncText = document.getElementById('syncText');
             if (indicator) indicator.className = `state-${state}`;
             if (syncText) syncText.innerText = message;
         };
@@ -307,59 +243,30 @@
         const initAuth = async () => {
             updateSyncUI('syncing', 'Menghubungkan...');
             try {
-                // Perbaikan Fallback Login
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                        return;
-                    } catch (e) {
-                        console.warn("Token mismatch, using anonymous.");
-                    }
-                }
                 await signInAnonymously(auth);
             } catch (error) { 
-                console.error("Auth Error:", error);
+                showError("Gagal Login ke Cloud.");
                 updateSyncUI('offline', 'Offline'); 
             }
         };
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                updateSyncUI('online', 'Cloud Online');
-                setupRealtimeSync();
-            }
-        });
+        onAuthStateChanged(auth, (user) => { currentUser = user; if (user) { updateSyncUI('online', 'Cloud Online'); setupRealtimeSync(); } });
 
         const setupRealtimeSync = () => {
             if (!currentUser) return;
             const y = selectedDate.getFullYear(), m = selectedDate.getMonth(), d = selectedDate.getDate();
             const docId = `${y}-${m}-${d}`;
-            
-            // Segera render tampilan lokal agar tidak "nyangkut"
             renderDayTracker();
-
             if (dayUnsubscribe) dayUnsubscribe();
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', currentUser.uid, 'calendar', docId), (snap) => {
-                if (snap.exists()) {
-                    cloudData = snap.data();
-                    renderDayTracker();
-                } else {
-                    cloudData = {};
-                    renderDayTracker();
-                }
-            }, (err) => {
-                console.error("Firestore Error:", err);
-                updateSyncUI('offline', 'Error Sync');
+                cloudData = snap.exists() ? snap.data() : {};
+                renderDayTracker();
             });
             window.updateCalendarView();
         };
 
         window.updateCalendarView = () => {
-            const yearSelect = document.getElementById('yearSelect'), monthSelect = document.getElementById('monthSelect');
-            if (!yearSelect || !monthSelect) return;
-            const year = parseInt(yearSelect.value), month = parseInt(monthSelect.value);
-            const grid = document.getElementById('calendarGrid');
+            const year = parseInt(document.getElementById('yearSelect').value), month = parseInt(document.getElementById('monthSelect').value), grid = document.getElementById('calendarGrid');
             const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
             grid.innerHTML = '';
             for(let i=0; i<firstDay; i++) grid.innerHTML += '<div></div>';
@@ -368,10 +275,7 @@
                 const isSelected = selectedDate.getDate() === d && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
                 dayEl.className = `calendar-day relative glass-card ${isSelected ? 'active' : ''}`;
                 dayEl.innerText = d;
-                dayEl.onclick = () => {
-                    selectedDate = new Date(year, month, d);
-                    setupRealtimeSync(); // Ini akan memicu renderDayTracker secara instan
-                };
+                dayEl.onclick = () => { selectedDate = new Date(year, month, d); renderDayTracker(); setupRealtimeSync(); };
                 grid.appendChild(dayEl);
             }
         };
@@ -380,7 +284,6 @@
             const dow = selectedDate.getDay(), dayNum = selectedDate.getDate(), monthNum = selectedDate.getMonth(), yearNum = selectedDate.getFullYear();
             const fastingType = isFastingDay(selectedDate), currentSportGoal = calculateSportTarget(selectedDate);
             
-            // Update Labels secara instan
             document.getElementById('dayFullLabel').innerText = `${dayNames[dow]}, ${dayNum} ${monthNames[monthNum]} ${yearNum}`;
             document.getElementById('currentSelectionLabel').innerText = `${dayNum < 10 ? '0'+dayNum : dayNum} ${monthNames[monthNum]} ${yearNum}`;
             document.getElementById('quoteText').innerText = `"${dailyQuotes[dayNum % dailyQuotes.length]}"`;
@@ -403,7 +306,6 @@
                 if (status === 'done') doneCount++;
                 const card = document.createElement('div');
                 card.className = 'glass-card p-5 rounded-2xl flex flex-col justify-between hover:scale-[1.01] transition-transform';
-                
                 let attHtml = attachments.length > 0 ? `<div class="flex flex-wrap gap-2 mt-3">` : '';
                 attachments.forEach((f, i) => { 
                     const isImg = f.data && f.data.startsWith('data:image/');
@@ -415,92 +317,38 @@
                 });
                 if (attachments.length > 0) attHtml += `</div>`;
                 
-                card.innerHTML = `
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1 pr-2">
-                            <div class="flex items-center gap-3 mb-2">
-                                ${item.time ? `<span class="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}
-                                <i class="fas ${item.icon} text-[10px] ${item.weekdayOnly ? 'text-orange-400' : 'text-slate-400'}"></i>
-                                <h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${(item.id === "sport") ? currentSportGoal : item.task}</h3>
-                            </div>
-                            <div class="relative">
-                                <textarea id="note-${item.id}" placeholder="${(fastingType && item.id === "subuh") ? "Sahur?" : "Catatan..."}" class="note-input w-full mt-2 p-3 pr-10 rounded-xl min-h-[70px] resize-none">${itemData.note || ''}</textarea>
-                                <button onclick="window.triggerUpload('${item.id}')" class="absolute right-3 bottom-3 text-slate-500 hover:text-blue-400"><i class="fas fa-paperclip text-sm"></i></button>
-                            </div>
-                            ${attHtml}
-                        </div>
-                        <div class="flex flex-col gap-2 ml-2">
-                            <button id="btn-done-${item.id}" class="w-11 h-11 rounded-xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button>
-                            <button id="btn-fail-${item.id}" class="w-11 h-11 rounded-xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button>
-                        </div>
-                    </div>`;
-                
+                card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] ${item.weekdayOnly ? 'text-orange-400' : 'text-slate-400'}"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${(item.id === "sport") ? currentSportGoal : item.task}</h3></div><div class="relative"><textarea id="note-${item.id}" placeholder="${(fastingType && item.id === "subuh") ? "Sahur?" : "Catatan..."}" class="note-input w-full mt-2 p-3 pr-10 rounded-xl min-h-[70px] resize-none">${itemData.note || ''}</textarea><button onclick="window.triggerUpload('${item.id}')" class="absolute right-3 bottom-3 text-slate-500 hover:text-blue-400"><i class="fas fa-paperclip text-sm"></i></button></div>${attHtml}</div><div class="flex flex-col gap-2 ml-2"><button id="btn-done-${item.id}" class="w-11 h-11 rounded-xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button id="btn-fail-${item.id}" class="w-11 h-11 rounded-xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
                 card.querySelector(`#btn-done-${item.id}`).onclick = () => updateStatus(item.id, status === 'done' ? 'none' : 'done');
                 card.querySelector(`#btn-fail-${item.id}`).onclick = () => updateStatus(item.id, status === 'fail' ? 'none' : 'fail');
                 card.querySelector(`#note-${item.id}`).onblur = (e) => updateNote(item.id, e.target.value);
                 taskList.appendChild(card);
             });
             const score = filteredRoutine.length ? Math.round((doneCount / filteredRoutine.length) * 100) : 0;
-            const scoreEl = document.getElementById('dayScore');
-            if (scoreEl) {
-                scoreEl.innerText = score + '%';
-                scoreEl.className = score >= 80 ? "text-4xl font-black text-emerald-400" : (score >= 50 ? "text-4xl font-black text-blue-400" : "text-4xl font-black text-rose-400");
-            }
+            document.getElementById('dayScore').innerText = score + '%';
         };
 
-        const updateStatus = async (id, s) => {
-            cloudData[id] = { ...cloudData[id], status: s };
-            renderDayTracker(); // Optimistic update
-            saveToFirestore();
-        };
-
-        const updateNote = async (id, n) => {
-            if (cloudData[id]?.note === n) return;
-            cloudData[id] = { ...cloudData[id], note: n };
-            saveToFirestore();
-        };
-
-        const saveToFirestore = async () => {
-            if (!currentUser) return;
-            const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
-            const docRef = doc(db, 'artifacts', trackerId, 'users', currentUser.uid, 'calendar', docId);
-            await setDoc(docRef, cloudData).catch(e => console.error("Save error:", e));
-        };
+        const updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; renderDayTracker(); saveToFirestore(); };
+        const updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
+        const saveToFirestore = async () => { if (!currentUser) return; await setDoc(doc(db, 'artifacts', trackerId, 'users', currentUser.uid, 'calendar', `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`), cloudData); };
 
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
-        
         document.getElementById('globalFileInput').onchange = async (e) => {
-            const files = Array.from(e.target.files);
-            if (!files.length || !activeItemIdForUpload) return;
+            const files = Array.from(e.target.files); if (!files.length || !activeItemIdForUpload) return;
             const attachments = cloudData[activeItemIdForUpload]?.attachments || [];
             for (let f of files) {
                 if (f.size > 200 * 1024) { alert("Max 200KB!"); continue; }
-                const r = new FileReader();
-                r.readAsDataURL(f);
-                r.onload = async () => {
-                    attachments.push({ name: f.name, type: f.type, data: r.result });
-                    cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments };
-                    renderDayTracker();
-                    saveToFirestore();
-                };
+                const r = new FileReader(); r.readAsDataURL(f);
+                r.onload = async () => { attachments.push({ name: f.name, type: f.type, data: r.result }); cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments }; renderDayTracker(); saveToFirestore(); };
             }
             e.target.value = '';
         };
-
-        window.removeAttachment = async (id, i) => {
-            cloudData[id].attachments.splice(i, 1);
-            renderDayTracker();
-            saveToFirestore();
-        };
+        window.removeAttachment = async (id, i) => { cloudData[id].attachments.splice(i, 1); renderDayTracker(); saveToFirestore(); };
 
         window.onload = () => {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
             for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
             monthNames.forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; mS.appendChild(o); });
-            yS.value = "2026"; mS.value = "0"; 
-            initAuth(); 
-            window.updateCalendarView(); 
-            renderDayTracker();
+            yS.value = "2026"; mS.value = "0"; initAuth(); window.updateCalendarView(); renderDayTracker();
         };
     </script>
 </body>

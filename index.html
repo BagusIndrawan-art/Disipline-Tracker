@@ -12,11 +12,12 @@
     <meta name="application-name" content="Tracker 2026">
     <meta name="theme-color" content="#050810">
     
-    <!-- Ikon (Gunakan JPG kamu) -->
+    <!-- Ikon (Gunakan JPG kamu - Pastikan file ini ada di folder yang sama di GitHub) -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
-    
-    <!-- Manifest Dinamis -->
+    <link rel="shortcut icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
+
+    <!-- Manifest ID harus ada agar tidak null -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>2026 Elite Discipline Tracker</title>
@@ -100,7 +101,7 @@
         .fasting-alert { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
         
         /* Timer Styles */
-        .timer-panel { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-top: 10px; flex-direction: column; align-items: center; }
+        .timer-panel { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-top: 10px; display: none; flex-direction: column; align-items: center; }
         .timer-display { font-family: 'Courier New', Courier, monospace; font-weight: 800; color: #60a5fa; font-size: 1.5rem; }
         .pomo-badge { font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
         
@@ -108,6 +109,8 @@
 
         .notif-active { color: #10b981; }
         .notif-blocked { color: #ef4444; }
+
+        #installBtn { display: none; background: #3b82f6; color: white; padding: 5px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
     </style>
 </head>
 <body class="bg-[#050810]">
@@ -123,9 +126,12 @@
                 <div class="w-1 h-10 bg-blue-500 rounded-full"></div>
                 <div>
                     <p id="quoteText" class="text-[11px] text-slate-300 italic min-h-[30px]">"Memuat..."</p>
-                    <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[9px] font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
-                        <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Notif: Cek Izin</span>
-                    </button>
+                    <div class="flex items-center gap-3 mt-1">
+                        <button id="notifStatusBtn" onclick="requestNotifPermission()" class="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                            <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Notif</span>
+                        </button>
+                        <button id="installBtn">Instal App</button>
+                    </div>
                 </div>
             </div>
             <div class="flex flex-col items-center">
@@ -178,7 +184,7 @@
 
     <footer>
         <p>© 2026 ELITE DISCIPLINE TRACKER | ALL RIGHTS RESERVED</p>
-        <p class="mt-1 opacity-40 font-medium uppercase text-[8px] sm:text-[10px]">Dirancang untuk Performa Tinggi & Kedisiplinan Mutlak</p>
+        <p class="mt-1 opacity-40 font-medium uppercase text-[8px] sm:text-[10px]">DIRANCANG UNTUK PERFORMA TINGGI & KEDISPLINAN MUTLAK</p>
     </footer>
 
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.doc,.docx,.txt">
@@ -188,7 +194,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // Quotes logic (365 days cycle)
+        // Konfigurasi Quotes (Placeholder)
         const yearlyQuotes = [
             "Disiplin adalah jembatan antara target dan pencapaian.",
             "Waktu lo terbatas, jangan sia-siakan untuk hal yang nggak guna.",
@@ -216,7 +222,6 @@
         const db = getFirestore(app);
         const trackerId = "discipline-tracker-2026";
 
-        // Enable Offline Storage
         enableIndexedDbPersistence(db).catch(() => {});
 
         let currentUser = null;
@@ -226,18 +231,58 @@
         let activeItemIdForUpload = null;
         let lastNotifDate = null;
         
-        // Timer panel states
         window.openTimerPanels = {};
 
-        // Register a dummy service worker to satisfy PWA requirements for "Install" prompt
+        // --- PWA MANIFEST DENGAN FIX TYPEERROR ---
+        const setupPWA = () => {
+            const manifestData = {
+                "name": "Discipline Tracker 2026",
+                "short_name": "Tracker2026",
+                "start_url": window.location.origin + window.location.pathname,
+                "display": "standalone",
+                "background_color": "#050810",
+                "theme_color": "#050810",
+                "icons": [
+                    {
+                        "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
+                        "sizes": "731x731",
+                        "type": "image/jpeg",
+                        "purpose": "any maskable"
+                    }
+                ]
+            };
+            const manifestLink = document.getElementById('pwa-manifest');
+            if (manifestLink) {
+                const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+                manifestLink.setAttribute('href', URL.createObjectURL(blob));
+            }
+        };
+
+        // --- SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const swCode = `self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });`;
+                const swCode = `self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request)); });`;
                 const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW failed', err));
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
             });
         }
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('installBtn');
+            if(btn) btn.style.display = 'block';
+        });
+
+        document.getElementById('installBtn')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') document.getElementById('installBtn').style.display = 'none';
+                deferredPrompt = null;
+            }
+        });
 
         // --- GLOBAL FUNCTIONS ---
         window.initAuth = async function() {
@@ -251,10 +296,10 @@
                 const icon = document.getElementById('notifIcon'), label = document.getElementById('notifText');
                 if (p === "granted") { 
                     if (icon) icon.className = "fas fa-bell notif-active"; 
-                    if (label) label.innerText = "Reminder Aktif (03:30)"; 
+                    if (label) label.innerText = "Aktif"; 
                 } else { 
                     if (icon) icon.className = "fas fa-bell notif-blocked"; 
-                    if (label) label.innerText = "Notif Diblokir"; 
+                    if (label) label.innerText = "Blok"; 
                 }
             });
         };
@@ -307,7 +352,6 @@
             const allPossible = [
                 { id: "english", duration: 30 * 60000 },
                 { id: "muscle_subuh", duration: 20 * 60000 },
-                { id: "sport", noTimer: true },
                 { id: "deep1", duration: 210 * 60000 },
                 { id: "muscle_dzuhur", duration: 20 * 60000 },
                 { id: "deep2", duration: 60 * 60000 },
@@ -328,12 +372,13 @@
             return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         };
 
+        // --- FIREBASE SYNC ---
         const updateSyncUI = () => {
             const indicator = document.getElementById('syncIndicator'), syncText = document.getElementById('syncText');
             if (!indicator) return;
-            if (!navigator.onLine) { indicator.className = 'state-offline'; syncText.innerText = "Mode Offline"; }
-            else if (currentUser) { indicator.className = 'state-online'; syncText.innerText = "Cloud Online"; }
-            else { indicator.className = 'state-syncing'; syncText.innerText = "Menghubungkan..."; }
+            if (!navigator.onLine) { indicator.className = 'state-offline'; syncText.innerText = "Offline"; }
+            else if (currentUser) { indicator.className = 'state-online'; syncText.innerText = "Online"; }
+            else { indicator.className = 'state-syncing'; syncText.innerText = "Connecting"; }
         };
 
         window.addEventListener('online', updateSyncUI);
@@ -347,7 +392,6 @@
                 if (Notification.permission === "granted") {
                     const icon = document.getElementById('notifIcon'), label = document.getElementById('notifText');
                     if (icon) icon.className = "fas fa-bell notif-active"; 
-                    if (label) label.innerText = "Reminder Aktif (03:30)";
                 }
             } 
         });
@@ -368,6 +412,7 @@
             await setDoc(doc(db, 'artifacts', trackerId, 'users', currentUser.uid, 'calendar', `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`), cloudData); 
         };
 
+        // --- DYNAMIC SPORT LOGIC ---
         const isFastingDay = (date) => {
             const day = date.getDay(), ramadanStart = new Date(2026, 1, 18), ramadanEnd = new Date(2026, 2, 19);
             if (date >= ramadanStart && date <= ramadanEnd) return "Ramadhan";
@@ -388,25 +433,28 @@
             if (sched.type === "Rest") return "🛌 Total Rest";
             let runDist = 5 + Math.floor(month / 3);
             if (fasting === "Ramadhan") {
-                if (sched.type === "Gowes") return `🚴 Gowes Santai ${sched.val} KM (Low Intensity)`;
-                return "🚶 Steps 10k - 20k / Lari Pendek 2KM";
+                if (sched.type === "Gowes") return `🚴 Gowes Santai ${sched.val} KM`;
+                return "🚶 Steps 10k-20k / Lari 2KM";
             }
-            if (sched.type === "Run") return `🏃 Lari ${runDist} KM (Target Progresif)`;
+            if (sched.type === "Run") return `🏃 Lari ${runDist} KM`;
             return `🚴 Gowes ${sched.val} KM`;
         };
 
+        // --- RENDER LOGIC ---
         const renderDayTracker = () => {
             const isFriday = selectedDate.getDay() === 5;
             const isThursday = selectedDate.getDay() === 4;
             const isMonday = selectedDate.getDay() === 1;
             const dayNum = selectedDate.getDate();
+            const monthNum = selectedDate.getMonth();
+            
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
             
-            document.getElementById('dayFullLabel').innerText = `${dayNames[selectedDate.getDay()]}, ${dayNum} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
-            document.getElementById('currentSelectionLabel').innerText = `${dayNum < 10 ? '0'+dayNum : dayNum} ${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+            document.getElementById('dayFullLabel').innerText = `${dayNames[selectedDate.getDay()]}, ${dayNum} ${monthNames[monthNum]} ${selectedDate.getFullYear()}`;
+            document.getElementById('currentSelectionLabel').innerText = `${dayNum < 10 ? '0'+dayNum : dayNum} ${monthNames[monthNum]} ${selectedDate.getFullYear()}`;
             
-            const quoteIdx = (dayNum + selectedDate.getMonth() * 31) % yearlyQuotes.length;
+            const quoteIdx = (dayNum + monthNum * 31) % yearlyQuotes.length;
             document.getElementById('quoteText').innerText = `"${yearlyQuotes[quoteIdx]}"`;
             
             const fastingType = isFastingDay(selectedDate);
@@ -444,7 +492,7 @@
                 { id: "piring", task: "Mencuci Piring", icon: "fa-sink" },
                 { id: "istigfar", task: "Istigfar 1000x", icon: "fa-comment-dots" },
                 { id: "taubat", task: "Sholat Taubat", icon: "fa-person-praying" },
-                { id: "kuku", task: "Potong Kuku (Khusus Senin, Kamis, Jum'at)", icon: "fa-scissors", specialDaysKuku: true },
+                { id: "kuku", task: "Potong Kuku (Senin, Kamis, Jum'at)", icon: "fa-scissors", specialDaysKuku: true },
                 { id: "cuci", task: "Cuci Pakaian", icon: "fa-shirt", fridayOnly: true }
             ];
 
@@ -530,9 +578,10 @@
             const mainDone = renderList(baseRoutine, 'taskList');
             const extraDone = renderList(extraTasks, 'extraTaskList');
             
-            const totalTasks = document.querySelectorAll('.glass-card').length;
-            const score = totalTasks ? Math.round(((mainDone + extraDone) / totalTasks) * 100) : 0;
-            document.getElementById('dayScore').innerText = score + '%';
+            const totalTasksCount = document.querySelectorAll('.glass-card').length;
+            const score = totalTasksCount ? Math.round(((mainDone + extraDone) / totalTasksCount) * 100) : 0;
+            const scoreEl = document.getElementById('dayScore');
+            if (scoreEl) scoreEl.innerText = score + '%';
         };
 
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; renderDayTracker(); saveToFirestore(); };
@@ -581,7 +630,7 @@
                     let remaining = cloudData[id].timerEnd - Date.now();
                     
                     if (remaining <= 0) {
-                        if ("vibrate" in navigator) navigator.vibrate([400, 200, 400, 200, 600]);
+                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]);
                         if (id === 'buku') {
                             if (cloudData[id].pomoState === 'work') {
                                 cloudData[id].pomoState = 'rest';
@@ -594,6 +643,7 @@
                             }
                         } else {
                             cloudData[id].timerRunning = false;
+                            cloudData[id].remainingMs = 0;
                         }
                         saveToFirestore();
                     }
@@ -605,29 +655,20 @@
             const witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
             if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) {
                 if (Notification.permission === "granted") {
-                    new Notification("Tracker 2026", { body: "Bangun, bro! Jam 03:30 WITA. Waktunya eksekusi disiplin.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" });
+                    new Notification("Tracker 2026", { body: "Bangun, bro! Jam 03:30 WITA.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" });
                     lastNotifDate = witaTime.toDateString();
                 }
             }
         }, 1000);
 
-        // --- MANIFEST GENERATION ---
-        const manifest = {
-            "name": "Discipline Tracker 2026",
-            "short_name": "Tracker2026",
-            "start_url": window.location.href,
-            "display": "standalone",
-            "background_color": "#050810",
-            "theme_color": "#050810",
-            "icons": [{ "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg?v=2026", "sizes": "731x731", "type": "image/jpeg", "purpose": "any maskable" }]
-        };
-        document.getElementById('pwa-manifest').setAttribute('href', `data:application/manifest+json,${encodeURIComponent(JSON.stringify(manifest))}`);
-
         window.addEventListener('load', () => {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
-            for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
-            ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; mS.appendChild(o); });
-            yS.value = "2026"; mS.value = "0"; 
+            for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; if(yS) yS.appendChild(o); }
+            ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; if(mS) mS.appendChild(o); });
+            if(yS) yS.value = "2026"; 
+            if(mS) mS.value = "0"; 
+            
+            setupPWA();
             window.initAuth();
             window.updateCalendarView();
             renderDayTracker();

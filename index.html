@@ -19,7 +19,7 @@
 
     <link rel="manifest" id="pwa-manifest">
 
-    <title>Produktif Discipline Tracker</title>
+    <title>Discipline Tracker Everyday</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -94,11 +94,26 @@
 
         select { background-color: #1e293b; color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 12px; border-radius: 10px; font-size: 13px; }
 
-        .attachment-badge { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 8px; border-radius: 8px; display: flex; align-items: center; gap: 6px; font-size: 10px; color: #93c5fd; max-width: 150px; }
-        .attachment-preview { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+        /* Attachment Styles */
+        .attachment-badge { 
+            background: rgba(59, 130, 246, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            padding: 4px 8px; 
+            border-radius: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 10px; 
+            color: #94a3b8; 
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .attachment-badge:hover { background: rgba(59, 130, 246, 0.2); color: #f1f5f9; }
+        .attachment-preview { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: #0f172a; }
 
         .fasting-alert { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
         
+        /* Timer Styles */
         .timer-panel { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-top: 10px; display: none; flex-direction: column; align-items: center; }
         .timer-display { font-family: 'Courier New', Courier, monospace; font-weight: 800; color: #60a5fa; font-size: 1.5rem; }
         .pomo-badge { font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
@@ -121,6 +136,14 @@
             display: none; background: #ef4444; color: white; text-align: center;
             padding: 8px; font-size: 10px; font-weight: 800; position: sticky; top: 0; z-index: 1000;
         }
+
+        /* Image Preview Modal */
+        #imagePreviewModal {
+            display: none; position: fixed; inset: 0; z-index: 11000;
+            background: rgba(0,0,0,0.95); padding: 20px;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        #previewImage { max-width: 100%; max-height: 80vh; border-radius: 12px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body class="bg-[#050810]">
@@ -132,6 +155,14 @@
     <div id="uploadLoader">
         <div class="pulse-dot text-blue-500 mb-4"></div>
         <p class="text-white font-bold text-[10px]">MENGECILKAN UKURAN GAMBAR...</p>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="imagePreviewModal" onclick="window.closeImagePreview()">
+        <button class="absolute top-6 right-6 text-white text-3xl"><i class="fas fa-times"></i></button>
+        <img id="previewImage" src="" alt="Preview">
+        <p id="previewName" class="mt-4 text-slate-400 text-xs font-bold uppercase"></p>
+        <a id="downloadLink" href="" download="" class="mt-4 bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-[10px] font-bold uppercase" onclick="event.stopPropagation()">Download Berkas</a>
     </div>
 
     <div id="syncIndicator" class="state-syncing">
@@ -168,6 +199,7 @@
     </header>
 
     <main class="max-w-5xl mx-auto p-6 pb-20">
+        <!-- Kalender -->
         <div class="glass-card p-6 rounded-[2rem] mb-10">
             <div class="grid grid-cols-7 gap-3 text-center mb-4 font-black text-slate-500 text-[10px] uppercase">
                 <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
@@ -207,7 +239,8 @@
         <p class="mt-1 opacity-40 font-medium uppercase text-[8px] sm:text-[10px]">DIRANCANG UNTUK PERFORMA TINGGI & KEDISPLINAN MUTLAK</p>
     </footer>
 
-    <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*">
+    <!-- File Input mendukung berbagai format -->
+    <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -253,33 +286,47 @@
 
         enableIndexedDbPersistence(db).catch(() => {});
 
-        // --- CORE FUNCTIONS (DECLARATIONS) ---
+        // --- CORE FUNCTIONS (IMMEDIATELY ASSIGNED TO WINDOW) ---
 
-        function updateSyncUI() {
+        window.updateSyncUI = function() {
             const indicator = document.getElementById('syncIndicator');
             const syncText = document.getElementById('syncText');
             if (!indicator || !syncText) return;
             if (!navigator.onLine) { indicator.className = 'state-offline'; syncText.innerText = "Offline"; }
             else if (auth.currentUser) { indicator.className = 'state-online'; syncText.innerText = "Cloud Online"; }
             else { indicator.className = 'state-syncing'; syncText.innerText = "Connecting"; }
-        }
+        };
 
-        function updateNotifUI(permission) {
+        window.updateNotifUI = function(permission) {
             const icon = document.getElementById('notifIcon'), text = document.getElementById('notifText');
             if (!icon || !text) return;
             icon.className = `fas fa-bell notif-${permission}`;
             if (permission === "granted") text.innerText = "Aktif";
             else if (permission === "denied") text.innerText = "Blok";
             else text.innerText = "Izin?";
-        }
+        };
 
-        function formatTime(ms) {
-            if (ms <= 0) return "00:00";
-            const s = Math.floor(ms / 1000);
-            return `${Math.floor(s / 3600) > 0 ? Math.floor(s / 3600) + ':' : ''}${Math.floor((s % 3600) / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
-        }
+        window.requestNotifPermission = function() {
+            if (!("Notification" in window)) { window.updateNotifUI("denied"); return; }
+            if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+                const warn = document.getElementById('secureContextWarning');
+                if(warn) warn.style.display = 'block';
+                window.updateNotifUI("denied");
+                return;
+            }
+            Notification.requestPermission().then(p => {
+                window.updateNotifUI(p);
+                if (p === "granted") {
+                    new Notification("🏆 Elite Discipline Aktif", { 
+                        body: "Notifikasi reminder aktif! Lo bakal diingetin jam 03:30 pagi.", 
+                        icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
+                        requireInteraction: true 
+                    });
+                }
+            });
+        };
 
-        async function initAuth() {
+        window.initAuth = async function() {
             window.updateSyncUI();
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -288,15 +335,11 @@
                     await signInAnonymously(auth);
                 }
             } catch (e) { console.error("Auth Error:", e); window.updateSyncUI(); }
-        }
+        };
 
-        function setupPWA() {
+        window.setupPWA = function() {
             const manifestLink = document.getElementById('pwa-manifest');
             if (!manifestLink) return;
-            if (!window.isSecureContext && window.location.hostname !== 'localhost') {
-                const warn = document.getElementById('secureContextWarning');
-                if(warn) warn.style.display = 'block';
-            }
             const manifestData = {
                 "name": "Elite Discipline Tracker 2026",
                 "short_name": "Tracker2026",
@@ -316,9 +359,9 @@
                 const swCode = `self.addEventListener('install', (e) => e.waitUntil(self.skipWaiting())); self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim())); self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request)); });`;
                 navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' }))).catch(() => {});
             }
-        }
+        };
 
-        function updateCalendarView() {
+        window.updateCalendarView = function() {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect'), grid = document.getElementById('calendarGrid');
             if (!yS || !mS || !grid) return;
             const year = parseInt(yS.value), month = parseInt(mS.value);
@@ -333,9 +376,9 @@
                 dayEl.onclick = () => { selectedDate = new Date(year, month, d); window.setupRealtimeSync(); };
                 grid.appendChild(dayEl);
             }
-        }
+        };
 
-        function setupRealtimeSync() {
+        window.setupRealtimeSync = function() {
             if (!auth.currentUser) return;
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             if (dayUnsubscribe) dayUnsubscribe();
@@ -344,7 +387,9 @@
                 window.renderDayTracker();
             }, (err) => { console.error("Sync Error:", err); window.updateSyncUI(); });
             window.updateCalendarView();
-        }
+        };
+
+        // --- ENGINE FUNCTIONS ---
 
         async function saveToFirestore() { 
             if (!auth.currentUser) return; 
@@ -352,6 +397,13 @@
             await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
         }
 
+        window.formatTime = function(ms) {
+            if (ms <= 0) return "00:00";
+            const s = Math.floor(ms / 1000);
+            return `${Math.floor(s / 3600) > 0 ? Math.floor(s / 3600) + ':' : ''}${Math.floor((s % 3600) / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+        }
+
+        // Kompresi Gambar
         function compressImage(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -372,6 +424,30 @@
                 };
             });
         }
+
+        // --- IMAGE PREVIEW LOGIC ---
+        window.openImagePreview = function(data, name) {
+            const modal = document.getElementById('imagePreviewModal');
+            const img = document.getElementById('previewImage');
+            const nameEl = document.getElementById('previewName');
+            const dl = document.getElementById('downloadLink');
+            
+            if (data.startsWith('data:image/')) {
+                img.src = data;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+            
+            nameEl.innerText = name;
+            dl.href = data;
+            dl.download = name;
+            modal.style.display = 'flex';
+        };
+
+        window.closeImagePreview = function() {
+            document.getElementById('imagePreviewModal').style.display = 'none';
+        };
 
         window.renderDayTracker = function() {
             const isFri = selectedDate.getDay() === 5, isThu = selectedDate.getDay() === 4, isMon = selectedDate.getDay() === 1;
@@ -446,8 +522,24 @@
                     }
                     const card = document.createElement('div');
                     card.className = 'glass-card p-5 rounded-2xl flex flex-col hover:scale-[1.01] transition-transform';
-                    let attHtml = (itemData.attachments || []).map((f, i) => `<div class="attachment-badge relative group">${f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt"></i>`}<span class="truncate text-[9px] ml-1">${f.name}</span><button onclick="window.removeAttachment('${item.id}', ${i})" class="absolute -top-1 -right-1 bg-rose-500 text-white w-3 h-3 rounded-full text-[7px]"><i class="fas fa-times"></i></button></div>`).join('');
-                    card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan..." class="note-input w-full mt-1 p-2 rounded-lg min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-2 mt-2">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
+                    
+                    // Render Attachment dengan preview
+                    let attHtml = '';
+                    if (itemData.attachments && itemData.attachments.length > 0) {
+                        attHtml = `<div class="flex flex-wrap gap-2 mt-2">`;
+                        itemData.attachments.forEach((f, i) => {
+                            const isImg = f.data.startsWith('data:image/');
+                            attHtml += `
+                            <div class="attachment-badge relative group" onclick="window.openImagePreview('${f.data}', '${f.name}')">
+                                ${isImg ? `<img src="${f.data}" class="attachment-preview" />` : `<div class="attachment-preview flex items-center justify-center bg-blue-500/10"><i class="fas fa-file-alt text-blue-400"></i></div>`}
+                                <span class="truncate max-w-[60px] ml-1">${f.name}</span>
+                                <button onclick="event.stopPropagation(); window.removeAttachment('${item.id}', ${i})" class="absolute -top-1 -right-1 bg-rose-500 text-white w-3 h-3 rounded-full text-[7px] flex items-center justify-center"><i class="fas fa-times"></i></button>
+                            </div>`;
+                        });
+                        attHtml += `</div>`;
+                    }
+                    
+                    card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan..." class="note-input w-full mt-1 p-2 rounded-lg min-h-[40px] resize-none">${itemData.note || ''}</textarea>${attHtml}<div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
                     const area = card.querySelector(`#note-${item.id}`);
                     if(area) area.onblur = (e) => window.updateNote(item.id, e.target.value);
                     container.appendChild(card);
@@ -460,36 +552,9 @@
             const scoreLabel = document.getElementById('dayScore');
             const totalC = document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1;
             if(scoreLabel) scoreLabel.innerText = Math.round(((mainD + extraD) / totalC) * 100) + '%';
-        };
+        }
 
-        // --- GLOBAL WINDOW BINDINGS (FIX ReferenceError) ---
-        window.setupPWA = setupPWA;
-        window.initAuth = initAuth;
-        window.updateSyncUI = updateSyncUI;
-        window.updateNotifUI = updateNotifUI;
-        window.formatTime = formatTime; // PERBAIKAN: Menghubungkan fungsi asli ke objek window
-        window.updateCalendarView = updateCalendarView;
-        window.setupRealtimeSync = setupRealtimeSync;
-
-        window.requestNotifPermission = function() {
-            if (!("Notification" in window)) { window.updateNotifUI("denied"); return; }
-            if (!window.isSecureContext && window.location.hostname !== 'localhost') {
-                document.getElementById('secureContextWarning').style.display = 'block';
-                window.updateNotifUI("denied");
-                return;
-            }
-            Notification.requestPermission().then(p => {
-                window.updateNotifUI(p);
-                if (p === "granted") {
-                    new Notification("🏆 Elite Discipline Aktif", { 
-                        body: "Notifikasi reminder aktif! Lo bakal diingetin jam 03:30 pagi.", 
-                        icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
-                        requireInteraction: true 
-                    });
-                }
-            });
-        };
-
+        // --- GLOBAL WINDOW BINDINGS ---
         window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
         window.startCountdown = (id, durationMs, isPomo = false) => {
             const taskData = cloudData[id] || {};
@@ -511,29 +576,47 @@
         window.updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
-        window.handleInstallClick = async function() {
-            if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') document.getElementById('installBtn').style.display = 'none'; deferredPrompt = null; }
-        };
-
-        // --- EVENTS ---
+        
+        // --- UPLOAD LOGIC ---
         document.getElementById('globalFileInput').onchange = async (e) => {
             const files = Array.from(e.target.files);
             if (!files.length || !activeItemIdForUpload) return;
+            
             document.getElementById('uploadLoader').style.display = 'flex';
             const attachments = cloudData[activeItemIdForUpload]?.attachments || [];
+            
             for (let f of files) {
                 try {
-                    const compressedData = await compressImage(f);
-                    attachments.push({ name: f.name.split('.')[0] + ".jpg", type: "image/jpeg", data: compressedData });
+                    let fileData = "";
+                    let fileName = f.name;
+                    
+                    if (f.type.startsWith('image/')) {
+                        fileData = await compressImage(f);
+                        if (!fileName.toLowerCase().endsWith('.jpg')) fileName += ".jpg";
+                    } else {
+                        // Baca sebagai DataURL untuk file non-gambar (limit 1MB untuk Firestore safety)
+                        if (f.size > 1024 * 1024) {
+                            alert(`File ${f.name} terlalu besar (Maks 1MB untuk dokumen non-gambar).`);
+                            continue;
+                        }
+                        fileData = await new Promise((resolve) => {
+                            const r = new FileReader();
+                            r.onload = () => resolve(r.result);
+                            r.readAsDataURL(f);
+                        });
+                    }
+                    
+                    attachments.push({ name: fileName, type: f.type, data: fileData });
                 } catch(err) { console.error("Upload error:", err); }
             }
+            
             cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments };
             await saveToFirestore(); window.renderDayTracker();
             document.getElementById('uploadLoader').style.display = 'none';
             e.target.value = '';
         };
 
-        // --- TICKER LOOP ---
+        // --- TICKER & BOOTSTRAP ---
         setInterval(() => {
             window.updateSyncUI();
             let re = false;
@@ -562,7 +645,6 @@
             }
         }, 1000);
 
-        // --- FINAL BOOTSTRAP ---
         window.addEventListener('load', async () => {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
             if(yS && mS) {
@@ -570,12 +652,8 @@
                 ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; mS.appendChild(o); });
                 yS.value = "2026"; mS.value = "0"; 
             }
-            
             window.setupPWA();
-            onAuthStateChanged(auth, (user) => { 
-                window.updateSyncUI(); 
-                if (user) window.setupRealtimeSync(); 
-            });
+            onAuthStateChanged(auth, (user) => { window.updateSyncUI(); if (user) window.setupRealtimeSync(); });
             await window.initAuth();
             window.renderDayTracker();
             if ("Notification" in window) window.updateNotifUI(Notification.permission);

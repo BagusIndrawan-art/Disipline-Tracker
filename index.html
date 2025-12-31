@@ -9,9 +9,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Disipline Tracker">
     <meta name="theme-color" content="#050810">
+    <meta name="mobile-web-app-capable" content="yes">
     
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
+    
+    <!-- Manifest Placeholder (Akan diisi via JS untuk kompatibilitas PWA) -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
@@ -96,9 +99,6 @@
             font-size: 11px;
         }
 
-        .timer-panel { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-top: 10px; display: none; flex-direction: column; align-items: center; }
-        .timer-display { font-family: 'Courier New', Courier, monospace; font-weight: 800; color: #60a5fa; font-size: 1.5rem; }
-
         #imagePreviewModal {
             display: none; position: fixed; inset: 0; z-index: 12000;
             background: rgba(0,0,0,0.95); padding: 20px;
@@ -143,7 +143,7 @@
             border: 1px solid rgba(59, 130, 246, 0.2);
             box-shadow: 0 0 40px rgba(59, 130, 246, 0.05);
             max-width: 600px;
-            margin: 0 auto;
+            margin: 40px auto;
             z-index: 10;
         }
 
@@ -177,7 +177,6 @@
         }
         .msg-hide { opacity: 0; transform: translate(-50%, -20px); }
 
-        /* Custom Dynamic Header */
         #mainHeader { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .header-clean { border-bottom-color: transparent !important; background: transparent !important; }
     </style>
@@ -393,7 +392,7 @@
             else { btn.classList.add("notif-prompt"); text.innerText = "Izin?"; icon.className = "fas fa-bell"; }
         };
 
-        // --- 3. FIREBASE CONFIG ---
+        // --- 3. CONFIG & STATE ---
         const firebaseConfig = {
             apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ",
             authDomain: "tracker-2026-4bbd9.firebaseapp.com",
@@ -412,7 +411,6 @@
         let dayUnsubscribe = null;
         let selectedDate = new Date(2026, 0, 1);
         let cloudData = {};
-        let activeItemIdForUpload = null;
         let lastNotifDate = null;
         window.openTimerPanels = {};
 
@@ -585,7 +583,7 @@
                 window.updateNotifUI(p); 
                 if (p === "granted") {
                     window.showMessage("Notifikasi Aktif!");
-                    const opt = { body: "Konfirmasi: Notifikasi kamu sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" };
+                    const opt = { body: "Notifikasi kamu sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" };
                     if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => reg.showNotification("Disipline Tracker", opt));
                     new Notification("Disipline Tracker", opt);
                 }
@@ -603,10 +601,8 @@
                     vibrate: [200, 100, 200]
                 };
                 
-                // Kirim langsung via API browser (Paling Instan di Desktop)
-                try {
-                    new Notification(title, opt);
-                } catch(e) {}
+                // Kirim via API browser (Paling Instan di Desktop)
+                try { new Notification(title, opt); } catch(e) {}
                 
                 // Kirim via Service Worker (Paling Handal di Mobile/PWA)
                 if ('serviceWorker' in navigator) {
@@ -616,9 +612,7 @@
                 }
                 
                 if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
-            } else { 
-                window.showMessage("Izinkan notif dulu (klik ikon lonceng)."); 
-            } 
+            } else { window.showMessage("Izinkan notif dulu (klik ikon lonceng)."); } 
         };
 
         window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
@@ -627,7 +621,46 @@
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
         window.updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
 
-        // --- 8. BOOTSTRAP & TICKER ---
+        // --- 8. BOOTSTRAP, MANIFEST & SERVICE WORKER ---
+        const setupPWA = async () => {
+            // 1. Injeksi Manifest (Kunci agar bisa di-install di HP)
+            const manifest = {
+                "name": "Disipline Tracker 2026",
+                "short_name": "Disipline",
+                "start_url": ".",
+                "display": "standalone",
+                "background_color": "#050810",
+                "theme_color": "#050810",
+                "icons": [{
+                    "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
+                    "sizes": "731x731",
+                    "type": "image/jpeg"
+                }]
+            };
+            const stringManifest = JSON.stringify(manifest);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            document.getElementById('pwa-manifest').setAttribute('href', manifestURL);
+
+            // 2. Registrasi Service Worker (Wajib untuk tombol Install)
+            if ('serviceWorker' in navigator) {
+                try {
+                    const swCode = `
+                        self.addEventListener('install', e => self.skipWaiting());
+                        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+                        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));
+                        self.addEventListener('push', e => {
+                            const data = e.data.json();
+                            self.registration.showNotification(data.title, { body: data.body, icon: data.icon });
+                        });
+                    `;
+                    const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                    const swURL = URL.createObjectURL(swBlob);
+                    await navigator.serviceWorker.register(swURL);
+                } catch(e) { console.warn("PWA SW Warning:", e); }
+            }
+        };
+
         setInterval(() => {
             window.updateSyncUI();
             let redraw = false;
@@ -643,15 +676,14 @@
                             if (reg) reg.showNotification("🏆 EKSEKUSI!", opt);
                             else new Notification("🏆 EKSEKUSI!", opt);
                         });
-                    } else {
-                        new Notification("🏆 EKSEKUSI!", opt);
-                    }
+                    } else { new Notification("🏆 EKSEKUSI!", opt); }
                 } 
                 lastNotifDate = witaTime.toDateString(); 
             }
         }, 1000);
 
         window.addEventListener('load', async () => {
+            setupPWA();
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
             if(yS && mS) {
                 for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
@@ -661,18 +693,9 @@
             }
 
             onAuthStateChanged(auth, (user) => {
-                const area = document.getElementById('dayTrackerArea'), 
-                      overlay = document.getElementById('loginOverlay'), 
-                      info = document.getElementById('userInfo'), 
-                      wrapper = document.getElementById('notifWrapper'), 
-                      loginSec = document.getElementById('loginSection'), 
-                      hBrand = document.getElementById('headerBrand'), 
-                      navWrap = document.getElementById('navWrapper'),
-                      hMain = document.getElementById('mainHeader');
-                
+                const area = document.getElementById('dayTrackerArea'), overlay = document.getElementById('loginOverlay'), info = document.getElementById('userInfo'), wrapper = document.getElementById('notifWrapper'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader');
                 if (user) {
-                    isUserLoggedIn = true; 
-                    area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
+                    isUserLoggedIn = true; area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
                     if(loginSec) loginSec.classList.add('hidden'); 
                     if(hBrand) hBrand.classList.remove('hidden');
                     if(navWrap) navWrap.classList.remove('hidden');
@@ -683,15 +706,13 @@
                     info.innerHTML = `<div class="flex items-center gap-2">${user.photoURL ? `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border border-white/20">` : `<i class="fas fa-user-circle text-white text-2xl"></i>`}<span class="text-[10px] font-black uppercase ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[9px] text-rose-500 font-bold ml-2">Logout</button></div>`;
                     window.setupRealtimeSync();
                 } else {
-                    isUserLoggedIn = false; 
-                    area.classList.add('hidden', 'opacity-0'); 
+                    isUserLoggedIn = false; area.classList.add('hidden', 'opacity-0'); 
                     if(loginSec) loginSec.classList.remove('hidden'); 
                     if(hBrand) hBrand.classList.add('hidden');
                     if(navWrap) navWrap.classList.add('hidden');
                     if(hMain) hMain.classList.add('header-clean');
                     overlay.classList.remove('hidden'); wrapper.classList.add('hidden');
-                    info.innerHTML = ``; 
-                    initParticles(); 
+                    info.innerHTML = ``; initParticles(); 
                 }
                 window.updateSyncUI();
             });

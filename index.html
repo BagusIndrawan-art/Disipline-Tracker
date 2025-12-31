@@ -4,20 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- PWA Primary Meta Tags -->
+    <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tracker 2026">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Tracker 2026">
+    <meta name="apple-mobile-web-app-title" content="Tracker-2026">
     <meta name="theme-color" content="#050810">
     
-    <!-- Ikon (Gunakan file lo di root GitHub) -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="manifest" id="pwa-manifest">
 
-    <title>2026 Elite Discipline Tracker</title>
+    <title>Disipline Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -54,32 +51,33 @@
             font-weight: 700;
             transition: all 0.2s;
             font-size: 0.75rem;
+            color: #64748b;
         }
 
         .calendar-day.active {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
+            color: white !important;
             box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
         }
 
         .task-done-text { color: #64748b; text-decoration: line-through; opacity: 0.7; }
 
-        /* Status Pills */
         .status-pill {
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 99px;
             font-size: 9px;
             font-weight: 800;
             text-transform: uppercase;
             display: flex;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        #syncIndicator { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
-        .state-online { background: #064e3b; color: #34d399; border: 1px solid #059669; }
-        .state-offline { background: #450a0a; color: #f87171; border: 1px solid #b91c1c; }
+        #syncIndicator { position: fixed; bottom: 25px; right: 25px; z-index: 100; transition: all 0.3s ease; }
+        .state-online { background: #064e3b; color: #34d399; }
+        .state-offline { background: #450a0a; color: #f87171; }
 
         .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; position: relative; }
         .pulse-dot::after {
@@ -88,11 +86,15 @@
         }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
+        .notif-active { color: #10b981 !important; }
+        .notif-prompt { color: #f59e0b !important; }
+        .notif-blocked { color: #ef4444 !important; }
+
         .note-input {
             background-color: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #f1f5f9;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .timer-panel { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 12px; margin-top: 10px; display: none; flex-direction: column; align-items: center; }
@@ -122,26 +124,23 @@
 
         .fasting-alert { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
         
-        #errorBanner {
-            display: none;
-            background: #ef4444;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            font-size: 11px;
-            font-weight: 800;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            text-transform: uppercase;
+        /* Dropdown Besaran */
+        select { 
+            background-color: #1e293b; 
+            color: #f1f5f9; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 8px 16px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            outline: none; 
+            font-size: 14px; 
+            font-weight: 700;
+            transition: all 0.2s ease;
         }
+        select:hover { border-color: #3b82f6; background-color: #243147; }
     </style>
 </head>
 <body class="bg-[#050810]">
-
-    <div id="errorBanner">
-        Domain Tidak Diizinkan! Daftarkan domain ini di Firebase Console lo.
-    </div>
 
     <div id="uploadLoader" class="fixed inset-0 bg-black/80 z-[20000] hidden flex-col items-center justify-center">
         <div class="pulse-dot text-blue-500 mb-4"></div>
@@ -155,83 +154,106 @@
         <p id="previewName" class="mt-4 text-slate-400 text-[10px] font-bold uppercase"></p>
     </div>
 
-    <!-- Cloud Sync Indicator -->
+    <!-- Status Cloud -->
     <div id="syncIndicator" class="status-pill state-offline">
         <div class="pulse-dot"></div>
-        <span id="syncText">Mencari Koneksi</span>
+        <span id="syncText">Cloud Offline</span>
     </div>
 
-    <header class="sticky top-0 z-50 bg-[#050810]/80 backdrop-blur-xl border-b border-white/5 p-5">
-        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 items-center gap-6">
-            <!-- Info Akun (Kiri) -->
-            <div class="flex flex-col gap-2 items-center md:items-start">
-                <div id="userInfo" class="flex items-center gap-3">
-                    <button onclick="window.loginWithGoogle()" id="loginBtn" class="bg-white text-black text-[9px] font-black uppercase px-4 py-1.5 rounded-full flex items-center gap-2">
+    <header class="sticky top-0 z-50 bg-[#050810]/90 backdrop-blur-xl border-b border-white/5 p-4 sm:p-5">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Akun & Notif -->
+            <div class="flex items-center gap-4 w-full md:w-1/3 justify-center md:justify-start">
+                <div id="userInfo">
+                    <button onclick="window.loginWithGoogle()" class="bg-white text-black text-[10px] font-black uppercase px-4 py-2 rounded-full flex items-center gap-2">
                         <i class="fab fa-google"></i> Login Google
                     </button>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 text-slate-400">
-                        <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Notif</span>
+                <div class="h-8 w-px bg-white/10 hidden sm:block"></div>
+                <div class="flex items-center gap-3">
+                    <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 notif-prompt">
+                        <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Izin?</span>
                     </button>
-                    <button onclick="window.testNotification()" class="text-[9px] text-slate-500 font-bold uppercase border border-white/10 px-2 py-0.5 rounded">Tes Notif</button>
+                    <button onclick="window.testNotification()" class="text-[9px] text-slate-500 font-bold uppercase border border-white/10 px-2 py-1 rounded">Tes</button>
                 </div>
             </div>
 
-            <!-- Judul -->
-            <div class="flex flex-col items-center">
-                <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
+            <!-- Logo & Tanggal -->
+            <div class="flex flex-col items-center w-full md:w-1/3">
+                <h1 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
                     <span class="text-blue-500"><i class="fas fa-bolt"></i></span> FOCUS LOG
                 </h1>
-                <p id="currentSelectionLabel" class="text-[11px] text-blue-400 font-bold uppercase mt-1">01 JAN 2026</p>
+                <p id="currentSelectionLabel" class="text-[10px] text-blue-400 font-bold uppercase tracking-tighter mt-1">01 JAN 2026</p>
             </div>
 
-            <!-- Kontrol Kalender -->
-            <div class="flex items-center justify-center md:justify-end gap-3">
+            <!-- Navigasi Kalender -->
+            <div class="flex items-center justify-center md:justify-end gap-3 w-full md:w-1/3">
                 <select id="monthSelect" onchange="window.updateCalendarView()"></select>
                 <select id="yearSelect" onchange="window.updateCalendarView()"></select>
             </div>
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto p-6 pb-20">
-        <div class="glass-card p-6 rounded-[2rem] mb-10">
-            <div class="grid grid-cols-7 gap-3 text-center mb-4 font-black text-slate-500 text-[10px] uppercase">
-                <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
-            </div>
-            <div id="calendarGrid" class="grid grid-cols-7 gap-3"></div>
+    <main class="max-w-6xl mx-auto p-4 sm:p-6 pb-24">
+        
+        <!-- Quote -->
+        <div class="mb-8 text-center px-4">
+            <p id="quoteText" class="text-xs sm:text-sm text-slate-400 italic font-medium leading-relaxed max-w-2xl mx-auto">"Memuat motivasi..."</p>
         </div>
 
-        <div id="dayTrackerArea" class="opacity-40 pointer-events-none transition-opacity duration-500">
-            <div id="dayHeader" class="flex items-end justify-between mb-8 px-2">
-                <div>
+        <!-- Kalender -->
+        <div class="glass-card p-5 sm:p-8 rounded-[2rem] mb-12 shadow-2xl">
+            <div class="grid grid-cols-7 gap-2 sm:gap-4 text-center mb-4 font-black text-slate-500 text-[10px] uppercase tracking-widest">
+                <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
+            </div>
+            <div id="calendarGrid" class="grid grid-cols-7 gap-2 sm:gap-4"></div>
+        </div>
+
+        <!-- Tracker Content -->
+        <div id="dayTrackerArea" class="opacity-40 pointer-events-none transition-all duration-700">
+            <div id="dayHeader" class="flex flex-col sm:flex-row items-center sm:items-end justify-between mb-10 px-2 gap-4">
+                <div class="text-center sm:text-left">
                     <div id="fastingBadgeContainer"></div>
-                    <h2 id="dayFullLabel" class="text-2xl font-extrabold text-white leading-none">...</h2>
-                    <div class="flex items-center gap-3 mt-3">
-                        <span id="sportTargetLabel" class="text-[11px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full font-bold uppercase border border-blue-500/20">...</span>
+                    <h2 id="dayFullLabel" class="text-2xl sm:text-3xl font-black text-white leading-tight">...</h2>
+                    <div class="flex items-center justify-center sm:justify-start gap-3 mt-3">
+                        <span id="sportTargetLabel" class="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-full font-bold uppercase border border-blue-500/20 tracking-wider">...</span>
                     </div>
                 </div>
-                <div class="text-right">
-                    <span id="dayScore" class="text-4xl font-black text-emerald-400">0%</span>
-                    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Skor Progres</p>
+                <div class="text-center sm:text-right bg-white/5 p-4 rounded-3xl border border-white/5 min-w-[120px]">
+                    <span id="dayScore" class="text-4xl font-black text-emerald-400 leading-none">0%</span>
+                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mt-1">Daily Progres</p>
                 </div>
             </div>
 
-            <div class="mb-6 px-2">
-                <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-[3px] mb-4">Jadwal Utama</h3>
-                <div id="taskList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+            <div class="mb-12">
+                <div class="flex items-center gap-3 mb-6 px-2">
+                    <div class="h-px bg-blue-500/30 flex-1"></div>
+                    <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-[4px]">Jadwal Utama</h3>
+                    <div class="h-px bg-blue-500/30 flex-1"></div>
+                </div>
+                <div id="taskList" class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6"></div>
             </div>
 
-            <div class="mt-12 px-2">
-                <h3 class="text-[10px] font-black text-emerald-500 uppercase tracking-[3px] mb-4">Tugas Rutin & Ibadah</h3>
-                <div id="extraTaskList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+            <div class="mt-16">
+                <div class="flex items-center gap-3 mb-6 px-2">
+                    <div class="h-px bg-emerald-500/30 flex-1"></div>
+                    <h3 class="text-[10px] font-black text-emerald-500 uppercase tracking-[4px]">Rutin & Ibadah</h3>
+                    <div class="h-px bg-emerald-500/30 flex-1"></div>
+                </div>
+                <div id="extraTaskList" class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6"></div>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>© 2026 ELITE DISCIPLINE TRACKER | ALL RIGHTS RESERVED</p>
-        <p class="mt-1 opacity-40 font-medium uppercase text-[8px] sm:text-[10px]">DIRANCANG UNTUK PERFORMA TINGGI & KEDISPLINAN MUTLAK</p>
+        <div class="max-w-6xl mx-auto">
+            <p class="font-black text-[11px] tracking-[2px]">© 2026 FOCUS LOG | ALL RIGHTS RESERVED</p>
+            <p class="mt-2 opacity-40 font-bold uppercase text-[9px] tracking-widest leading-loose">
+                DIRANCANG UNTUK PERFORMA TINGGI & KEDISPLINAN MUTLAK<br>
+                SINKRONISASI CLOUD OTOMATIS ANTAR PERANGKAT
+            </p>
+        </div>
     </footer>
 
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.txt">
@@ -241,15 +263,14 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // --- 1. CORE FUNCTIONS (SANGAT KRUSIAL - DEKLARASI DI AWAL) ---
-        
-        window.formatTime = function(ms) {
+        // --- 1. CORE UTILITIES (REGISTERED FIRST) ---
+
+        window.formatTime = (ms) => {
             if (ms <= 0) return "00:00";
             const s = Math.floor(ms / 1000);
-            const hrs = Math.floor(s / 3600);
             const mins = Math.floor((s % 3600) / 60);
             const secs = s % 60;
-            return `${hrs > 0 ? hrs + ':' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         };
 
         window.updateSyncUI = function() {
@@ -257,21 +278,23 @@
             if (!indicator || !syncText) return;
             if (!navigator.onLine) {
                 indicator.className = 'status-pill state-offline';
-                syncText.innerText = "Modus Offline";
+                syncText.innerText = "Cloud Offline";
             } else if (auth.currentUser) {
                 indicator.className = 'status-pill state-online';
                 syncText.innerText = "Cloud Online";
             } else {
                 indicator.className = 'status-pill state-offline';
-                syncText.innerText = "Belum Login";
+                syncText.innerText = "Cloud Offline";
             }
         };
 
         window.updateNotifUI = function(permission) {
-            const icon = document.getElementById('notifIcon'), text = document.getElementById('notifText');
-            if (!icon || !text) return;
-            icon.className = `fas fa-bell notif-${permission}`;
-            text.innerText = permission === "granted" ? "Aktif" : (permission === "denied" ? "Blok" : "Izin?");
+            const btn = document.getElementById('notifStatusBtn'), text = document.getElementById('notifText');
+            if (!btn || !text) return;
+            btn.className = "text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 transition-colors";
+            if (permission === "granted") { btn.classList.add("notif-active"); text.innerText = "Aktif"; }
+            else if (permission === "denied") { btn.classList.add("notif-blocked"); text.innerText = "Diblokir"; }
+            else { btn.classList.add("notif-prompt"); text.innerText = "Izin?"; }
         };
 
         // --- 2. CONFIG & STATE ---
@@ -290,7 +313,7 @@
         const provider = new GoogleAuthProvider();
         const trackerId = "discipline-tracker-2026";
 
-        try { enableIndexedDbPersistence(db).catch(() => {}); } catch(e) {}
+        try { enableIndexedDbPersistence(db); } catch(e) {}
 
         let dayUnsubscribe = null;
         let selectedDate = new Date(2026, 0, 1);
@@ -312,31 +335,21 @@
             "Terus melangkah, meskipun langkah itu kecil."
         ];
 
-        // --- 3. DATA LOGIC ---
+        // --- 3. ACTIONS ---
 
         window.loginWithGoogle = async () => {
-            try {
-                const banner = document.getElementById('errorBanner');
-                if(banner) banner.style.display = 'none';
-                await signInWithPopup(auth, provider);
-            } catch (e) {
-                console.error("Login Error", e);
-                if (e.code === 'auth/unauthorized-domain') {
-                    const banner = document.getElementById('errorBanner');
-                    if(banner) banner.style.display = 'block';
-                }
-            }
+            try { await signInWithPopup(auth, provider); } 
+            catch (e) { console.error("Login Error", e); }
         };
 
         window.logout = async () => {
-            if(confirm("Keluar dari akun?")) await signOut(auth);
+            if(confirm("Keluar dari aplikasi?")) await signOut(auth);
         };
 
         window.setupRealtimeSync = function() {
             if (!auth.currentUser) return;
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             if (dayUnsubscribe) dayUnsubscribe();
-            
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), (snap) => {
                 cloudData = snap.exists() ? snap.data() : {};
                 window.renderDayTracker();
@@ -357,12 +370,13 @@
             if (!yS || !mS || !grid) return;
             const year = parseInt(yS.value), month = parseInt(mS.value);
             grid.innerHTML = '';
-            const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
             for(let i=0; i<firstDay; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=daysInMonth; d++) {
                 const dayEl = document.createElement('div');
                 const isSelected = selectedDate.getDate() === d && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
-                dayEl.className = `calendar-day relative glass-card ${isSelected ? 'active' : ''}`;
+                dayEl.className = `calendar-day glass-card ${isSelected ? 'active' : ''}`;
                 dayEl.innerText = d;
                 dayEl.onclick = () => { selectedDate = new Date(year, month, d); window.setupRealtimeSync(); };
                 grid.appendChild(dayEl);
@@ -370,7 +384,7 @@
         };
 
         window.renderDayTracker = function() {
-            const labels = {
+            const ui = {
                 full: document.getElementById('dayFullLabel'),
                 sel: document.getElementById('currentSelectionLabel'),
                 quote: document.getElementById('quoteText'),
@@ -379,24 +393,24 @@
                 score: document.getElementById('dayScore')
             };
 
-            if (!labels.full || !labels.sel || !labels.quote) return;
+            if (!ui.full || !ui.sel || !ui.quote) return;
 
             const isFri = selectedDate.getDay() === 5, mNum = selectedDate.getMonth(), dNum = selectedDate.getDate();
             const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
             
-            labels.full.innerText = `${dNames[selectedDate.getDay()]}, ${dNum} ${mNames[mNum]} ${selectedDate.getFullYear()}`;
-            labels.sel.innerText = `${dNum < 10 ? '0'+dNum : dNum} ${mNames[mNum]} ${selectedDate.getFullYear()}`;
-            labels.quote.innerText = `"${yearlyQuotes[(dNum + mNum * 31) % yearlyQuotes.length]}"`;
+            ui.full.innerText = `${dNames[selectedDate.getDay()]}, ${dNum} ${mNames[mNum]} ${selectedDate.getFullYear()}`;
+            ui.sel.innerText = `${dNum < 10 ? '0'+dNum : dNum} ${mNames[mNum]} ${selectedDate.getFullYear()}`;
+            ui.quote.innerText = `"${yearlyQuotes[(dNum + mNum * 31) % yearlyQuotes.length]}"`;
             
             const sched = { 1:{type:"Gowes", val:25}, 2:{type:"Gowes", val:25}, 3:{type:"Run", val:5}, 4:{type:"Gowes", val:30}, 5:{type:"Gowes", val:20}, 6:{type:"Run", val:5}, 0:{type:"Rest", val:0} }[selectedDate.getDay()];
             let runDist = 5 + Math.floor(mNum / 3);
             const sportGoal = sched.type === "Rest" ? "🛌 Total Rest" : (sched.type === "Run" ? `🏃 Lari ${runDist} KM` : `🚴 Gowes ${sched.val} KM`);
-            if(labels.sport) labels.sport.innerText = sportGoal;
+            if(ui.sport) ui.sport.innerText = sportGoal;
 
             const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19);
             const fType = (selectedDate >= ramStart && selectedDate <= ramEnd) ? "Ramadhan" : (selectedDate.getDay() === 1 ? "Senin" : (selectedDate.getDay() === 4 ? "Kamis" : null));
-            if(labels.fasting) labels.fasting.innerHTML = fType ? `<div class="fasting-alert">Puasa ${fType}</div>` : '';
+            if(ui.fasting) ui.fasting.innerHTML = fType ? `<div class="fasting-alert">Puasa ${fType}</div>` : '';
 
             const routine = [
                 { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", icon: "fa-language", duration: 30 * 60000 },
@@ -446,11 +460,11 @@
                         let rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : (itemData.remainingMs || item.duration || 25*60000);
                         timerUI = `<div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}"><span class="timer-display">${window.formatTime(rem)}</span><div class="flex gap-4 mt-3"><button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i></button><button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center"><i class="fas fa-stop"></i></button></div></div>`;
                     }
-                    let attHtml = (itemData.attachments || []).map((f, i) => `<div class="attachment-badge relative group" onclick="window.openImagePreview('${f.data}', '${f.name}')">${f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt"></i>`}<span class="truncate max-w-[60px] ml-1">${f.name}</span><button onclick="event.stopPropagation(); window.removeAttachment('${item.id}', ${i})" class="absolute -top-1 -right-1 bg-rose-500 text-white w-3 h-3 rounded-full text-[7px] flex items-center justify-center"><i class="fas fa-times"></i></button></div>`).join('');
+                    let attHtml = (itemData.attachments || []).map((f, i) => `<div class="attachment-badge relative group" onclick="window.openImagePreview('${f.data}', '${f.name}')">${f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt"></i>`}<span class="truncate max-w-[50px] ml-1">${f.name}</span><button onclick="event.stopPropagation(); window.removeAttachment('${item.id}', ${i})" class="absolute -top-1 -right-1 bg-rose-500 text-white w-3 h-3 rounded-full text-[7px] flex items-center justify-center"><i class="fas fa-times"></i></button></div>`).join('');
                     
                     const card = document.createElement('div');
-                    card.className = 'glass-card p-5 rounded-2xl flex flex-col hover:scale-[1.01] transition-transform';
-                    card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan..." class="note-input w-full mt-1 p-2 rounded-lg min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-2 mt-2">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
+                    card.className = 'glass-card p-5 rounded-3xl flex flex-col hover:scale-[1.01] transition-all duration-300';
+                    card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan..." class="note-input w-full mt-1 p-2 rounded-xl min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-2 mt-2">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
                     card.querySelector(`#note-${item.id}`).onblur = (e) => window.updateNote(item.id, e.target.value);
                     container.appendChild(card);
                 });
@@ -460,26 +474,23 @@
             const mD = renderItems(routine, 'taskList');
             const eD = renderItems(extra, 'extraTaskList');
             const total = document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1;
-            if(scoreLabel) scoreLabel.innerText = Math.round(((mD + eD) / total) * 100) + '%';
+            if(ui.score) ui.score.innerText = Math.round(((mD + eD) / total) * 100) + '%';
         };
 
         // --- 5. HANDLERS ---
-
         window.requestNotifPermission = () => { 
             if (!("Notification" in window)) return; 
             Notification.requestPermission().then(p => { 
                 window.updateNotifUI(p); 
-                if (p === "granted") new Notification("Elite Tracker", { body: "Notifikasi AKTIF! Bangun 03:30 lo bakal diingetin.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" }); 
+                if (p === "granted") new Notification("Elite Tracker", { body: "Notifikasi AKTIF!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" }); 
             }); 
         };
-
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
-                new Notification("🏆 SISTEM ELITE", { body: "Notifikasi & Getar Berfungsi!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true }); 
+                new Notification("🏆 SISTEM ELITE", { body: "Tes Berhasil!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true }); 
                 if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
-            } else { alert("Izin notif diblokir! Klik ikon lonceng."); } 
+            } else { alert("Izinkan notif dulu lewat ikon lonceng."); } 
         };
-
         window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
         window.startCountdown = (id, d) => { const t = cloudData[id] || {}; if (t.timerRunning) { t.timerRunning = false; t.remainingMs = (t.timerEnd || 0) - Date.now(); } else { t.timerRunning = true; t.timerEnd = Date.now() + (t.remainingMs || d); } cloudData[id] = t; saveToFirestore(); window.renderDayTracker(); };
         window.stopTimer = (id) => { cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; saveToFirestore(); window.renderDayTracker(); };
@@ -511,19 +522,21 @@
             const witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
             if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) {
                 if (Notification.permission === "granted") {
-                    new Notification("🏆 WAKTUNYA EKSEKUSI!", { body: "Bro, bangun! Sesi Inggris dimulai. Isi progres lo sekarang!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true });
+                    new Notification("🏆 WAKTUNYA EKSEKUSI!", { body: "Bangun! Isi progres tracker lo sekarang!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true });
                 }
                 lastNotifDate = witaTime.toDateString();
             }
         }, 1000);
 
-        // --- 7. INITIAL LOAD ---
+        // --- 7. BOOTSTRAP ---
         window.addEventListener('load', async () => {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
             if(yS && mS) {
                 for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
-                ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; mS.appendChild(o); });
-                yS.value = "2026"; mS.value = "0"; 
+                const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                mNames.forEach((m, i) => { let o = document.createElement('option'); o.value = i; o.innerText = m; mS.appendChild(o); });
+                yS.value = selectedDate.getFullYear();
+                mS.value = selectedDate.getMonth();
             }
 
             onAuthStateChanged(auth, (user) => {
@@ -533,18 +546,19 @@
                     if(area) area.classList.remove('opacity-40', 'pointer-events-none');
                     if(info) info.innerHTML = `
                         <div class="flex items-center gap-2">
-                            ${user.photoURL ? `<img src="${user.photoURL}" class="w-6 h-6 rounded-full border border-white/20">` : `<i class="fas fa-user-circle text-white text-xl"></i>`}
-                            <span class="text-[9px] font-black uppercase text-emerald-400">${user.displayName.split(' ')[0]}</span>
-                            <button onclick="window.logout()" class="text-[8px] text-rose-500 font-bold ml-2">Logout</button>
+                            ${user.photoURL ? `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border border-white/20">` : `<i class="fas fa-user-circle text-white text-2xl"></i>`}
+                            <span class="text-[11px] font-black uppercase text-emerald-400">${user.displayName.split(' ')[0]}</span>
+                            <button onclick="window.logout()" class="text-[9px] text-rose-500 font-bold ml-2">Logout</button>
                         </div>`;
                     window.setupRealtimeSync();
                 } else {
                     if(area) area.classList.add('opacity-40', 'pointer-events-none');
-                    if(info) info.innerHTML = `<button onclick="window.loginWithGoogle()" class="bg-white text-black text-[9px] font-black uppercase px-4 py-1.5 rounded-full flex items-center gap-2"><i class="fab fa-google"></i> Login Google</button>`;
+                    if(info) info.innerHTML = `<button onclick="window.loginWithGoogle()" class="bg-white text-black text-[10px] font-black uppercase px-4 py-2 rounded-full flex items-center gap-2"><i class="fab fa-google"></i> Login Google</button>`;
                 }
                 window.updateSyncUI();
             });
 
+            window.updateCalendarView();
             window.renderDayTracker();
             if ("Notification" in window) window.updateNotifUI(Notification.permission);
         });

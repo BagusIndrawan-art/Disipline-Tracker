@@ -12,7 +12,7 @@
     <meta name="application-name" content="Tracker 2026">
     <meta name="theme-color" content="#050810">
     
-    <!-- Ikon (Pastikan file ada di GitHub) -->
+    <!-- Ikon (Gunakan JPG kamu - Pastikan file ada di folder root GitHub) -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="shortcut icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
@@ -126,7 +126,7 @@
 <body class="bg-[#050810]">
 
     <div id="secureContextWarning">
-        KONEKSI TIDAK AMAN! Gunakan 'localhost' atau HTTPS agar Notifikasi bisa diaktifkan.
+        KONEKSI TIDAK AMAN! Gunakan 'localhost' atau HTTPS agar Notifikasi & Fitur Instal bisa aktif.
     </div>
 
     <div id="uploadLoader">
@@ -145,7 +145,7 @@
                 <div class="w-1 h-10 bg-blue-500 rounded-full"></div>
                 <div>
                     <p id="quoteText" class="text-[11px] text-slate-300 italic min-h-[30px]">"Memuat..."</p>
-                    <div class="flex items-center gap-3 mt-1">
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
                         <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
                             <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Notif</span>
                         </button>
@@ -168,7 +168,6 @@
     </header>
 
     <main class="max-w-5xl mx-auto p-6 pb-20">
-        <!-- Kalender -->
         <div class="glass-card p-6 rounded-[2rem] mb-10">
             <div class="grid grid-cols-7 gap-3 text-center mb-4 font-black text-slate-500 text-[10px] uppercase">
                 <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
@@ -254,54 +253,33 @@
 
         enableIndexedDbPersistence(db).catch(() => {});
 
-        // --- FUNCTIONS DEFINITIONS ---
+        // --- CORE FUNCTIONS (DECLARATIONS) ---
 
-        window.updateSyncUI = function() {
-            const indicator = document.getElementById('syncIndicator'), syncText = document.getElementById('syncText');
+        function updateSyncUI() {
+            const indicator = document.getElementById('syncIndicator');
+            const syncText = document.getElementById('syncText');
             if (!indicator || !syncText) return;
-            
-            // Prioritas pengecekan navigator.onLine agar status offline akurat
-            if (!navigator.onLine) { 
-                indicator.className = 'state-offline'; 
-                syncText.innerText = "Offline"; 
-            } else if (auth.currentUser) { 
-                indicator.className = 'state-online'; 
-                syncText.innerText = "Cloud Online"; 
-            } else { 
-                indicator.className = 'state-syncing'; 
-                syncText.innerText = "Connecting"; 
-            }
-        };
+            if (!navigator.onLine) { indicator.className = 'state-offline'; syncText.innerText = "Offline"; }
+            else if (auth.currentUser) { indicator.className = 'state-online'; syncText.innerText = "Cloud Online"; }
+            else { indicator.className = 'state-syncing'; syncText.innerText = "Connecting"; }
+        }
 
-        window.updateNotifUI = function(permission) {
+        function updateNotifUI(permission) {
             const icon = document.getElementById('notifIcon'), text = document.getElementById('notifText');
             if (!icon || !text) return;
             icon.className = `fas fa-bell notif-${permission}`;
             if (permission === "granted") text.innerText = "Aktif";
             else if (permission === "denied") text.innerText = "Blok";
             else text.innerText = "Izin?";
-        };
+        }
 
-        window.requestNotifPermission = function() {
-            if (!("Notification" in window)) { window.updateNotifUI("denied"); return; }
-            if (!window.isSecureContext && window.location.hostname !== 'localhost') {
-                document.getElementById('secureContextWarning').style.display = 'block';
-                window.updateNotifUI("denied");
-                return;
-            }
-            Notification.requestPermission().then(p => {
-                window.updateNotifUI(p);
-                if (p === "granted") {
-                    new Notification("🏆 Elite Discipline Aktif", { 
-                        body: "Notifikasi reminder aktif! Lo bakal diingetin jam 03:30 pagi.", 
-                        icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
-                        requireInteraction: true 
-                    });
-                }
-            });
-        };
+        function formatTime(ms) {
+            if (ms <= 0) return "00:00";
+            const s = Math.floor(ms / 1000);
+            return `${Math.floor(s / 3600) > 0 ? Math.floor(s / 3600) + ':' : ''}${Math.floor((s % 3600) / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+        }
 
-        window.initAuth = async function() {
+        async function initAuth() {
             window.updateSyncUI();
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -310,29 +288,37 @@
                     await signInAnonymously(auth);
                 }
             } catch (e) { console.error("Auth Error:", e); window.updateSyncUI(); }
-        };
+        }
 
-        window.setupPWA = function() {
+        function setupPWA() {
             const manifestLink = document.getElementById('pwa-manifest');
             if (!manifestLink) return;
+            if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+                const warn = document.getElementById('secureContextWarning');
+                if(warn) warn.style.display = 'block';
+            }
             const manifestData = {
-                "name": "Discipline Tracker 2026",
+                "name": "Elite Discipline Tracker 2026",
                 "short_name": "Tracker2026",
                 "start_url": window.location.origin + window.location.pathname,
                 "display": "standalone",
                 "background_color": "#050810",
                 "theme_color": "#050810",
-                "icons": [{ "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", "sizes": "731x731", "type": "image/jpeg", "purpose": "any maskable" }]
+                "icons": [
+                    { "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", "sizes": "731x731", "type": "image/jpeg", "purpose": "any maskable" },
+                    { "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", "sizes": "192x192", "type": "image/jpeg" },
+                    { "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", "sizes": "512x512", "type": "image/jpeg" }
+                ]
             };
             const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
             manifestLink.setAttribute('href', URL.createObjectURL(blob));
             if ('serviceWorker' in navigator && window.isSecureContext) {
-                const swCode = `self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request)); });`;
+                const swCode = `self.addEventListener('install', (e) => e.waitUntil(self.skipWaiting())); self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim())); self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request)); });`;
                 navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' }))).catch(() => {});
             }
-        };
+        }
 
-        window.updateCalendarView = function() {
+        function updateCalendarView() {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect'), grid = document.getElementById('calendarGrid');
             if (!yS || !mS || !grid) return;
             const year = parseInt(yS.value), month = parseInt(mS.value);
@@ -347,9 +333,9 @@
                 dayEl.onclick = () => { selectedDate = new Date(year, month, d); window.setupRealtimeSync(); };
                 grid.appendChild(dayEl);
             }
-        };
+        }
 
-        window.setupRealtimeSync = function() {
+        function setupRealtimeSync() {
             if (!auth.currentUser) return;
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             if (dayUnsubscribe) dayUnsubscribe();
@@ -358,20 +344,12 @@
                 window.renderDayTracker();
             }, (err) => { console.error("Sync Error:", err); window.updateSyncUI(); });
             window.updateCalendarView();
-        };
-
-        // --- ENGINE FUNCTIONS ---
+        }
 
         async function saveToFirestore() { 
             if (!auth.currentUser) return; 
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
-        }
-
-        function formatTime(ms) {
-            if (ms <= 0) return "00:00";
-            const s = Math.floor(ms / 1000);
-            return `${Math.floor(s / 3600) > 0 ? Math.floor(s / 3600) + ':' : ''}${Math.floor((s % 3600) / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
         }
 
         function compressImage(file) {
@@ -383,32 +361,16 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let width = img.width, height = img.height, max_size = 1200;
+                        let width = img.width, height = img.height, max_size = 1000;
                         if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } }
                         else { if (height > max_size) { width *= max_size / height; height = max_size; } }
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                        resolve(canvas.toDataURL('image/jpeg', 0.5));
                     };
                 };
             });
-        }
-
-        function calculateSportTarget(date) {
-            const day = date.getDay(), month = date.getMonth();
-            const sched = { 1:{type:"Gowes", val:25}, 2:{type:"Gowes", val:25}, 3:{type:"Run", val:5}, 4:{type:"Gowes", val:30}, 5:{type:"Gowes", val:20}, 6:{type:"Run", val:5}, 0:{type:"Rest", val:0} }[day];
-            if (sched.type === "Rest") return "🛌 Total Rest";
-            let runDist = 5 + Math.floor(month / 3);
-            return sched.type === "Run" ? `🏃 Lari ${runDist} KM` : `🚴 Gowes ${sched.val} KM`;
-        }
-
-        function isFastingDay(date) {
-            const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19);
-            if (date >= ramStart && date <= ramEnd) return "Ramadhan";
-            if (date.getDay() === 1) return "Senin";
-            if (date.getDay() === 4) return "Kamis";
-            return null;
         }
 
         window.renderDayTracker = function() {
@@ -422,10 +384,13 @@
             if(selectLabel) selectLabel.innerText = `${dNum < 10 ? '0'+dNum : dNum} ${mNames[mNum]} ${selectedDate.getFullYear()}`;
             if(quoteEl) quoteEl.innerText = `"${yearlyQuotes[(dNum + mNum * 31) % yearlyQuotes.length]}"`;
             
-            const sportGoal = calculateSportTarget(selectedDate);
+            const sched = { 1:{type:"Gowes", val:25}, 2:{type:"Gowes", val:25}, 3:{type:"Run", val:5}, 4:{type:"Gowes", val:30}, 5:{type:"Gowes", val:20}, 6:{type:"Run", val:5}, 0:{type:"Rest", val:0} }[selectedDate.getDay()];
+            let runDist = 5 + Math.floor(mNum / 3);
+            const sportGoal = sched.type === "Rest" ? "🛌 Total Rest" : (sched.type === "Run" ? `🏃 Lari ${runDist} KM` : `🚴 Gowes ${sched.val} KM`);
             if(document.getElementById('sportTargetLabel')) document.getElementById('sportTargetLabel').innerText = sportGoal;
 
-            const fType = isFastingDay(selectedDate);
+            const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19);
+            const fType = (selectedDate >= ramStart && selectedDate <= ramEnd) ? "Ramadhan" : (selectedDate.getDay() === 1 ? "Senin" : (selectedDate.getDay() === 4 ? "Kamis" : null));
             const badgeCont = document.getElementById('fastingBadgeContainer');
             if(badgeCont) badgeCont.innerHTML = fType ? `<div class="fasting-alert">Puasa ${fType}</div>` : '';
 
@@ -477,7 +442,7 @@
                     let timerUI = '';
                     if (!item.noTimer && (item.duration || item.isPomo)) {
                         let rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : (itemData.remainingMs || item.duration || 25*60000);
-                        timerUI = `<div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}">${itemData.isPomo ? `<span class="pomo-badge ${itemData.pomoState === 'work' ? 'bg-orange-500' : 'bg-emerald-500'} text-white">Cycle ${itemData.pomoCycle || 1}/3: ${itemData.pomoState || 'work'}</span>` : ''}<span class="timer-display">${formatTime(rem)}</span><div class="flex gap-4 mt-3"><button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000}, ${!!item.isPomo})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i></button><button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center"><i class="fas fa-stop"></i></button></div></div>`;
+                        timerUI = `<div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}">${itemData.isPomo ? `<span class="pomo-badge ${itemData.pomoState === 'work' ? 'bg-orange-500' : 'bg-emerald-500'} text-white">Cycle ${itemData.pomoCycle || 1}/3: ${itemData.pomoState || 'work'}</span>` : ''}<span class="timer-display">${window.formatTime(rem)}</span><div class="flex gap-4 mt-3"><button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000}, ${!!item.isPomo})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i></button><button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center"><i class="fas fa-stop"></i></button></div></div>`;
                     }
                     const card = document.createElement('div');
                     card.className = 'glass-card p-5 rounded-2xl flex flex-col hover:scale-[1.01] transition-transform';
@@ -492,30 +457,43 @@
 
             const mainD = renderListInternal(baseRoutine, 'taskList');
             const extraD = renderListInternal(extraTasks, 'extraTaskList');
-            const totalC = document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1;
             const scoreLabel = document.getElementById('dayScore');
+            const totalC = document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1;
             if(scoreLabel) scoreLabel.innerText = Math.round(((mainD + extraD) / totalC) * 100) + '%';
-        }
+        };
 
-        // --- GLOBAL WINDOW BINDINGS (INSTANT REGISTRATION) ---
+        // --- GLOBAL WINDOW BINDINGS (FIX ReferenceError) ---
         window.setupPWA = setupPWA;
         window.initAuth = initAuth;
         window.updateSyncUI = updateSyncUI;
         window.updateNotifUI = updateNotifUI;
-        window.requestNotifPermission = requestNotifPermission;
-        window.setupRealtimeSync = setupRealtimeSync;
+        window.formatTime = formatTime; // PERBAIKAN: Menghubungkan fungsi asli ke objek window
         window.updateCalendarView = updateCalendarView;
-        window.renderDayTracker = renderDayTracker;
-        window.formatTime = formatTime;
+        window.setupRealtimeSync = setupRealtimeSync;
+
+        window.requestNotifPermission = function() {
+            if (!("Notification" in window)) { window.updateNotifUI("denied"); return; }
+            if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+                document.getElementById('secureContextWarning').style.display = 'block';
+                window.updateNotifUI("denied");
+                return;
+            }
+            Notification.requestPermission().then(p => {
+                window.updateNotifUI(p);
+                if (p === "granted") {
+                    new Notification("🏆 Elite Discipline Aktif", { 
+                        body: "Notifikasi reminder aktif! Lo bakal diingetin jam 03:30 pagi.", 
+                        icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
+                        requireInteraction: true 
+                    });
+                }
+            });
+        };
 
         window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
         window.startCountdown = (id, durationMs, isPomo = false) => {
             const taskData = cloudData[id] || {};
-            if (taskData.timerRunning) { 
-                taskData.timerRunning = false; 
-                taskData.remainingMs = (taskData.timerEnd || 0) - Date.now();
-                cloudData[id] = taskData; saveToFirestore(); window.renderDayTracker(); return; 
-            }
+            if (taskData.timerRunning) { taskData.timerRunning = false; taskData.remainingMs = (taskData.timerEnd || 0) - Date.now(); cloudData[id] = taskData; saveToFirestore(); window.renderDayTracker(); return; }
             taskData.timerRunning = true;
             taskData.timerEnd = Date.now() + (taskData.remainingMs || durationMs);
             if (isPomo && !taskData.pomoState) { taskData.pomoState = 'work'; taskData.pomoCycle = 1; taskData.timerEnd = Date.now() + (25 * 60000); }
@@ -533,7 +511,6 @@
         window.updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
-        
         window.handleInstallClick = async function() {
             if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') document.getElementById('installBtn').style.display = 'none'; deferredPrompt = null; }
         };
@@ -545,9 +522,10 @@
             document.getElementById('uploadLoader').style.display = 'flex';
             const attachments = cloudData[activeItemIdForUpload]?.attachments || [];
             for (let f of files) {
-                if (f.size > 12 * 1024 * 1024) continue;
-                const compressedData = await compressImage(f);
-                attachments.push({ name: f.name.split('.')[0] + ".jpg", type: "image/jpeg", data: compressedData });
+                try {
+                    const compressedData = await compressImage(f);
+                    attachments.push({ name: f.name.split('.')[0] + ".jpg", type: "image/jpeg", data: compressedData });
+                } catch(err) { console.error("Upload error:", err); }
             }
             cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments };
             await saveToFirestore(); window.renderDayTracker();
@@ -555,11 +533,9 @@
             e.target.value = '';
         };
 
-        // --- TICKER (MEMPERBAIKI MASALAH KONEKSI REAL-TIME) ---
+        // --- TICKER LOOP ---
         setInterval(() => {
-            // Update status koneksi secara real-time setiap detik
             window.updateSyncUI();
-
             let re = false;
             Object.keys(cloudData).forEach(id => {
                 if (cloudData[id].timerRunning) {
@@ -580,11 +556,7 @@
             const witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
             if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) {
                 if (Notification.permission === "granted") {
-                    new Notification("🏆 Waktunya Eksekusi!", { 
-                        body: "Bro, jam 03:30 WITA! Bangun & isi progres tracker lo.", 
-                        icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
-                        requireInteraction: true
-                    });
+                    new Notification("🏆 Waktunya Eksekusi!", { body: "Bro, jam 03:30 WITA! Bangun & isi progres tracker lo.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true });
                 }
                 lastNotifDate = witaTime.toDateString();
             }
@@ -610,8 +582,6 @@
         });
 
         window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('installBtn'); if(btn) btn.style.display = 'block'; });
-
-        // Event listener tambahan untuk memantau status offline secara instan
         window.addEventListener('online', window.updateSyncUI);
         window.addEventListener('offline', window.updateSyncUI);
 

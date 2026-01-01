@@ -12,10 +12,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     
     <!-- 1. Ikon Browser (Tab Laptop - Transparan) -->
-    <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png?v=FINAL_AUTO_V2">
+    <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
     
     <!-- 2. Ikon Apple (iOS - Kotak Penuh) -->
-    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png?v=FINAL_AUTO_V2">
+    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
     
     <!-- Manifest Placeholder (Akan diisi otomatis oleh Javascript) -->
     <link rel="manifest" id="pwa-manifest">
@@ -330,8 +330,7 @@
 
             <div id="navWrapper" class="hidden flex flex-row items-center justify-center md:justify-end gap-4 w-full md:w-1/3">
                 <!-- INSTALL BUTTON FOR PWA -->
-                <!-- Selalu tampil (disabled) sampai PWA siap, ini untuk debugging -->
-                <button id="installAppBtn" onclick="window.installPWA()" class="bg-slate-700 text-slate-400 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center gap-2 cursor-not-allowed opacity-50">
+                <button id="installAppBtn" onclick="window.installPWA()" class="hidden bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center gap-2 install-pulse">
                     <i class="fas fa-download"></i> Install App
                 </button>
 
@@ -490,6 +489,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
+        
+        // FIX: FORCE SELECT ACCOUNT
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
+
         const trackerId = "discipline-tracker-2026";
         try { enableIndexedDbPersistence(db); } catch(e) {}
 
@@ -522,7 +527,15 @@
 
         window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); } };
         window.loginAsGuest = async () => { try { await signInAnonymously(auth); } catch (e) { console.error(e); } };
-        window.logout = async () => { if(confirm("Keluar dari aplikasi?")) await signOut(auth); };
+        window.logout = async () => { 
+            if(confirm("Keluar dari aplikasi?")) {
+                // Clear local data visual before signOut
+                if(dayUnsubscribe) dayUnsubscribe();
+                cloudData = {};
+                window.renderDayTracker();
+                await signOut(auth); 
+            }
+        };
 
         window.setupRealtimeSync = function() {
             if (!auth.currentUser) return;
@@ -707,7 +720,7 @@
             const appIconName = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
             
             // Construct Absolute URL (Wajib untuk PWA)
-            const absoluteAppIcon = base_url + appIconName + "?v=FINAL_AUTO_V2";
+            const absoluteAppIcon = base_url + appIconName;
 
             // Generate Manifest Object
             const manifest = {
@@ -771,12 +784,6 @@
             deferredPrompt = e;
             installBtn.classList.remove('hidden'); 
             installBtn.classList.add('flex');
-            
-            // Enable button
-            installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
-            installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
-            installBtn.classList.remove('bg-slate-700', 'text-slate-400');
-            console.log("Install prompt intercepted");
         });
 
         window.installPWA = async () => {
@@ -838,10 +845,14 @@
                     info.innerHTML = `<div class="flex items-center gap-3">${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}<div class="flex flex-col"><span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button></div></div>`;
                     window.setupRealtimeSync();
                 } else {
+                    // Reset UI to login state
                     isUserLoggedIn = false; area.classList.add('hidden', 'opacity-0'); 
                     if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean');
                     wrapper.classList.add('hidden');
                     info.innerHTML = ``; initParticles(); 
+                    // Clear data visually
+                    cloudData = {};
+                    window.renderDayTracker();
                 }
                 window.updateSyncUI();
             });

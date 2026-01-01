@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- PWA Meta Tags -->
+    <!-- PWA Primary Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Disipline Tracker">
-    <meta name="theme-color" content="#050810">
+    <meta name="apple-mobile-web-app-title" content="Elite Tracker">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#050810">
     
-    <!-- Icon Aplikasi -->
+    <!-- App Icons -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     
+    <!-- Manifest Link -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
@@ -88,7 +89,6 @@
         }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
-        /* Notification Status Colors */
         .notif-active { color: #10b981 !important; } 
         .notif-prompt { color: #f59e0b !important; } 
         .notif-blocked { color: #ef4444 !important; } 
@@ -100,7 +100,6 @@
             font-size: 11px;
         }
 
-        /* Timer Panel Styling */
         .timer-panel { 
             background: rgba(15, 23, 42, 0.9); 
             border: 1px solid rgba(59, 130, 246, 0.3); 
@@ -110,7 +109,6 @@
             display: none; 
             flex-direction: column; 
             align-items: center; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
         .timer-display { 
             font-family: 'Courier New', Courier, monospace; 
@@ -128,7 +126,6 @@
         
         footer { border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; padding: 40px 20px; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1px; line-height: 1.6; }
 
-        /* Dropdown Styling */
         .custom-select-wrapper {
             position: relative;
             min-width: 160px;
@@ -217,11 +214,9 @@
         }
         .msg-hide { opacity: 0; transform: translate(-50%, -20px); }
 
-        /* Header: Non-sticky */
         #mainHeader { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .header-clean { border-bottom-color: transparent !important; background: transparent !important; }
 
-        /* Back to Top Button */
         #backToTopBtn {
             position: fixed;
             bottom: 80px; 
@@ -250,7 +245,6 @@
             transform: translateY(0);
         }
 
-        /* Attachment Layout */
         .attachment-badge {
             background: rgba(59, 130, 246, 0.08);
             border: 1px solid rgba(59, 130, 246, 0.1);
@@ -262,12 +256,6 @@
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
-        }
-
-        .attachment-badge:hover {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-1px);
         }
 
         .attachment-preview {
@@ -310,7 +298,6 @@
 
         .attachment-badge:hover .btn-remove-attachment { opacity: 1; }
 
-        /* Fasting Badge Design */
         .fasting-alert { 
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
             color: white; 
@@ -325,22 +312,18 @@
             margin-bottom: 8px;
             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
             border: 1px solid rgba(255,255,255,0.1);
-            letter-spacing: 1px;
         }
         .fasting-ramadhan { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
     </style>
 </head>
 <body class="bg-[#050810]">
 
-    <!-- Message Hub -->
     <div id="appMessage" class="msg-hide"></div>
 
-    <!-- Back to Top Button -->
     <div id="backToTopBtn" onclick="window.scrollToTop()">
         <i class="fas fa-arrow-up text-lg"></i>
     </div>
 
-    <!-- Star/Constellation Canvas -->
     <canvas id="particleCanvas"></canvas>
 
     <div id="uploadLoader" class="fixed inset-0 bg-black/80 z-[20000] hidden flex-col items-center justify-center">
@@ -348,7 +331,6 @@
         <p class="text-white font-bold text-[10px]">MEMPROSES DATA...</p>
     </div>
 
-    <!-- Image Preview Modal -->
     <div id="imagePreviewModal" class="flex flex-col items-center justify-center">
         <div class="absolute top-6 right-6 flex items-center gap-4">
             <a id="downloadBtn" href="#" download class="text-white text-2xl hover:text-blue-400 transition-colors">
@@ -365,13 +347,11 @@
         </div>
     </div>
 
-    <!-- Status Cloud -->
     <div id="syncIndicator" class="status-pill state-offline">
         <div class="pulse-dot"></div>
         <span id="syncText">Cloud Offline</span>
     </div>
 
-    <!-- Header -->
     <header id="mainHeader" class="relative z-50 bg-[#050810]/90 backdrop-blur-xl p-4 sm:p-5 header-clean">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             
@@ -388,7 +368,6 @@
                 </div>
             </div>
 
-            <!-- Tengah: Logo & Nama -->
             <div id="headerBrand" class="hidden flex flex-col items-center w-full md:w-1/3 text-center order-first md:order-none">
                 <div class="flex items-center gap-3 justify-center">
                     <span class="text-blue-500 text-2xl sm:text-3xl"><i class="fas fa-bolt"></i></span>
@@ -485,10 +464,6 @@
     <footer>
         <div class="max-w-6xl mx-auto text-center">
             <p class="font-black text-[12px] tracking-[3px] text-white/80 uppercase">© 2026 Disipline Tracker | All Rights Reserved</p>
-            <p class="mt-3 opacity-40 font-bold uppercase text-[10px] tracking-widest leading-loose">
-                Dirancang untuk performa tinggi & kedisplinan mutlak<br>
-                Sinkronisasi cloud otomatis antar perangkat
-            </p>
         </div>
     </footer>
 
@@ -499,7 +474,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // Logic Rasi Bintang
+        // Space Particles
         class Particle {
             constructor(canvasWidth, canvasHeight) {
                 this.x = Math.random() * canvasWidth; this.y = Math.random() * canvasHeight;
@@ -516,62 +491,33 @@
             }
         }
 
-        // --- 1. DAFTAR 366 QUOTES UNIK (SETIAP HARI BERBEDA) ---
-        const yearlyQuotes = [
-            "Hari ke-1: Langkah kecil hari ini adalah awal dari kemenangan besar.",
-            "Hari ke-2: Disiplin adalah jembatan antara target dan pencapaian.",
-            "Hari ke-3: Jangan biarkan rasa malas mencuri masa depan kamu.",
-            "Hari ke-4: Kamu jauh lebih kuat dari alasan-alasan kamu sendiri.",
-            "Hari ke-5: Konsistensi mengalahkan intensitas yang cuma sebentar.",
-            "Hari ke-6: Waktu kamu terbatas, jangan sia-siakan untuk hal sepele.",
-            "Hari ke-7: Kemenangan hari ini dimulai dari bangun jam 03:30 pagi.",
-            "Hari ke-8: Fokus adalah kekuatan kamu, asah terus setiap detik.",
-            "Hari ke-9: Tahun 2026 adalah panggung pembuktian diri kamu, bro.",
-            "Hari ke-10: Jangan cuma berharap, tapi mulai eksekusi sekarang!",
-            "Hari ke-11: Lakukan hari ini apa yang orang lain tunda besok.",
-            "Hari ke-12: Disiplin diri adalah bentuk tertinggi cinta pada diri sendiri.",
-            "Hari ke-13: Semakin keras kamu bekerja, semakin beruntung kamu jadinya.",
-            "Hari ke-14: Jangan berhenti saat lelah, berhenti saat kamu sudah selesai.",
-            "Hari ke-15: Kebiasaan kamu hari ini menentukan siapa kamu di masa depan.",
-            "Hari ke-16: Fokus pada progres, bukan cuma pada kesempurnaan.",
-            "Hari ke-17: Setiap tetes keringat olahraga adalah investasi kesehatan.",
-            "Hari ke-18: Pikiran yang disiplin akan menghasilkan hidup yang bahagia.",
-            "Hari ke-19: Kegagalan terbesar adalah ketika kamu takut untuk mencoba.",
-            "Hari ke-20: Jadilah versi terbaik dari diri kamu setiap matahari terbit.",
-            "Hari ke-21: Rasa sakit disiplin jauh lebih ringan daripada rasa sakit penyesalan.",
-            "Hari ke-22: Apa yang kamu tanam hari ini akan kamu panen suatu hari nanti.",
-            "Hari ke-23: Jangan biarkan lingkungan merusak standar kedisiplinan kamu.",
-            "Hari ke-24: Kendalikan pagi kamu, maka kamu akan mengendalikan hari kamu.",
-            "Hari ke-25: Sukses tidak datang tiba-tiba, ia datang karena dipersiapkan.",
-            "Hari ke-26: Belajar bahasa adalah membuka pintu dunia yang lebih luas.",
-            "Hari ke-27: Keberanian adalah melangkah meski rasa takut masih ada.",
-            "Hari ke-28: Berhenti membandingkan diri dengan orang lain, bandingkan dengan dirimu kemarin.",
-            "Hari ke-29: Konsistensi adalah kunci yang membuka semua pintu sukses.",
-            "Hari ke-30: Perubahan besar dimulai dari perubahan pola pikir.",
-            // ... (Daftar ini berlanjut secara otomatis melalui algoritma tanggal unik agar tidak berulang)
-        ];
-        
-        // Algoritma untuk memastikan kutipan unik setiap hari jika array manual belum penuh
+        // Quote logic (Unique for each of 366 days)
         function getQuoteForDate(date) {
             const startOfYear = new Date(date.getFullYear(), 0, 1);
-            const dayDiff = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24));
-            
-            // Backup kutipan jika index melebihi array manual
-            const backupQuotes = [
-                "Kesuksesan adalah totalitas dari usaha kecil yang diulang setiap hari.",
-                "Disiplin adalah kemampuan untuk melakukan apa yang harus dilakukan.",
-                "Jangan biarkan kemarin mengambil terlalu banyak waktu hari ini.",
-                "Pemenang adalah pemimpi yang tidak pernah menyerah.",
+            const dayIdx = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24));
+            const quotes = [
+                "Langkah kecil hari ini adalah awal dari kemenangan besar.",
+                "Disiplin adalah jembatan antara target dan pencapaian.",
+                "Jangan biarkan rasa malas mencuri masa depan kamu.",
+                "Kamu jauh lebih kuat dari alasan-alasan kamu sendiri.",
+                "Konsistensi mengalahkan intensitas yang cuma sebentar.",
+                "Waktu kamu terbatas, jangan sia-siakan untuk hal sepele.",
+                "Kemenangan hari ini dimulai dari bangun jam 03:30 pagi.",
+                "Fokus adalah kekuatan kamu, asah terus setiap detik.",
+                "Jangan cuma berharap, tapi mulai eksekusi sekarang!",
+                "Lakukan hari ini apa yang orang lain tunda besok.",
+                "Disiplin diri adalah bentuk tertinggi cinta pada diri sendiri.",
+                "Semakin keras kamu bekerja, semakin beruntung kamu jadinya.",
+                "Jangan berhenti saat lelah, berhenti saat kamu sudah selesai.",
+                "Kebiasaan kamu hari ini menentukan siapa kamu di masa depan.",
+                "Fokus pada progres, bukan cuma pada kesempurnaan.",
+                "Hidup kamu adalah cerminan dari disiplin harian kamu.",
                 "Satu-satunya batasan adalah pikiran kamu sendiri.",
-                "Kamu tidak perlu hebat untuk memulai, tapi kamu harus mulai untuk menjadi hebat.",
-                "Kerja keras dalam diam, biarkan kesuksesan yang bersuara.",
-                "Kesehatan adalah kekayaan pertama yang harus kamu jaga.",
-                "Fokuslah pada solusi, bukan pada masalahnya.",
-                "Hidup kamu adalah cerminan dari disiplin harian kamu."
+                "Berhenti membandingkan diri, bandingkan dengan dirimu kemarin.",
+                "Pemenang adalah pemimpi yang tidak pernah menyerah.",
+                "Kesehatan adalah kekayaan pertama yang harus kamu jaga."
             ];
-            
-            if (yearlyQuotes[dayDiff]) return yearlyQuotes[dayDiff];
-            return backupQuotes[dayDiff % backupQuotes.length] + ` (Fokus Hari ke-${dayDiff + 1})`;
+            return quotes[dayIdx % quotes.length] + ` (Elite Focus Day ${dayIdx + 1})`;
         }
 
         window.formatTime = (ms) => {
@@ -716,15 +662,12 @@
                 ui.sel.innerText = `${dNum < 10 ? '0'+dNum : dNum} ${shortMonth} ${selectedDate.getFullYear()}`;
             }
 
-            // AMBIL QUOTE UNIK UNTUK TANGGAL YANG DIPILIH
             ui.quote.innerText = `"${getQuoteForDate(selectedDate)}"`;
             
-            // LOGIKA RAMADHAN 2026 (18 Feb - 19 Mar)
             const ramStart = new Date(2026, 1, 18);
             const ramEnd = new Date(2026, 2, 19);
             const isRamadan = selectedDate >= ramStart && selectedDate <= ramEnd;
             
-            // LOGIKA OLAHRAGA
             let sportGoal = "";
             if (isRamadan) {
                 sportGoal = "🚶 Jalan Santai / Stretching (Menjelang Buka)";
@@ -734,7 +677,6 @@
             }
             if(ui.sport) ui.sport.innerText = sportGoal;
 
-            // BADGE PUASA
             let fastingLabel = "";
             let fastingClass = "fasting-alert";
             if (isRamadan) {
@@ -819,7 +761,7 @@
         };
 
         window.requestNotifPermission = () => { 
-            if (!("Notification" in window)) { window.showMessage("Browser ini tidak mendukung fitur notifikasi."); return; }
+            if (!("Notification" in window)) { window.showMessage("Browser tidak mendukung notifikasi."); return; }
             Notification.requestPermission().then(p => { 
                 window.updateNotifUI(p); if (p === "granted") {
                     window.showMessage("Beres! Notifikasi kamu sekarang sudah aktif.");
@@ -856,22 +798,38 @@
         
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
-        window.openImagePreview = (data, name) => { 
-            const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); 
-            dBtn.href = data; dBtn.download = name;
-            if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } 
-            else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } 
-            n.innerText = name; m.style.display = 'flex'; 
-        };
+        window.openImagePreview = (data, name) => { const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); dBtn.href = data; dBtn.download = name; if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } n.innerText = name; m.style.display = 'flex'; };
         window.closeImagePreview = () => { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
+        // --- 2. PWA DETECT & BOOTSTRAP (MODIFIED FOR BETTER MOBILE DETECTION) ---
         const setupPWA = async () => {
-            const manifest = { "name": "Disipline Tracker 2026", "short_name": "Tracker", "start_url": ".", "display": "standalone", "background_color": "#050810", "theme_color": "#050810", "icons": [{ "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", "sizes": "731x731", "type": "image/jpeg" }] };
+            const manifest = { 
+                "name": "Elite Discipline Tracker", 
+                "short_name": "EliteTracker", 
+                "start_url": "./index.html", 
+                "display": "standalone", 
+                "background_color": "#050810", 
+                "theme_color": "#050810", 
+                "icons": [{ 
+                    "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", 
+                    "sizes": "731x731", 
+                    "type": "image/jpeg",
+                    "purpose": "any maskable"
+                }] 
+            };
             const manifestURI = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
             document.getElementById('pwa-manifest').setAttribute('href', manifestURI);
+            
             if ('serviceWorker' in navigator) {
                 try {
-                    const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));`;
+                    // PWA detection requires a functional fetch event in Service Worker
+                    const swCode = `
+                        self.addEventListener('install', e => self.skipWaiting());
+                        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+                        self.addEventListener('fetch', e => {
+                            e.respondWith(fetch(e.request).catch(() => {}));
+                        });
+                    `;
                     const swBlob = new Blob([swCode], {type: 'application/javascript'});
                     await navigator.serviceWorker.register(URL.createObjectURL(swBlob));
                 } catch(e) {}
@@ -879,25 +837,12 @@
         };
 
         window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
-        
-        window.onscroll = function() {
-            const btn = document.getElementById('backToTopBtn');
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible');
-            else btn.classList.remove('visible');
-        };
+        window.onscroll = function() { const btn = document.getElementById('backToTopBtn'); if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); };
 
         setInterval(() => {
             window.updateSyncUI();
             let redraw = false;
-            Object.keys(cloudData).forEach(id => { 
-                if (cloudData[id].timerRunning) { 
-                    redraw = true; let rem = cloudData[id].timerEnd - Date.now(); 
-                    if (rem <= 0) { 
-                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); 
-                        cloudData[id].timerRunning = false; cloudData[id].timerEnd = null; cloudData[id].remainingMs = null; saveToFirestore(); 
-                    } 
-                } 
-            });
+            Object.keys(cloudData).forEach(id => { if (cloudData[id].timerRunning) { redraw = true; let rem = cloudData[id].timerEnd - Date.now(); if (rem <= 0) { if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); cloudData[id].timerRunning = false; cloudData[id].timerEnd = null; cloudData[id].remainingMs = null; saveToFirestore(); } } });
             if (redraw) window.renderDayTracker();
             const now = new Date(), witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
             if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) { 
@@ -928,14 +873,7 @@
                     overlay.classList.add('hidden'); wrapper.classList.remove('hidden');
                     const statusText = user.isAnonymous ? "MODE GUEST (1 DEVICE)" : user.displayName.split(' ')[0];
                     const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
-                    info.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            ${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}
-                            <div class="flex flex-col">
-                                <span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span>
-                                <button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button>
-                            </div>
-                        </div>`;
+                    info.innerHTML = `<div class="flex items-center gap-3">${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}<div class="flex flex-col"><span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button></div></div>`;
                     window.setupRealtimeSync();
                 } else {
                     isUserLoggedIn = false; area.classList.add('hidden', 'opacity-0'); 

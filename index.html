@@ -12,11 +12,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     
-    <!-- KONFIGURASI IKON BARU -->
-    <!-- 1. Ikon Browser (Favicon) - Menggunakan JPEG -->
+    <!-- KONFIGURASI IKON (Pastikan nama file ini sesuai dengan yang ada di folder Anda) -->
+    <!-- 1. Ikon Browser (Favicon) -->
     <link rel="shortcut icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
     
-    <!-- 2. Ikon Aplikasi (Home Screen) - Menggunakan PNG -->
+    <!-- 2. Ikon Aplikasi (Home Screen) -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
     <link rel="icon" type="image/png" sizes="32x32" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
     <link rel="icon" type="image/png" sizes="192x192" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
@@ -323,7 +323,7 @@
 
             <div id="headerBrand" class="hidden flex flex-col items-center w-full md:w-1/3 text-center order-first md:order-none">
                 <div class="flex items-center gap-3 justify-center">
-                    <!-- ICON PETIR (LIGHTNING BOLT) -->
+                    <!-- ICON PETIR (LIGHTNING BOLT) SEPERTI SEMULA -->
                     <span class="text-blue-500 text-2xl sm:text-3xl"><i class="fas fa-bolt"></i></span>
                     <h1 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter">Disipline Tracker</h1>
                 </div>
@@ -701,7 +701,7 @@
 
             // Load PNG Icon from URL if possible to ensure Android recognizes it
             // We use the uploaded PNG file name.
-            let iconUrl = "image_f28d85.png";
+            let iconUrl = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
             
             // MAGIC CONVERTER: Convert the icon to Base64 to force it into the manifest
             // This bypasses some strict browser checks that fail on relative paths in blob environments.
@@ -731,6 +731,11 @@
                 "icons": [
                     { 
                         "src": iconUrl, 
+                        "sizes": "731x731", 
+                        "type": "image/png" 
+                    },
+                    {
+                        "src": iconUrl,
                         "sizes": "192x192", 
                         "type": "image/png" 
                     },

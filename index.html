@@ -475,13 +475,81 @@
             else { indicator.className = 'status-pill state-offline'; syncText.innerText = "Cloud Offline"; }
         };
 
+        // --- FIXED NOTIFICATION PERMISSION LOGIC ---
         window.updateNotifUI = function(permission) {
-            const btn = document.getElementById('notifStatusBtn'), text = document.getElementById('notifText'), icon = document.getElementById('notifIcon');
+            const btn = document.getElementById('notifStatusBtn');
+            const text = document.getElementById('notifText');
+            const icon = document.getElementById('notifIcon');
+            
             if (!btn || !text || !icon) return;
+            
+            // Hapus semua class lama
             btn.classList.remove('notif-active', 'notif-prompt', 'notif-blocked');
-            if (permission === "granted") { btn.classList.add("notif-active"); text.innerText = "Aktif"; icon.className = "fas fa-bell"; } 
-            else if (permission === "denied") { btn.classList.add("notif-blocked"); text.innerText = "Akses Diblokir"; icon.className = "fas fa-bell-slash"; } 
-            else { btn.classList.add("notif-prompt"); text.innerText = "Izin?"; icon.className = "fas fa-bell"; }
+            
+            if (permission === "granted") {
+                btn.classList.add("notif-active");
+                text.innerText = "AKTIF";
+                icon.className = "fas fa-bell";
+            } else if (permission === "denied") {
+                btn.classList.add("notif-blocked");
+                text.innerText = "BLOKIR";
+                icon.className = "fas fa-bell-slash";
+            } else {
+                btn.classList.add("notif-prompt");
+                text.innerText = "IZIN?";
+                icon.className = "fas fa-bell";
+            }
+        };
+
+        window.requestNotifPermission = async () => { 
+            if (!("Notification" in window)) {
+                window.showMessage("Browser ini tidak mendukung notifikasi.");
+                return;
+            }
+            
+            // Request permission modern way (Promise-based)
+            try {
+                const permission = await Notification.requestPermission();
+                window.updateNotifUI(permission);
+                
+                if (permission === "granted") {
+                    window.showMessage("Notifikasi berhasil diaktifkan!");
+                    // Test send immediate notification
+                    window.testNotification();
+                } else if (permission === "denied") {
+                    window.showMessage("Izin notifikasi ditolak. Cek pengaturan browser.");
+                }
+            } catch (error) {
+                console.error("Gagal meminta izin notifikasi:", error);
+            }
+        };
+
+        window.testNotification = () => { 
+            if (Notification.permission === "granted") { 
+                window.showMessage("Mengirim notifikasi tes...");
+                
+                const title = "🔔 TES DISIPLINE TRACKER";
+                const options = {
+                    body: "Sistem notifikasi berjalan dengan baik! Semangat!",
+                    icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png",
+                    requireInteraction: false
+                };
+
+                // Coba lewat Service Worker dulu (lebih stabil di Android)
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(function(registration) {
+                        registration.showNotification(title, options);
+                    });
+                } else {
+                    // Fallback ke notifikasi biasa (Desktop)
+                    new Notification(title, options);
+                }
+
+                if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
+
+            } else {
+                window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
+            }
         };
 
         const firebaseConfig = { apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ", authDomain: "tracker-2026-4bbd9.firebaseapp.com", projectId: "tracker-2026-4bbd9", storageBucket: "tracker-2026-4bbd9.firebasestorage.app", messagingSenderId: "634119648342", appId: "1:634119648342:web:35aff0729cdcb37dcc37f7" };
@@ -489,7 +557,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
+        
+        // FIX: FORCE SELECT ACCOUNT
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
 
         const trackerId = "discipline-tracker-2026";
         try { enableIndexedDbPersistence(db); } catch(e) {}
@@ -730,7 +802,7 @@
 
         // Logic 1: Android/Chrome "Install App" Button
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); 
+            e.preventDefault(); // Prevent default banner
             deferredPrompt = e;
             installBtn.classList.remove('hidden'); 
             installBtn.classList.add('flex');
@@ -744,7 +816,8 @@
 
         window.installPWA = async () => {
             if (!deferredPrompt) {
-                alert("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung.");
+                // Manual fallback instructions
+                alert("Tekan tombol 'Install App' atau 'Add to Home Screen' di menu browser Anda.");
                 return;
             }
             deferredPrompt.prompt();
@@ -795,6 +868,11 @@
                 } catch(e) { console.log('SW failed', e); }
             }
 
+            // AUTO CHECK PERMISSION ON LOAD
+            if ("Notification" in window) {
+                window.updateNotifUI(Notification.permission);
+            }
+
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
             if(yS && mS) {
                 for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
@@ -843,7 +921,8 @@
                 await saveToFirestore(); window.renderDayTracker();
                 document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden'); e.target.value = '';
             };
-            window.updateCalendarView(); window.renderDayTracker(); if ("Notification" in window) window.updateNotifUI(Notification.permission);
+            window.updateCalendarView(); window.renderDayTracker(); 
+            // if ("Notification" in window) window.updateNotifUI(Notification.permission); // Moved up
         });
     </script>
 </body>

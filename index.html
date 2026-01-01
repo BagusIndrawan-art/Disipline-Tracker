@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- PWA Meta Tags - Optimized for Native Feel -->
+    <!-- PWA Meta Tags - Wajib untuk mode Aplikasi -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Disipline Tracker">
@@ -12,10 +12,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     
-    <!-- Icon Aplikasi -->
-    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
-    <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
+    <!-- Placeholder Icon sebelum Script Load -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     
+    <!-- Manifest Placeholder -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
@@ -35,7 +35,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Scrollbar styling for a cleaner look */
+        /* Scrollbar styling */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #050810; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
@@ -111,7 +111,6 @@
         }
         .note-input:focus { border-color: rgba(59, 130, 246, 0.5); outline: none; }
 
-        /* Timer Panel Styling */
         .timer-panel { 
             background: rgba(15, 23, 42, 0.95); 
             border: 1px solid rgba(59, 130, 246, 0.3); 
@@ -141,7 +140,6 @@
         
         footer { border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; padding: 40px 20px; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1px; line-height: 1.6; }
 
-        /* Dropdown Styling */
         .custom-select-wrapper { position: relative; min-width: 120px; flex: 1; }
         .custom-select-wrapper::after {
             content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
@@ -160,90 +158,44 @@
             font-size: 12px; font-weight: 800; width: 100%;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase; letter-spacing: 1px;
-            /* CENTER TEXT INSIDE SELECT */
-            text-align: center;
-            text-align-last: center;
+            text-align: center; text-align-last: center;
         }
 
-        /* LOGIN BARU: COMPLEX STYLE */
-        .login-complex-container {
-            position: relative;
-            z-index: 50;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
+        .login-complex-container { position: relative; z-index: 50; width: 100%; max-width: 400px; margin: 0 auto; }
         
         .login-card-complex {
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(5, 8, 16, 0.95) 100%);
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 24px;
-            padding: 2px; /* For border gradient effect placeholder */
-            position: relative;
-            overflow: hidden;
+            padding: 2px; position: relative; overflow: hidden;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.1);
         }
 
-        /* Garis scan/animasi halus pada login */
         .login-scan-line {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
             background: linear-gradient(90deg, transparent, #3b82f6, transparent);
-            opacity: 0.5;
-            animation: scanLogin 3s linear infinite;
+            opacity: 0.5; animation: scanLogin 3s linear infinite;
         }
         @keyframes scanLogin { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(400px); opacity: 0; } }
 
-        .login-inner {
-            background: #0b101e;
-            border-radius: 22px;
-            padding: 40px 30px;
-            position: relative;
-            z-index: 2;
-        }
+        .login-inner { background: #0b101e; border-radius: 22px; padding: 40px 30px; position: relative; z-index: 2; }
 
         .login-btn-google {
-            background: #fff;
-            color: #000;
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
-            font-size: 13px;
+            background: #fff; color: #000; width: 100%; padding: 16px; border-radius: 12px;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1); font-size: 13px;
         }
         .login-btn-google:active { transform: scale(0.98); }
 
         .login-btn-guest {
-            background: transparent;
-            color: #64748b;
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 11px;
-            transition: all 0.3s;
+            background: transparent; color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3);
+            width: 100%; padding: 16px; border-radius: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; font-size: 11px; transition: all 0.3s;
         }
-        .login-btn-guest:hover {
-            color: #94a3b8;
-            border-color: rgba(100, 116, 139, 0.6);
-            background: rgba(255,255,255,0.02);
-        }
+        .login-btn-guest:hover { color: #94a3b8; border-color: rgba(100, 116, 139, 0.6); background: rgba(255,255,255,0.02); }
 
-        #particleCanvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 5;
-        }
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
         #appMessage {
             position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
@@ -256,29 +208,21 @@
         }
         .msg-hide { opacity: 0; transform: translate(-50%, -20px); }
 
-        /* Header: Non-sticky */
         #mainHeader { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .header-clean { border-bottom-color: transparent !important; background: transparent !important; }
 
-        /* Back to Top Button */
         #backToTopBtn {
-            position: fixed; bottom: 80px; right: 25px;
-            width: 50px; height: 50px; background: #2563eb; color: white;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            position: fixed; bottom: 80px; right: 25px; width: 50px; height: 50px;
+            background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 1000; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
             opacity: 0; visibility: hidden; transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255, 255, 255, 0.1);
         }
         #backToTopBtn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
 
-        /* Attachment Layout */
         .attachment-badge {
-            background: rgba(59, 130, 246, 0.08);
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            padding: 6px 12px 6px 6px;
-            border-radius: 14px;
-            display: flex; align-items: center; gap: 10px;
+            background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.1);
+            padding: 6px 12px 6px 6px; border-radius: 14px; display: flex; align-items: center; gap: 10px;
             cursor: pointer; transition: all 0.2s ease;
         }
         .attachment-badge:hover { background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
@@ -301,13 +245,11 @@
         }
         .attachment-badge:hover .btn-remove-attachment { opacity: 1; }
 
-        /* Task Checkbox Text */
         .task-done-text { 
             text-decoration: line-through; color: #64748b !important; 
             text-decoration-color: #3b82f6; text-decoration-thickness: 2px;
         }
 
-        /* Fasting Badge Design */
         .fasting-alert { 
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
             color: white; padding: 6px 14px; border-radius: 10px; 
@@ -318,19 +260,15 @@
         }
         .fasting-ramadhan { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 
+        /* Install Button Pulse */
+        @keyframes installPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+        .install-pulse { animation: installPulse 2s infinite; }
     </style>
 </head>
 <body class="bg-[#050810]">
 
-    <!-- Message Hub -->
     <div id="appMessage" class="msg-hide"></div>
-
-    <!-- Back to Top Button -->
-    <div id="backToTopBtn" onclick="window.scrollToTop()">
-        <i class="fas fa-arrow-up text-lg"></i>
-    </div>
-
-    <!-- Star/Constellation Canvas -->
+    <div id="backToTopBtn" onclick="window.scrollToTop()"><i class="fas fa-arrow-up text-lg"></i></div>
     <canvas id="particleCanvas"></canvas>
 
     <div id="uploadLoader" class="fixed inset-0 bg-black/80 z-[20000] hidden flex-col items-center justify-center">
@@ -338,15 +276,21 @@
         <p class="text-white font-bold text-[10px]">MEMPROSES DATA...</p>
     </div>
 
-    <!-- Image Preview Modal -->
+    <!-- PWA Install Guide for iOS (Floating) -->
+    <div id="iosInstallPrompt" class="hidden fixed bottom-6 left-4 right-4 z-[9000] bg-slate-900/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl flex-col gap-3">
+        <div class="flex justify-between items-start">
+            <h3 class="text-white font-bold text-sm">Install Aplikasi</h3>
+            <button onclick="document.getElementById('iosInstallPrompt').style.display='none'" class="text-slate-400"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-xs text-slate-300">Untuk performa terbaik di iPhone:</p>
+        <div class="flex items-center gap-2 text-xs text-slate-400">1. Klik tombol Share <i class="fas fa-share-from-square text-blue-500"></i></div>
+        <div class="flex items-center gap-2 text-xs text-slate-400">2. Pilih "Add to Home Screen" <i class="fas fa-plus-square text-white"></i></div>
+    </div>
+
     <div id="imagePreviewModal" class="flex flex-col items-center justify-center">
         <div class="absolute top-6 right-6 flex items-center gap-4">
-            <a id="downloadBtn" href="#" download class="text-white text-2xl hover:text-blue-400 transition-colors">
-                <i class="fas fa-download"></i>
-            </a>
-            <button onclick="window.closeImagePreview()" class="text-white text-3xl hover:text-rose-400 transition-colors">
-                <i class="fas fa-times"></i>
-            </button>
+            <a id="downloadBtn" href="#" download class="text-white text-2xl hover:text-blue-400 transition-colors"><i class="fas fa-download"></i></a>
+            <button onclick="window.closeImagePreview()" class="text-white text-3xl hover:text-rose-400 transition-colors"><i class="fas fa-times"></i></button>
         </div>
         <img id="previewImage" src="" alt="Preview" class="max-w-[90%] max-h-[85vh] rounded-2xl shadow-2xl object-contain border border-white/10">
         <div id="fileInfoLabel" class="mt-6 flex flex-col items-center gap-1 text-center">
@@ -355,16 +299,10 @@
         </div>
     </div>
 
-    <!-- Status Cloud -->
-    <div id="syncIndicator" class="status-pill state-offline">
-        <div class="pulse-dot"></div>
-        <span id="syncText">Cloud Offline</span>
-    </div>
+    <div id="syncIndicator" class="status-pill state-offline"><div class="pulse-dot"></div><span id="syncText">Cloud Offline</span></div>
 
-    <!-- Header -->
     <header id="mainHeader" class="relative z-50 bg-[#050810]/90 backdrop-blur-xl p-4 sm:p-5 header-clean">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-            
             <div class="flex items-center gap-5 w-full md:w-1/3 justify-center md:justify-start">
                 <div id="userInfo"></div>
                 <div id="notifWrapper" class="flex flex-col items-start gap-2 hidden">
@@ -378,17 +316,20 @@
                 </div>
             </div>
 
-            <!-- Tengah: Logo & Nama -->
             <div id="headerBrand" class="hidden flex flex-col items-center w-full md:w-1/3 text-center order-first md:order-none">
                 <div class="flex items-center gap-3 justify-center">
                     <span class="text-blue-500 text-2xl sm:text-3xl"><i class="fas fa-bolt"></i></span>
                     <h1 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter">Disipline Tracker</h1>
                 </div>
-                <!-- Updated Header Date Label: Centered and slightly larger -->
                 <p id="currentSelectionLabel" class="text-xs text-blue-400 font-bold uppercase tracking-[2px] mt-1 text-center">01 JAN 2026</p>
             </div>
 
             <div id="navWrapper" class="hidden flex flex-row items-center justify-center md:justify-end gap-4 w-full md:w-1/3">
+                <!-- INSTALL BUTTON FOR PWA -->
+                <button id="installAppBtn" onclick="window.installPWA()" class="hidden bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg install-pulse hover:bg-blue-500 transition-all flex items-center gap-2">
+                    <i class="fas fa-download"></i> Install App
+                </button>
+
                 <div class="custom-select-wrapper">
                     <select id="monthSelect" onchange="window.updateCalendarView(true)"></select>
                 </div>
@@ -400,57 +341,34 @@
     </header>
 
     <main class="max-w-7xl mx-auto p-4 sm:p-8 pb-24">
-        
         <div class="mb-10 text-center px-4">
             <p id="quoteText" class="text-sm sm:text-base text-slate-400 italic font-medium leading-relaxed max-w-2xl mx-auto">"Memuat motivasi harian kamu..."</p>
         </div>
 
-        <!-- LOGIN SECTION (COMPLEX UI) -->
         <div id="loginSection" class="login-complex-container mt-10">
             <div class="login-card-complex">
                 <div class="login-scan-line"></div>
                 <div class="login-inner text-center">
-                    
                     <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-500/10 rounded-2xl mb-6 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.15)] relative overflow-hidden">
                         <i class="fas fa-fingerprint text-4xl text-blue-500 animate-pulse"></i>
                         <div class="absolute inset-0 bg-gradient-to-tr from-transparent to-blue-500/10"></div>
                     </div>
-
                     <h2 class="text-3xl font-black text-white uppercase tracking-tighter mb-2">System Access</h2>
-                    <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[3px] mb-8 opacity-80">
-                        Disipline Tracker 2026
-                    </p>
-
+                    <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[3px] mb-8 opacity-80">Disipline Tracker 2026</p>
                     <div class="space-y-4">
-                        <!-- Sequential Buttons (Vertical Stack) -->
                         <div class="group relative">
                             <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                            <button onclick="window.loginWithGoogle()" class="relative login-btn-google">
-                                <i class="fab fa-google text-lg text-blue-600"></i>
-                                <span>Login via Google</span>
-                            </button>
+                            <button onclick="window.loginWithGoogle()" class="relative login-btn-google"><i class="fab fa-google text-lg text-blue-600"></i><span>Login via Google</span></button>
                         </div>
-                        
                         <div class="relative">
-                            <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                <div class="w-full border-t border-slate-700/50"></div>
-                            </div>
-                            <div class="relative flex justify-center">
-                                <span class="bg-[#0b101e] px-2 text-[9px] text-slate-500 uppercase tracking-widest font-bold">Atau</span>
-                            </div>
+                            <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-slate-700/50"></div></div>
+                            <div class="relative flex justify-center"><span class="bg-[#0b101e] px-2 text-[9px] text-slate-500 uppercase tracking-widest font-bold">Atau</span></div>
                         </div>
-
-                        <button onclick="window.loginAsGuest()" class="login-btn-guest">
-                            <i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest
-                        </button>
+                        <button onclick="window.loginAsGuest()" class="login-btn-guest"><i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest</button>
                     </div>
-
                     <div class="mt-8 pt-6 border-t border-slate-800/50">
-                        <p class="text-[9px] text-slate-600 uppercase font-bold tracking-wider">
-                            <i class="fas fa-shield-alt mr-1"></i> Secure Connection • v2.6
-                        </p>
+                        <p class="text-[9px] text-slate-600 uppercase font-bold tracking-wider"><i class="fas fa-shield-alt mr-1"></i> Secure Connection • v2.6</p>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -463,20 +381,14 @@
                 <div id="calendarGrid" class="grid grid-cols-7 gap-3 sm:gap-5"></div>
             </div>
 
-            <!-- DAY HEADER: VERTICALLY CENTERED & TEXT CENTERED -->
             <div id="dayHeader" class="flex flex-col sm:flex-row items-center justify-between mb-12 px-2 gap-6">
-                <!-- Changed sm:text-left to text-center (Always Centered Text) -->
                 <div class="text-center w-full sm:w-auto">
-                    <!-- Added flex justify-center to force badge centering -->
                     <div id="fastingBadgeContainer" class="flex justify-center sm:justify-start mb-2"></div>
-                    <!-- Increased size: text-3xl to text-4xl/5xl -->
                     <h2 id="dayFullLabel" class="text-4xl sm:text-5xl font-black text-white leading-tight tracking-tight">...</h2>
                     <div class="flex items-center justify-center sm:justify-start gap-4 mt-4">
                         <span id="sportTargetLabel" class="text-[11px] bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full font-bold uppercase border border-blue-500/20 tracking-wider">...</span>
                     </div>
                 </div>
-                
-                <!-- PROGRESS CONTAINER (Reverted to Emerald/Green with Glow) -->
                 <div class="text-center sm:text-right bg-emerald-500/5 p-5 rounded-[2rem] border border-emerald-500/10 min-w-[140px] shadow-xl shadow-emerald-500/10">
                     <span id="dayScore" class="text-5xl font-black text-emerald-400 leading-none drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]">0%</span>
                     <p class="text-[10px] text-emerald-500/60 uppercase font-black tracking-[2px] mt-2">Daily Progress</p>
@@ -506,10 +418,7 @@
     <footer>
         <div class="max-w-6xl mx-auto text-center">
             <p class="font-black text-[12px] tracking-[3px] text-white/80 uppercase">© 2026 Disipline Tracker | All Rights Reserved</p>
-            <p class="mt-3 opacity-40 font-bold uppercase text-[10px] tracking-widest leading-loose">
-                Dirancang untuk performa tinggi & kedisplinan mutlak<br>
-                Sinkronisasi cloud otomatis antar perangkat
-            </p>
+            <p class="mt-3 opacity-40 font-bold uppercase text-[10px] tracking-widest leading-loose">Dirancang untuk performa tinggi & kedisplinan mutlak<br>Sinkronisasi cloud otomatis antar perangkat</p>
         </div>
     </footer>
 
@@ -520,7 +429,6 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // Logic Rasi Bintang
         class Particle {
             constructor(canvasWidth, canvasHeight) {
                 this.x = Math.random() * canvasWidth; this.y = Math.random() * canvasHeight;
@@ -537,57 +445,12 @@
             }
         }
 
-        // --- 1. DAFTAR 366 QUOTES UNIK (SETIAP HARI BERBEDA) ---
-        const yearlyQuotes = [
-            "Hari ke-1: Langkah kecil hari ini adalah awal dari kemenangan besar.",
-            "Hari ke-2: Disiplin adalah jembatan antara target dan pencapaian.",
-            "Hari ke-3: Jangan biarkan rasa malas mencuri masa depan kamu.",
-            "Hari ke-4: Kamu jauh lebih kuat dari alasan-alasan kamu sendiri.",
-            "Hari ke-5: Konsistensi mengalahkan intensitas yang cuma sebentar.",
-            "Hari ke-6: Waktu kamu terbatas, jangan sia-siakan untuk hal sepele.",
-            "Hari ke-7: Kemenangan hari ini dimulai dari bangun jam 03:30 pagi.",
-            "Hari ke-8: Fokus adalah kekuatan kamu, asah terus setiap detik.",
-            "Hari ke-9: Tahun 2026 adalah panggung pembuktian diri kamu, bro.",
-            "Hari ke-10: Jangan cuma berharap, tapi mulai eksekusi sekarang!",
-            "Hari ke-11: Lakukan hari ini apa yang orang lain tunda besok.",
-            "Hari ke-12: Disiplin diri adalah bentuk tertinggi cinta pada diri sendiri.",
-            "Hari ke-13: Semakin keras kamu bekerja, semakin beruntung kamu jadinya.",
-            "Hari ke-14: Jangan berhenti saat lelah, berhenti saat kamu sudah selesai.",
-            "Hari ke-15: Kebiasaan kamu hari ini menentukan siapa kamu di masa depan.",
-            "Hari ke-16: Fokus pada progres, bukan cuma pada kesempurnaan.",
-            "Hari ke-17: Setiap tetes keringat olahraga adalah investasi kesehatan.",
-            "Hari ke-18: Pikiran yang disiplin akan menghasilkan hidup yang bahagia.",
-            "Hari ke-19: Kegagalan terbesar adalah ketika kamu takut untuk mencoba.",
-            "Hari ke-20: Jadilah versi terbaik dari diri kamu setiap matahari terbit.",
-            "Hari ke-21: Rasa sakit disiplin jauh lebih ringan daripada rasa sakit penyesalan.",
-            "Hari ke-22: Apa yang kamu tanam hari ini akan kamu panen suatu hari nanti.",
-            "Hari ke-23: Jangan biarkan lingkungan merusak standar kedisiplinan kamu.",
-            "Hari ke-24: Kendalikan pagi kamu, maka kamu akan mengendalikan hari kamu.",
-            "Hari ke-25: Sukses tidak datang tiba-tiba, ia datang karena dipersiapkan.",
-            "Hari ke-26: Belajar bahasa adalah membuka pintu dunia yang lebih luas.",
-            "Hari ke-27: Keberanian adalah melangkah meski rasa takut masih ada.",
-            "Hari ke-28: Berhenti membandingkan diri dengan orang lain, bandingkan dengan dirimu kemarin.",
-            "Hari ke-29: Konsistensi adalah kunci yang membuka semua pintu sukses.",
-            "Hari ke-30: Perubahan besar dimulai dari perubahan pola pikir.",
-        ];
+        const yearlyQuotes = [ "Hari ke-1: Langkah kecil hari ini adalah awal dari kemenangan besar.", "Hari ke-2: Disiplin adalah jembatan antara target dan pencapaian.", "Hari ke-3: Jangan biarkan rasa malas mencuri masa depan kamu.", "Hari ke-4: Kamu jauh lebih kuat dari alasan-alasan kamu sendiri.", "Hari ke-5: Konsistensi mengalahkan intensitas yang cuma sebentar.", "Hari ke-6: Waktu kamu terbatas, jangan sia-siakan untuk hal sepele.", "Hari ke-7: Kemenangan hari ini dimulai dari bangun jam 03:30 pagi.", "Hari ke-8: Fokus adalah kekuatan kamu, asah terus setiap detik.", "Hari ke-9: Tahun 2026 adalah panggung pembuktian diri kamu, bro.", "Hari ke-10: Jangan cuma berharap, tapi mulai eksekusi sekarang!", "Hari ke-11: Lakukan hari ini apa yang orang lain tunda besok.", "Hari ke-12: Disiplin diri adalah bentuk tertinggi cinta pada diri sendiri.", "Hari ke-13: Semakin keras kamu bekerja, semakin beruntung kamu jadinya.", "Hari ke-14: Jangan berhenti saat lelah, berhenti saat kamu sudah selesai.", "Hari ke-15: Kebiasaan kamu hari ini menentukan siapa kamu di masa depan.", "Hari ke-16: Fokus pada progres, bukan cuma pada kesempurnaan.", "Hari ke-17: Setiap tetes keringat olahraga adalah investasi kesehatan.", "Hari ke-18: Pikiran yang disiplin akan menghasilkan hidup yang bahagia.", "Hari ke-19: Kegagalan terbesar adalah ketika kamu takut untuk mencoba.", "Hari ke-20: Jadilah versi terbaik dari diri kamu setiap matahari terbit.", "Hari ke-21: Rasa sakit disiplin jauh lebih ringan daripada rasa sakit penyesalan.", "Hari ke-22: Apa yang kamu tanam hari ini akan kamu panen suatu hari nanti.", "Hari ke-23: Jangan biarkan lingkungan merusak standar kedisiplinan kamu.", "Hari ke-24: Kendalikan pagi kamu, maka kamu akan mengendalikan hari kamu.", "Hari ke-25: Sukses tidak datang tiba-tiba, ia datang karena dipersiapkan.", "Hari ke-26: Belajar bahasa adalah membuka pintu dunia yang lebih luas.", "Hari ke-27: Keberanian adalah melangkah meski rasa takut masih ada.", "Hari ke-28: Berhenti membandingkan diri dengan orang lain, bandingkan dengan dirimu kemarin.", "Hari ke-29: Konsistensi adalah kunci yang membuka semua pintu sukses.", "Hari ke-30: Perubahan besar dimulai dari perubahan pola pikir." ];
         
         function getQuoteForDate(date) {
             const startOfYear = new Date(date.getFullYear(), 0, 1);
             const dayDiff = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24));
-            
-            const backupQuotes = [
-                "Kesuksesan adalah totalitas dari usaha kecil yang diulang setiap hari.",
-                "Disiplin adalah kemampuan untuk melakukan apa yang harus dilakukan.",
-                "Jangan biarkan kemarin mengambil terlalu banyak waktu hari ini.",
-                "Pemenang adalah pemimpi yang tidak pernah menyerah.",
-                "Satu-satunya batasan adalah pikiran kamu sendiri.",
-                "Kamu tidak perlu hebat untuk memulai, tapi kamu harus mulai untuk menjadi hebat.",
-                "Kerja keras dalam diam, biarkan kesuksesan yang bersuara.",
-                "Kesehatan adalah kekayaan pertama yang harus kamu jaga.",
-                "Fokuslah pada solusi, bukan pada masalahnya.",
-                "Hidup kamu adalah cerminan dari disiplin harian kamu."
-            ];
-            
+            const backupQuotes = [ "Kesuksesan adalah totalitas dari usaha kecil yang diulang setiap hari.", "Disiplin adalah kemampuan untuk melakukan apa yang harus dilakukan.", "Jangan biarkan kemarin mengambil terlalu banyak waktu hari ini.", "Pemenang adalah pemimpi yang tidak pernah menyerah.", "Satu-satunya batasan adalah pikiran kamu sendiri.", "Kamu tidak perlu hebat untuk memulai, tapi kamu harus mulai untuk menjadi hebat.", "Kerja keras dalam diam, biarkan kesuksesan yang bersuara.", "Kesehatan adalah kekayaan pertama yang harus kamu jaga.", "Fokuslah pada solusi, bukan pada masalahnya.", "Hidup kamu adalah cerminan dari disiplin harian kamu." ];
             if (yearlyQuotes[dayDiff]) return yearlyQuotes[dayDiff];
             return backupQuotes[dayDiff % backupQuotes.length] + ` (Fokus Hari ke-${dayDiff + 1})`;
         }
@@ -617,14 +480,7 @@
             else { btn.classList.add("notif-prompt"); text.innerText = "Izin?"; icon.className = "fas fa-bell"; }
         };
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ",
-            authDomain: "tracker-2026-4bbd9.firebaseapp.com",
-            projectId: "tracker-2026-4bbd9",
-            storageBucket: "tracker-2026-4bbd9.firebasestorage.app",
-            messagingSenderId: "634119648342",
-            appId: "1:634119648342:web:35aff0729cdcb37dcc37f7"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ", authDomain: "tracker-2026-4bbd9.firebaseapp.com", projectId: "tracker-2026-4bbd9", storageBucket: "tracker-2026-4bbd9.firebasestorage.app", messagingSenderId: "634119648342", appId: "1:634119648342:web:35aff0729cdcb37dcc37f7" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -632,25 +488,13 @@
         const trackerId = "discipline-tracker-2026";
         try { enableIndexedDbPersistence(db); } catch(e) {}
 
-        let dayUnsubscribe = null;
-        let selectedDate = new Date(2026, 0, 1);
-        let cloudData = {};
-        let activeItemIdForUpload = null;
-        let lastNotifDate = null;
-        let isUserLoggedIn = false;
+        let dayUnsubscribe = null, selectedDate = new Date(2026, 0, 1), cloudData = {}, activeItemIdForUpload = null, lastNotifDate = null, isUserLoggedIn = false;
         window.openTimerPanels = {};
 
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let mouseX = -1000, mouseY = -1000;
+        const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
+        let particles = [], mouseX = -1000, mouseY = -1000;
 
-        function initParticles() {
-            particles = [];
-            let count = (canvas.width * canvas.height) / 10000;
-            for (let i = 0; i < count; i++) particles.push(new Particle(canvas.width, canvas.height));
-        }
-
+        function initParticles() { particles = []; let count = (canvas.width * canvas.height) / 10000; for (let i = 0; i < count; i++) particles.push(new Particle(canvas.width, canvas.height)); }
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!isUserLoggedIn) {
@@ -659,10 +503,7 @@
                     for (let j = i; j < particles.length; j++) {
                         const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y, distance = Math.sqrt(dx * dx + dy * dy);
                         const dmx = particles[i].x - mouseX, dmy = particles[i].y - mouseY, mouseDistance = Math.sqrt(dmx * dmx + dmy * dmy);
-                        if (distance < 100 && mouseDistance < 150) {
-                            ctx.strokeStyle = `rgba(59, 130, 246, ${1 - (distance / 100)})`;
-                            ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
-                        }
+                        if (distance < 100 && mouseDistance < 150) { ctx.strokeStyle = `rgba(59, 130, 246, ${1 - (distance / 100)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
                     }
                 }
             }
@@ -672,9 +513,7 @@
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); });
         document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
         document.addEventListener('touchmove', (e) => { if(e.touches.length) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; } });
-
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        initParticles(); animateParticles();
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); animateParticles();
 
         window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); } };
         window.loginAsGuest = async () => { try { await signInAnonymously(auth); } catch (e) { console.error(e); } };
@@ -701,15 +540,9 @@
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect'), grid = document.getElementById('calendarGrid');
             if (!yS || !mS || !grid) return;
             const year = parseInt(yS.value), month = parseInt(mS.value);
-
-            if(isFromDropdown) {
-                selectedDate = new Date(year, month, 1);
-                window.setupRealtimeSync();
-            }
-
+            if(isFromDropdown) { selectedDate = new Date(year, month, 1); window.setupRealtimeSync(); }
             grid.innerHTML = '';
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
             for(let i=0; i<firstDay; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=daysInMonth; d++) {
                 const dayEl = document.createElement('div');
@@ -729,36 +562,22 @@
             const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
             
             ui.full.innerText = `${dNames[selectedDate.getDay()]}, ${dNum} ${mNames[mNum]} ${selectedDate.getFullYear()}`;
-            if(ui.sel) {
-                const shortMonth = mNames[mNum].substring(0,3).toUpperCase();
-                ui.sel.innerText = `${dNum < 10 ? '0'+dNum : dNum} ${shortMonth} ${selectedDate.getFullYear()}`;
-            }
-
+            if(ui.sel) ui.sel.innerText = `${dNum < 10 ? '0'+dNum : dNum} ${mNames[mNum].substring(0,3).toUpperCase()} ${selectedDate.getFullYear()}`;
             ui.quote.innerText = `"${getQuoteForDate(selectedDate)}"`;
             
-            const ramStart = new Date(2026, 1, 18);
-            const ramEnd = new Date(2026, 2, 19);
-            const isRamadan = selectedDate >= ramStart && selectedDate <= ramEnd;
-            
+            const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19), isRamadan = selectedDate >= ramStart && selectedDate <= ramEnd;
             let sportGoal = "";
-            if (isRamadan) {
-                sportGoal = "🚶 Jalan Santai / Stretching (Menjelang Buka)";
-            } else {
+            if (isRamadan) sportGoal = "🚶 Jalan Santai / Stretching (Menjelang Buka)";
+            else {
                 const sched = { 1:{type:"Gowes", val:25}, 2:{type:"Gowes", val:25}, 3:{type:"Run", val:5}, 4:{type:"Gowes", val:30}, 5:{type:"Gowes", val:20}, 6:{type:"Run", val:5}, 0:{type:"Rest", val:0} }[selectedDate.getDay()];
                 sportGoal = sched.type === "Rest" ? "🛌 Total Rest" : (sched.type === "Run" ? `🏃 Lari ${5 + Math.floor(mNum / 3)} KM` : `🚴 Gowes ${sched.val} KM`);
             }
             if(ui.sport) ui.sport.innerText = sportGoal;
 
-            let fastingLabel = "";
-            let fastingClass = "fasting-alert";
-            if (isRamadan) {
-                fastingLabel = "🌙 Puasa Ramadhan";
-                fastingClass += " fasting-ramadhan";
-            } else if (selectedDate.getDay() === 1) {
-                fastingLabel = "✨ Puasa Sunnah Senin";
-            } else if (selectedDate.getDay() === 4) {
-                fastingLabel = "✨ Puasa Sunnah Kamis";
-            }
+            let fastingLabel = "", fastingClass = "fasting-alert";
+            if (isRamadan) { fastingLabel = "🌙 Puasa Ramadhan"; fastingClass += " fasting-ramadhan"; } 
+            else if (selectedDate.getDay() === 1) fastingLabel = "✨ Puasa Sunnah Senin";
+            else if (selectedDate.getDay() === 4) fastingLabel = "✨ Puasa Sunnah Kamis";
             if(ui.fasting) ui.fasting.innerHTML = fastingLabel ? `<div class="${fastingClass}">${fastingLabel}</div>` : '';
 
             const routine = [
@@ -801,12 +620,8 @@
                             <div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}">
                                 <span class="timer-display">${window.formatTime(rem)}</span>
                                 <div class="flex gap-4 mt-3">
-                                    <button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center transition-all hover:bg-blue-500/30">
-                                        <i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i>
-                                    </button>
-                                    <button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center transition-all hover:bg-rose-500/30">
-                                        <i class="fas fa-stop"></i>
-                                    </button>
+                                    <button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center transition-all hover:bg-blue-500/30"><i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i></button>
+                                    <button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center transition-all hover:bg-rose-500/30"><i class="fas fa-stop"></i></button>
                                 </div>
                             </div>`;
                     }
@@ -815,9 +630,7 @@
                         <div class="attachment-badge relative group" onclick="window.openImagePreview('${f.data}', '${f.name}')">
                             ${f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt text-blue-400 text-lg"></i>`}
                             <span class="attachment-name">${f.name}</span>
-                            <button onclick="event.stopPropagation(); window.removeAttachment('${item.id}', ${i})" class="btn-remove-attachment">
-                                <i class="fas fa-times text-[7px]"></i>
-                            </button>
+                            <button onclick="event.stopPropagation(); window.removeAttachment('${item.id}', ${i})" class="btn-remove-attachment"><i class="fas fa-times text-[7px]"></i></button>
                         </div>`).join('');
 
                     const card = document.createElement('div');
@@ -849,9 +662,7 @@
                 window.showMessage("Sedang mengirim notifikasi uji coba...");
                 const title = "🏆 DISIPLINE TEST", opt = { body: "Mantap! Notifikasi kamu berfungsi dengan baik.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true };
                 try { new Notification(title, opt); } catch(e) {}
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification(title, opt); });
-                }
+                if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification(title, opt); });
                 if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
             } else if (Notification.permission === "denied") window.showMessage("Akses notifikasi diblokir. Harap aktifkan kembali di pengaturan browser kamu.");
             else window.showMessage("Harap klik ikon lonceng di atas untuk mengizinkan notifikasi."); 
@@ -867,69 +678,111 @@
         window.stopTimer = (id) => { cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; saveToFirestore(); window.renderDayTracker(); };
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
         window.updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
-        
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
         window.openImagePreview = (data, name) => { 
             const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); 
             dBtn.href = data; dBtn.download = name;
-            if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } 
-            else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } 
+            if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } 
             n.innerText = name; m.style.display = 'flex'; 
         };
         window.closeImagePreview = () => { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
+        // --- PWA SETUP AND MANIFEST GENERATION ---
         const setupPWA = async () => {
-            const manifest = { 
-                "name": "Disipline Tracker 2026", 
-                "short_name": "Tracker", 
-                "start_url": ".", 
-                "display": "standalone", 
-                "background_color": "#050810", 
-                "theme_color": "#050810", 
+            // FALLBACK ICON (Blue Square) - Ensure PWA works even if image is missing
+            const fallbackIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAbFBMVEUAAAD///8AAAD8/PwAAAD9/f35+fn6+vr7+/v39/f29vb09PTz8/Py8vLx8fHu7u7t7e3r6+vq6urp6enl5eXk5OTi4uLg4ODd3d3b29vW1tbT09PQ0NDMzMzJycnFxcXAwMC8vLy2traxsbGqqqq9i204AAAAIUlEQVR4nO3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAICRYyUAAXg23lAAAAAASUVORK5CYII=";
+
+            const manifest = {
+                "name": "Disipline Tracker 2026",
+                "short_name": "Tracker",
+                "start_url": "./?source=pwa",  // Ensure correct start path
+                "display": "standalone",       // Force standalone mode
+                "background_color": "#050810",
+                "theme_color": "#050810",
                 "orientation": "portrait",
-                "icons": [{ "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", "sizes": "731x731", "type": "image/jpeg" }] 
+                "id": "/?source=pwa",
+                "scope": "./",
+                "icons": [
+                    { 
+                        "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", 
+                        "sizes": "731x731", 
+                        "type": "image/jpeg" 
+                    },
+                    {
+                        "src": fallbackIcon,
+                        "sizes": "225x225",
+                        "type": "image/png"
+                    }
+                ]
             };
+            
             const manifestURI = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
             document.getElementById('pwa-manifest').setAttribute('href', manifestURI);
+
+            // Register Service Worker
             if ('serviceWorker' in navigator) {
                 try {
-                    const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));`;
+                    const swCode = `
+                        self.addEventListener('install', e => self.skipWaiting());
+                        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+                        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));
+                    `;
                     const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                    await navigator.serviceWorker.register(URL.createObjectURL(swBlob));
-                } catch(e) {}
+                    const swUrl = URL.createObjectURL(swBlob);
+                    
+                    // Attempt registration
+                    await navigator.serviceWorker.register(swUrl, { scope: './' });
+                } catch(e) { 
+                    console.warn("PWA Service Worker registration failed (common in preview environments or non-HTTPS):", e); 
+                }
             }
         };
+
+        // --- PWA INSTALLATION LOGIC ---
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+        const iosPrompt = document.getElementById('iosInstallPrompt');
+
+        // Logic 1: Android/Chrome "Install App" Button
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.remove('hidden'); // Show button
+            installBtn.classList.add('flex');
+        });
+
+        window.installPWA = async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.classList.add('hidden');
+        };
+
+        // Logic 2: iOS Detection (Show Guide if not in standalone mode)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        
+        if (isIOS && !isStandalone) {
+            // Show iOS prompt after a slight delay
+            setTimeout(() => {
+                if(iosPrompt) {
+                    iosPrompt.classList.remove('hidden');
+                    iosPrompt.classList.add('flex');
+                }
+            }, 3000);
+        }
 
         window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+        window.onscroll = function() { const btn = document.getElementById('backToTopBtn'); if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); };
         
-        window.onscroll = function() {
-            const btn = document.getElementById('backToTopBtn');
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible');
-            else btn.classList.remove('visible');
-        };
-
         setInterval(() => {
-            window.updateSyncUI();
-            let redraw = false;
-            Object.keys(cloudData).forEach(id => { 
-                if (cloudData[id].timerRunning) { 
-                    redraw = true; let rem = cloudData[id].timerEnd - Date.now(); 
-                    if (rem <= 0) { 
-                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); 
-                        cloudData[id].timerRunning = false; cloudData[id].timerEnd = null; cloudData[id].remainingMs = null; saveToFirestore(); 
-                    } 
-                } 
-            });
+            window.updateSyncUI(); let redraw = false;
+            Object.keys(cloudData).forEach(id => { if (cloudData[id].timerRunning) { redraw = true; let rem = cloudData[id].timerEnd - Date.now(); if (rem <= 0) { if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); cloudData[id].timerRunning = false; cloudData[id].timerEnd = null; cloudData[id].remainingMs = null; saveToFirestore(); } } });
             if (redraw) window.renderDayTracker();
             const now = new Date(), witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
-            if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) { 
-                if (Notification.permission === "granted") { 
-                    const opt = { body: "Bangun! Sesi Inggris dimulai!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true };
-                    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); });
-                    else new Notification("🏆 EKSEKUSI!", opt);
-                } lastNotifDate = witaTime.toDateString(); 
-            }
+            if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) { if (Notification.permission === "granted") { const opt = { body: "Bangun! Sesi Inggris dimulai!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true }; if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); }); else new Notification("🏆 EKSEKUSI!", opt); } lastNotifDate = witaTime.toDateString(); }
         }, 1000);
 
         window.addEventListener('load', async () => {
@@ -951,14 +804,7 @@
                     wrapper.classList.remove('hidden');
                     const statusText = user.isAnonymous ? "MODE GUEST (1 DEVICE)" : user.displayName.split(' ')[0];
                     const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
-                    info.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            ${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}
-                            <div class="flex flex-col">
-                                <span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span>
-                                <button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button>
-                            </div>
-                        </div>`;
+                    info.innerHTML = `<div class="flex items-center gap-3">${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}<div class="flex flex-col"><span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button></div></div>`;
                     window.setupRealtimeSync();
                 } else {
                     isUserLoggedIn = false; area.classList.add('hidden', 'opacity-0'); 
@@ -977,32 +823,16 @@
                     try {
                         let data = "";
                         if (f.type.startsWith('image/')) {
-                            const reader = new FileReader();
-                            data = await new Promise((r) => {
-                                reader.readAsDataURL(f);
-                                reader.onload = (ev) => {
-                                    const img = new Image(); img.src = ev.target.result;
-                                    img.onload = () => {
-                                        const canvas = document.createElement('canvas');
-                                        let w = img.width, h = img.height, max = 800;
-                                        if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
-                                        canvas.width = w; canvas.height = h;
-                                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                                        r(canvas.toDataURL('image/jpeg', 0.5));
-                                    };
-                                };
-                            });
+                            const reader = new FileReader(); data = await new Promise((r) => { reader.readAsDataURL(f); reader.onload = (ev) => { const img = new Image(); img.src = ev.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 800; if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); r(canvas.toDataURL('image/jpeg', 0.5)); }; }; });
                         } else { if (f.size > 1024*1024) continue; data = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); }); }
                         atts.push({ name: f.name, data: data });
                     } catch(e) {}
                 }
                 cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments: atts };
                 await saveToFirestore(); window.renderDayTracker();
-                document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden');
-                e.target.value = '';
+                document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden'); e.target.value = '';
             };
-            window.updateCalendarView(); window.renderDayTracker();
-            if ("Notification" in window) window.updateNotifUI(Notification.permission);
+            window.updateCalendarView(); window.renderDayTracker(); if ("Notification" in window) window.updateNotifUI(Notification.permission);
         });
     </script>
 </body>

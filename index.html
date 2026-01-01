@@ -11,10 +11,10 @@
     <meta name="theme-color" content="#050810">
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- 1. Ikon Browser (Tab Laptop) -->
+    <!-- 1. Ikon Browser -->
     <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
     
-    <!-- 2. Ikon Apple (iOS) -->
+    <!-- 2. Ikon Apple -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
     
     <!-- 3. Manifest Fisik -->
@@ -99,7 +99,7 @@
         }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
-        /* Notification Status Colors - EMERALD */
+        /* Notification Status Colors */
         .notif-active { color: #10b981 !important; } 
         .notif-prompt { color: #f59e0b !important; } 
         .notif-blocked { color: #ef4444 !important; } 
@@ -265,14 +265,6 @@
         /* Install Button Pulse */
         @keyframes installPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .install-pulse { animation: installPulse 2s infinite; }
-        
-        /* Debug Error Box */
-        #imgErrorBox {
-            display: none; position: fixed; bottom: 80px; left: 20px; right: 20px;
-            background: rgba(239, 68, 68, 0.9); color: white; padding: 15px;
-            border-radius: 12px; z-index: 9999; font-size: 11px;
-            border: 1px solid #fee2e2;
-        }
     </style>
 </head>
 <body class="bg-[#050810]">
@@ -437,9 +429,24 @@
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.txt">
 
     <script type="module">
+        // ... existing imports ...
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // --- REGISTRASI SERVICE WORKER (Tambahkan bagian ini) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+        // -------------------------------------------------------
 
         class Particle {
             constructor(canvasWidth, canvasHeight) {
@@ -483,7 +490,7 @@
             else { indicator.className = 'status-pill state-offline'; syncText.innerText = "Cloud Offline"; }
         };
 
-        // --- FIXED NOTIFICATION PERMISSION LOGIC ---
+        // --- IMPROVED NOTIFICATION LOGIC ---
         window.updateNotifUI = function(permission) {
             const btn = document.getElementById('notifStatusBtn');
             const text = document.getElementById('notifText');
@@ -521,6 +528,7 @@
                 
                 if (permission === "granted") {
                     window.showMessage("Notifikasi berhasil diaktifkan!");
+                    // Test send immediate notification
                     window.testNotification();
                 } else if (permission === "denied") {
                     window.showMessage("Izin notifikasi ditolak. Cek pengaturan browser.");
@@ -533,23 +541,28 @@
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
                 window.showMessage("Mengirim notifikasi tes...");
+                
                 const title = "🔔 TES DISIPLINE TRACKER";
                 const options = {
                     body: "Sistem notifikasi berjalan dengan baik! Semangat!",
                     icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png",
+                    vibrate: [200, 100, 200], // Fitur Getar
                     requireInteraction: false
                 };
 
-                // Coba lewat Service Worker jika ada
+                // Trigger vibration manual (untuk HP)
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+                // Coba lewat Service Worker dulu (lebih stabil di Android)
                 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.ready.then(function(registration) {
                         registration.showNotification(title, options);
                     });
                 } else {
+                    // Fallback ke notifikasi biasa (Desktop)
                     new Notification(title, options);
                 }
 
-                if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
             } else {
                 window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
             }
@@ -560,7 +573,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
+        
+        // FIX: FORCE SELECT ACCOUNT
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
 
         const trackerId = "discipline-tracker-2026";
         try { enableIndexedDbPersistence(db); } catch(e) {}
@@ -596,6 +613,7 @@
         window.loginAsGuest = async () => { try { await signInAnonymously(auth); } catch (e) { console.error(e); } };
         window.logout = async () => { 
             if(confirm("Keluar dari aplikasi?")) {
+                // Clear local data visual before signOut
                 if(dayUnsubscribe) dayUnsubscribe();
                 cloudData = {};
                 window.renderDayTracker();
@@ -622,14 +640,22 @@
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             if (dayUnsubscribe) dayUnsubscribe();
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), (snap) => {
+                // IMPORTANT: When a new snapshot arrives, we merge it CAREFULLY
+                // If we blindly overwrite cloudData, we might lose text the user is currently typing
+                // if they haven't blurred yet.
                 const newData = snap.exists() ? snap.data() : {};
+                
+                // Merge logic: Don't overwrite notes if the user is currently focused on that note's input
                 const activeId = document.activeElement ? document.activeElement.id : null;
+                
                 if (activeId && activeId.startsWith('note-')) {
                     const editingItemId = activeId.replace('note-', '');
+                    // Keep the local note value for the item being edited
                     if (cloudData[editingItemId] && cloudData[editingItemId].note !== undefined) {
                         newData[editingItemId] = { ...newData[editingItemId], note: cloudData[editingItemId].note };
                     }
                 }
+                
                 cloudData = newData;
                 window.renderDayTracker();
             }, (err) => { console.error(err); window.updateSyncUI(); });
@@ -661,6 +687,8 @@
         };
 
         window.renderDayTracker = function() {
+            // --- FOCUS PRESERVATION LOGIC ---
+            // Before re-rendering, save the ID of the focused element and cursor position
             let activeId = document.activeElement ? document.activeElement.id : null;
             let selectionStart = 0;
             let selectionEnd = 0;
@@ -801,7 +829,7 @@
 
         // Logic 1: Android/Chrome "Install App" Button
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Prevent default banner
+            e.preventDefault(); 
             deferredPrompt = e;
             installBtn.classList.remove('hidden'); 
             installBtn.classList.add('flex');
@@ -810,18 +838,15 @@
             installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
             installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
             installBtn.classList.remove('bg-slate-700', 'text-slate-400');
-            console.log("Install prompt intercepted");
         });
 
         window.installPWA = async () => {
             if (!deferredPrompt) {
-                // Manual fallback instructions
-                alert("Tekan tombol 'Install App' atau 'Add to Home Screen' di menu browser Anda.");
+                alert("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung.");
                 return;
             }
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            console.log("User response to install prompt:", outcome);
             deferredPrompt = null;
             installBtn.classList.add('hidden');
         };
@@ -854,22 +879,10 @@
             // Service Worker Registration for PWA (Native Mode)
             if ('serviceWorker' in navigator) {
                 try {
-                    // Mendaftarkan service worker sederhana
-                    const swCode = `
-                        self.addEventListener('install', e => self.skipWaiting());
-                        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-                        self.addEventListener('fetch', e => {}); // Basic fetch handler
-                    `;
-                    const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                    const swUrl = URL.createObjectURL(swBlob);
-                    // Register at root scope
-                    navigator.serviceWorker.register(swUrl, {scope: './'});
+                    // Registering sw.js
+                    await navigator.serviceWorker.register('sw.js');
+                    console.log('SW registered');
                 } catch(e) { console.log('SW failed', e); }
-            }
-
-            // AUTO CHECK PERMISSION ON LOAD
-            if ("Notification" in window) {
-                window.updateNotifUI(Notification.permission);
             }
 
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
@@ -921,7 +934,7 @@
                 document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden'); e.target.value = '';
             };
             window.updateCalendarView(); window.renderDayTracker(); 
-            // if ("Notification" in window) window.updateNotifUI(Notification.permission); // Moved up
+            if ("Notification" in window) window.updateNotifUI(Notification.permission);
         });
     </script>
 </body>

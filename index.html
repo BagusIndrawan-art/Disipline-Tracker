@@ -12,9 +12,18 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     
-    <!-- DYNAMIC ICONS akan di-handle oleh Javascript di bawah agar path-nya selalu benar -->
-    <link rel="shortcut icon" id="dynamic-favicon" type="image/png" href="">
-    <link rel="apple-touch-icon" id="dynamic-apple-icon" href="">
+    <!-- ========================================= -->
+    <!-- 1. IKON BROWSER (Favicon Desktop Tab)     -->
+    <!-- Menggunakan versi transparan              -->
+    <!-- ========================================= -->
+    <link rel="shortcut icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png?v=FIX_GITHUB">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon_transparent_blue_text-removebg-preview.png?v=FIX_GITHUB">
+    
+    <!-- ========================================= -->
+    <!-- 2. IKON APLIKASI (iOS & Android Install)  -->
+    <!-- Menggunakan versi kotak/penuh             -->
+    <!-- ========================================= -->
+    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png?v=FIX_GITHUB">
     
     <!-- Manifest Placeholder -->
     <link rel="manifest" id="pwa-manifest">
@@ -692,45 +701,42 @@
 
         // --- PWA SETUP AND MANIFEST GENERATION ---
         const setupPWA = async () => {
-            // Determine the base path of the application
-            // This is CRUCIAL for GitHub Pages where the app might be in a subdirectory
+            // Determine the base path of the application - CRITICAL FIX FOR GITHUB PAGES
             const base_url = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            
-            // Filenames must match exactly with uploaded files in GitHub repo
+
+            // Icon Filenames (Must match uploaded files exactly)
             const appIconName = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
             const favIconName = "icon_transparent_blue_text-removebg-preview.png";
 
-            // Update Dynamic Links in Head
-            document.getElementById('dynamic-favicon').href = base_url + favIconName + "?v=3.0";
-            document.getElementById('dynamic-apple-icon').href = base_url + appIconName + "?v=3.0";
+            // Cache Buster string
+            const v = "?v=FIX_GITHUB_V3.1"; 
 
-            // Construct Absolute URL for the icon
-            const absoluteIconUrl = base_url + appIconName + "?v=3.0";
+            // Construct Absolute URLs
+            const absoluteAppIcon = base_url + appIconName + v;
+            const absoluteFavIcon = base_url + favIconName + v;
 
             const manifest = {
                 "name": "Disipline Tracker 2026",
                 "short_name": "Tracker",
-                "start_url": base_url, // Use absolute URL for start_url
+                "id": base_url, // Unique ID based on URL
+                "start_url": base_url, 
                 "display": "standalone",
                 "background_color": "#050810",
                 "theme_color": "#050810",
                 "orientation": "portrait",
-                "scope": base_url, // Use absolute URL for scope
+                "scope": base_url,
                 "icons": [
                     { 
-                        "src": absoluteIconUrl, 
-                        "sizes": "731x731", 
-                        "type": "image/png" 
-                    },
-                    {
-                        "src": absoluteIconUrl,
+                        "src": absoluteAppIcon, 
                         "sizes": "192x192", 
-                        "type": "image/png" 
+                        "type": "image/png",
+                        "purpose": "any maskable" // Critical for Android adaptive icons
                     },
                     {
-                        "src": absoluteIconUrl,
+                        "src": absoluteAppIcon,
                         "sizes": "512x512",
-                        "type": "image/png" 
+                        "type": "image/png",
+                        "purpose": "any maskable"
                     }
                 ]
             };
@@ -738,7 +744,7 @@
             const manifestURI = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
             document.getElementById('pwa-manifest').setAttribute('href', manifestURI);
 
-            // Register Service Worker with Absolute Path Scope
+            // Register Service Worker with Absolute Scope
             if ('serviceWorker' in navigator) {
                 try {
                     const swCode = `
@@ -749,7 +755,6 @@
                     const swBlob = new Blob([swCode], {type: 'application/javascript'});
                     const swUrl = URL.createObjectURL(swBlob);
                     
-                    // Add version to registration to force update
                     await navigator.serviceWorker.register(swUrl, { scope: base_url });
                 } catch(e) { 
                     console.warn("PWA Service Worker registration failed:", e); 

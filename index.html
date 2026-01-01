@@ -91,6 +91,7 @@
         #syncIndicator { position: fixed; bottom: 25px; right: 25px; z-index: 100; transition: all 0.3s ease; }
         .state-online { background: #064e3b; color: #34d399; }
         .state-offline { background: #450a0a; color: #f87171; }
+        .state-local { background: #d97706; color: #fcd34d; }
 
         .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; position: relative; }
         .pulse-dot::after {
@@ -115,22 +116,22 @@
 
         .timer-panel { 
             background: rgba(15, 23, 42, 0.95); 
-            border: 1px solid rgba(59, 130, 246, 0.3); 
-            border-radius: 16px; 
-            padding: 16px; 
-            margin-top: 12px; 
+            border: 1px solid rgba(59, 130, 246, 0.4); 
+            border-radius: 18px; 
+            padding: 18px; 
+            margin-top: 14px; 
             display: none; 
             flex-direction: column; 
             align-items: center; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .timer-display { 
             font-family: 'Courier New', Courier, monospace; 
             font-weight: 900; 
-            color: #60a5fa; 
-            font-size: 1.75rem; 
+            color: #ffffff; 
+            font-size: 2rem; 
             letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+            text-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
         #imagePreviewModal {
@@ -196,6 +197,7 @@
             text-transform: uppercase; letter-spacing: 1px; font-size: 11px; transition: all 0.3s;
         }
         .login-btn-guest:hover { color: #94a3b8; border-color: rgba(100, 116, 139, 0.6); background: rgba(255,255,255,0.02); }
+        .login-btn-guest.loading { cursor: wait; opacity: 0.7; }
 
         #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
@@ -368,7 +370,7 @@
                             <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-slate-700/50"></div></div>
                             <div class="relative flex justify-center"><span class="bg-[#0b101e] px-2 text-[9px] text-slate-500 uppercase tracking-widest font-bold">Atau</span></div>
                         </div>
-                        <button onclick="window.loginAsGuest()" class="login-btn-guest"><i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest</button>
+                        <button id="btnGuest" onclick="window.loginAsGuest()" class="login-btn-guest"><i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest</button>
                     </div>
                     <div class="mt-8 pt-6 border-t border-slate-800/50">
                         <p class="text-[9px] text-slate-600 uppercase font-bold tracking-wider"><i class="fas fa-shield-alt mr-1"></i> Secure Connection • v2.6</p>
@@ -429,24 +431,27 @@
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.txt">
 
     <script type="module">
-        // ... existing imports ...
+        // Global Error Handler for Debugging on Live Server
+        window.onerror = function(msg, url, line, col, error) {
+            console.error("Global Error:", msg, error);
+        };
+
+        // --- CLEANUP SERVICE WORKERS (SAFE VERSION) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                try {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        for(let registration of registrations) { registration.unregister(); }
+                    }).catch(e => console.log("SW Cleanup skipped:", e));
+                } catch (e) { console.log("SW Cleanup failed:", e); }
+            });
+        }
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // --- REGISTRASI SERVICE WORKER (Tambahkan bagian ini) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-            });
-        }
-        // -------------------------------------------------------
+        let isLocalMode = false;
 
         class Particle {
             constructor(canvasWidth, canvasHeight) {
@@ -486,8 +491,13 @@
         window.updateSyncUI = function() {
             const indicator = document.getElementById('syncIndicator'), syncText = document.getElementById('syncText');
             if (!indicator || !syncText) return;
-            if (navigator.onLine && auth.currentUser) { indicator.className = 'status-pill state-online'; syncText.innerText = "Cloud Online"; }
-            else { indicator.className = 'status-pill state-offline'; syncText.innerText = "Cloud Offline"; }
+            if (isLocalMode) {
+                indicator.className = 'status-pill state-local'; syncText.innerText = "Offline Mode (Local)";
+            } else if (navigator.onLine && auth.currentUser) { 
+                indicator.className = 'status-pill state-online'; syncText.innerText = "Cloud Online"; 
+            } else { 
+                indicator.className = 'status-pill state-offline'; syncText.innerText = "Cloud Offline"; 
+            }
         };
 
         // --- IMPROVED NOTIFICATION LOGIC ---
@@ -497,8 +507,6 @@
             const icon = document.getElementById('notifIcon');
             
             if (!btn || !text || !icon) return;
-            
-            // Hapus semua class lama
             btn.classList.remove('notif-active', 'notif-prompt', 'notif-blocked');
             
             if (permission === "granted") {
@@ -521,14 +529,11 @@
                 window.showMessage("Browser ini tidak mendukung notifikasi.");
                 return;
             }
-            
             try {
                 const permission = await Notification.requestPermission();
                 window.updateNotifUI(permission);
-                
                 if (permission === "granted") {
                     window.showMessage("Notifikasi berhasil diaktifkan!");
-                    // Test send immediate notification
                     window.testNotification();
                 } else if (permission === "denied") {
                     window.showMessage("Izin notifikasi ditolak. Cek pengaturan browser.");
@@ -541,7 +546,6 @@
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
                 window.showMessage("Mengirim notifikasi tes...");
-                
                 const title = "🔔 TES DISIPLINE TRACKER";
                 const options = {
                     body: "Sistem notifikasi berjalan dengan baik! Semangat!",
@@ -549,20 +553,8 @@
                     vibrate: [200, 100, 200], // Fitur Getar
                     requireInteraction: false
                 };
-
-                // Trigger vibration manual (untuk HP)
                 if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-
-                // Coba lewat Service Worker dulu (lebih stabil di Android)
-                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.ready.then(function(registration) {
-                        registration.showNotification(title, options);
-                    });
-                } else {
-                    // Fallback ke notifikasi biasa (Desktop)
-                    new Notification(title, options);
-                }
-
+                new Notification(title, options);
             } else {
                 window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
             }
@@ -574,10 +566,7 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         
-        // FIX: FORCE SELECT ACCOUNT
-        provider.setCustomParameters({
-            prompt: 'select_account'
-        });
+        provider.setCustomParameters({ prompt: 'select_account' });
 
         const trackerId = "discipline-tracker-2026";
         try { enableIndexedDbPersistence(db); } catch(e) {}
@@ -609,26 +598,59 @@
         document.addEventListener('touchmove', (e) => { if(e.touches.length) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; } });
         canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); animateParticles();
 
-        window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); } };
-        window.loginAsGuest = async () => { try { await signInAnonymously(auth); } catch (e) { console.error(e); } };
+        window.loginWithGoogle = async () => { 
+            try { 
+                await signInWithPopup(auth, provider); 
+            } catch (e) { 
+                console.error(e); 
+                alert("Login Google Gagal: " + e.message + "\n\nPastikan domain '127.0.0.1' sudah terdaftar di Firebase Console Authentication -> Settings -> Authorized Domains.");
+            } 
+        };
+        
+        // --- NEW GUEST LOGIN WITH OFFLINE FALLBACK ---
+        window.loginAsGuest = async () => { 
+            const btn = document.getElementById('btnGuest');
+            if(btn) { btn.innerHTML = '<div class="pulse-dot inline-block mr-2"></div> Memproses...'; btn.classList.add('loading'); }
+            
+            try { 
+                await signInAnonymously(auth); 
+            } catch (e) { 
+                console.error("Firebase Guest Login Failed, falling back to local:", e);
+                // Fallback to Offline Mode
+                if (e.code === 'auth/operation-not-allowed' || e.code === 'auth/internal-error' || e.message) {
+                    if(confirm("Login Guest Firebase gagal (mungkin belum diaktifkan di console). Masuk ke Mode Offline Lokal? Data hanya tersimpan di browser ini.")) {
+                        window.startLocalGuestMode();
+                    } else {
+                        alert("Tips: Aktifkan 'Anonymous' di Firebase Console -> Authentication -> Sign-in method.");
+                    }
+                }
+            } finally {
+                if(btn) { btn.innerHTML = '<i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest'; btn.classList.remove('loading'); }
+            }
+        };
+
+        window.startLocalGuestMode = () => {
+            isLocalMode = true;
+            const fakeUser = { uid: "local-guest", displayName: "OFFLINE GUEST", isAnonymous: true, photoURL: null };
+            handleUserLogin(fakeUser);
+        };
+
         window.logout = async () => { 
             if(confirm("Keluar dari aplikasi?")) {
-                // Clear local data visual before signOut
                 if(dayUnsubscribe) dayUnsubscribe();
                 cloudData = {};
+                isLocalMode = false;
                 window.renderDayTracker();
-                await signOut(auth); 
+                try { await signOut(auth); } catch(e) {}
                 window.location.reload(); 
             }
         };
 
-        // --- NEW FUNCTION: Update local note immediately on input ---
         window.updateNoteLocal = (id, n) => {
             if (!cloudData[id]) cloudData[id] = {};
             cloudData[id].note = n;
         };
 
-        // --- NEW FUNCTION: Save to Firestore (only called on blur) ---
         window.saveNoteToFirestore = async (id, n) => {
              if (!cloudData[id]) cloudData[id] = {};
              cloudData[id].note = n;
@@ -636,35 +658,50 @@
         };
 
         window.setupRealtimeSync = function() {
-            if (!auth.currentUser) return;
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+            
+            if (isLocalMode) {
+                // Local Storage Sync Logic
+                const localKey = `tracker_data_${docId}`;
+                const stored = localStorage.getItem(localKey);
+                cloudData = stored ? JSON.parse(stored) : {};
+                window.renderDayTracker();
+                window.updateSyncUI();
+                return;
+            }
+
+            if (!auth.currentUser) return;
+            
             if (dayUnsubscribe) dayUnsubscribe();
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), (snap) => {
-                // IMPORTANT: When a new snapshot arrives, we merge it CAREFULLY
-                // If we blindly overwrite cloudData, we might lose text the user is currently typing
-                // if they haven't blurred yet.
                 const newData = snap.exists() ? snap.data() : {};
-                
-                // Merge logic: Don't overwrite notes if the user is currently focused on that note's input
                 const activeId = document.activeElement ? document.activeElement.id : null;
-                
                 if (activeId && activeId.startsWith('note-')) {
                     const editingItemId = activeId.replace('note-', '');
-                    // Keep the local note value for the item being edited
                     if (cloudData[editingItemId] && cloudData[editingItemId].note !== undefined) {
                         newData[editingItemId] = { ...newData[editingItemId], note: cloudData[editingItemId].note };
                     }
                 }
-                
                 cloudData = newData;
                 window.renderDayTracker();
-            }, (err) => { console.error(err); window.updateSyncUI(); });
+            }, (err) => { 
+                console.error(err); 
+                window.updateSyncUI(); 
+            });
             window.updateCalendarView();
         };
 
         async function saveToFirestore() { 
-            if (!auth.currentUser) return; 
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+            
+            if (isLocalMode) {
+                const localKey = `tracker_data_${docId}`;
+                localStorage.setItem(localKey, JSON.stringify(cloudData));
+                window.updateSyncUI();
+                return;
+            }
+
+            if (!auth.currentUser) return; 
             await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
         }
 
@@ -687,8 +724,6 @@
         };
 
         window.renderDayTracker = function() {
-            // --- FOCUS PRESERVATION LOGIC ---
-            // Before re-rendering, save the ID of the focused element and cursor position
             let activeId = document.activeElement ? document.activeElement.id : null;
             let selectionStart = 0;
             let selectionEnd = 0;
@@ -778,16 +813,10 @@
                     const card = document.createElement('div');
                     card.className = 'glass-card p-5 rounded-3xl flex flex-col hover:scale-[1.01] transition-all relative';
                     
-                    // --- MODIFIED TEXTAREA LOGIC ---
                     card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan kamu..." class="note-input w-full mt-1 p-2 rounded-xl min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-3 mt-3">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
                     
-                    // Attach event listeners manually to elements inside card
                     const textarea = card.querySelector(`#note-${item.id}`);
-                    
-                    // 1. Update local state immediately on typing (prevents loss on re-render)
                     textarea.oninput = (e) => window.updateNoteLocal(item.id, e.target.value);
-                    
-                    // 2. Save to Firestore only when user is done (blur)
                     textarea.onblur = (e) => window.saveNoteToFirestore(item.id, e.target.value);
                     
                     container.appendChild(card);
@@ -797,12 +826,10 @@
             const mD = renderItems(routine, 'taskList'), eD = renderItems(extra, 'extraTaskList');
             if(ui.score) ui.score.innerText = Math.round(((mD + eD) / (document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1)) * 100) + '%';
 
-            // --- RESTORE FOCUS ---
             if (activeId) {
                 const el = document.getElementById(activeId);
                 if (el) {
                     el.focus();
-                    // Restore cursor position if possible
                     if (el.tagName === "TEXTAREA" && typeof el.setSelectionRange === "function") {
                         el.setSelectionRange(selectionStart, selectionEnd);
                     }
@@ -810,8 +837,26 @@
             }
         };
 
+        window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
+        window.startCountdown = (id, d) => { 
+            const t = cloudData[id] || {}; 
+            if (t.timerRunning) { 
+                t.timerRunning = false; 
+                t.remainingMs = (t.timerEnd || 0) - Date.now(); 
+                t.timerEnd = null;
+            } else { 
+                t.timerRunning = true; 
+                t.timerEnd = Date.now() + (t.remainingMs || d); 
+            } 
+            cloudData[id] = t; saveToFirestore(); window.renderDayTracker(); 
+        };
+
+        window.stopTimer = (id) => { 
+            cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; 
+            saveToFirestore(); window.renderDayTracker(); 
+        };
+
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
-        // window.updateNote removed in favor of updateNoteLocal and saveNoteToFirestore
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
         window.openImagePreview = (data, name) => { 
@@ -822,19 +867,15 @@
         };
         window.closeImagePreview = () => { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
-        // --- PWA INSTALLATION LOGIC ---
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
         const iosPrompt = document.getElementById('iosInstallPrompt');
 
-        // Logic 1: Android/Chrome "Install App" Button
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); 
             deferredPrompt = e;
             installBtn.classList.remove('hidden'); 
             installBtn.classList.add('flex');
-            
-            // Enable button
             installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
             installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
             installBtn.classList.remove('bg-slate-700', 'text-slate-400');
@@ -851,7 +892,6 @@
             installBtn.classList.add('hidden');
         };
 
-        // Logic 2: iOS Detection
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
         
@@ -867,24 +907,24 @@
         window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
         window.onscroll = function() { const btn = document.getElementById('backToTopBtn'); if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); };
         
-        setInterval(() => {
-            window.updateSyncUI(); let redraw = false;
-            Object.keys(cloudData).forEach(id => { if (cloudData[id].timerRunning) { redraw = true; let rem = cloudData[id].timerEnd - Date.now(); if (rem <= 0) { if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); cloudData[id].timerRunning = false; cloudData[id].timerEnd = null; cloudData[id].remainingMs = null; saveToFirestore(); } } });
-            if (redraw) window.renderDayTracker();
-            const now = new Date(), witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
-            if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) { if (Notification.permission === "granted") { const opt = { body: "Bangun! Sesi Inggris dimulai!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png", requireInteraction: true }; if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); }); else new Notification("🏆 EKSEKUSI!", opt); } lastNotifDate = witaTime.toDateString(); }
-        }, 1000);
+        function handleUserLogin(user) {
+            const area = document.getElementById('dayTrackerArea'), info = document.getElementById('userInfo'), wrapper = document.getElementById('notifWrapper'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader');
+            
+            isUserLoggedIn = true; 
+            area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
+            if(loginSec) loginSec.classList.add('hidden'); 
+            if(hBrand) hBrand.classList.remove('hidden'); if(navWrap) navWrap.classList.remove('hidden'); if(hMain) hMain.classList.remove('header-clean');
+            wrapper.classList.remove('hidden');
+            
+            const statusText = user.isAnonymous ? "GUEST MODE" : user.displayName.split(' ')[0];
+            const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
+            
+            info.innerHTML = `<div class="flex items-center gap-3">${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}<div class="flex flex-col"><span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button></div></div>`;
+            window.setupRealtimeSync();
+            window.updateSyncUI();
+        }
 
         window.addEventListener('load', async () => {
-            // Service Worker Registration for PWA (Native Mode)
-            if ('serviceWorker' in navigator) {
-                try {
-                    // Registering sw.js
-                    await navigator.serviceWorker.register('sw.js');
-                    console.log('SW registered');
-                } catch(e) { console.log('SW failed', e); }
-            }
-
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect');
             if(yS && mS) {
                 for(let y=2026; y<=2030; y++) { let o = document.createElement('option'); o.value = y; o.innerText = y; yS.appendChild(o); }
@@ -894,19 +934,14 @@
             }
 
             onAuthStateChanged(auth, (user) => {
-                const area = document.getElementById('dayTrackerArea'), info = document.getElementById('userInfo'), wrapper = document.getElementById('notifWrapper'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader');
                 if (user) {
-                    isUserLoggedIn = true; area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
-                    if(loginSec) loginSec.classList.add('hidden'); 
-                    if(hBrand) hBrand.classList.remove('hidden'); if(navWrap) navWrap.classList.remove('hidden'); if(hMain) hMain.classList.remove('header-clean');
-                    wrapper.classList.remove('hidden');
-                    const statusText = user.isAnonymous ? "MODE GUEST (1 DEVICE)" : user.displayName.split(' ')[0];
-                    const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
-                    info.innerHTML = `<div class="flex items-center gap-3">${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}<div class="flex flex-col"><span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button></div></div>`;
-                    window.setupRealtimeSync();
+                    isLocalMode = false;
+                    handleUserLogin(user);
                 } else {
-                    // Reset UI to login state
-                    isUserLoggedIn = false; area.classList.add('hidden', 'opacity-0'); 
+                    if (isLocalMode) return; // Don't reset if in local mode
+                    isUserLoggedIn = false; 
+                    const area = document.getElementById('dayTrackerArea'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader'), wrapper = document.getElementById('notifWrapper'), info = document.getElementById('userInfo');
+                    area.classList.add('hidden', 'opacity-0'); 
                     if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean');
                     wrapper.classList.add('hidden');
                     info.innerHTML = ``; initParticles(); 
@@ -936,6 +971,29 @@
             window.updateCalendarView(); window.renderDayTracker(); 
             if ("Notification" in window) window.updateNotifUI(Notification.permission);
         });
+
+        // 1-SECOND TICKER
+        setInterval(() => {
+            window.updateSyncUI(); 
+            let redraw = false;
+            Object.keys(cloudData).forEach(id => { 
+                if (cloudData[id].timerRunning) { 
+                    redraw = true; 
+                    let rem = cloudData[id].timerEnd - Date.now(); 
+                    if (rem <= 0) { 
+                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]); // Getar Panjang
+                        if (Notification.permission === "granted") {
+                             new Notification("⏱️ WAKTU HABIS!", { body: `Sesi ${id} telah selesai!`, icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" });
+                        }
+                        cloudData[id].timerRunning = false; 
+                        cloudData[id].timerEnd = null; 
+                        cloudData[id].remainingMs = null; 
+                        saveToFirestore(); 
+                    } 
+                } 
+            });
+            if (redraw) window.renderDayTracker();
+        }, 1000);
     </script>
 </body>
 </html>

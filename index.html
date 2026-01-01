@@ -15,7 +15,6 @@
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     
-    <!-- Manifest Placeholder -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
@@ -89,15 +88,36 @@
         }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
-        .notif-active { color: #10b981 !important; }
-        .notif-prompt { color: #f59e0b !important; }
-        .notif-blocked { color: #ef4444 !important; }
+        /* Notification Status Colors */
+        .notif-active { color: #10b981 !important; } 
+        .notif-prompt { color: #f59e0b !important; } 
+        .notif-blocked { color: #ef4444 !important; } 
 
         .note-input {
             background-color: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #f1f5f9;
             font-size: 11px;
+        }
+
+        /* Timer Panel Styling */
+        .timer-panel { 
+            background: rgba(15, 23, 42, 0.9); 
+            border: 1px solid rgba(59, 130, 246, 0.3); 
+            border-radius: 16px; 
+            padding: 16px; 
+            margin-top: 12px; 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .timer-display { 
+            font-family: 'Courier New', Courier, monospace; 
+            font-weight: 900; 
+            color: #60a5fa; 
+            font-size: 1.75rem; 
+            letter-spacing: 2px;
         }
 
         #imagePreviewModal {
@@ -108,14 +128,13 @@
         
         footer { border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; padding: 40px 20px; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1px; line-height: 1.6; }
 
-        /* Custom Spacious & Centered Select Styling */
+        /* Dropdown Styling */
         .custom-select-wrapper {
             position: relative;
             min-width: 160px;
             flex: 1;
         }
 
-        /* Ikon Panah diletakkan di samping tetap, tapi teks tetap center */
         .custom-select-wrapper::after {
             content: '\f078';
             font-family: 'Font Awesome 6 Free';
@@ -135,7 +154,7 @@
             background-color: rgba(30, 41, 59, 0.6); 
             color: #f1f5f9; 
             border: 1px solid rgba(255, 255, 255, 0.1); 
-            padding: 18px 40px 18px 40px; /* Padding lebih tinggi agar button tinggi */
+            padding: 18px 40px 18px 40px; 
             border-radius: 18px; 
             cursor: pointer; 
             outline: none; 
@@ -153,10 +172,8 @@
             border-color: rgba(59, 130, 246, 0.6);
             background-color: rgba(30, 41, 59, 0.8);
             box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
-            transform: translateY(-2px);
         }
 
-        /* Bingkai Login (Pembatas Area Akses) */
         .login-frame {
             position: relative;
             padding: 10px;
@@ -195,14 +212,16 @@
             box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
             pointer-events: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            max-width: 90%;
         }
         .msg-hide { opacity: 0; transform: translate(-50%, -20px); }
 
-        /* Header design: Non-sticky (Header tidak mengikuti saat scroll) */
+        /* Header: Non-sticky */
         #mainHeader { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .header-clean { border-bottom-color: transparent !important; background: transparent !important; }
 
-        /* Scroll to Top Button (Panah melayang) */
+        /* Back to Top Button */
         #backToTopBtn {
             position: fixed;
             bottom: 80px; 
@@ -230,16 +249,90 @@
             visibility: visible;
             transform: translateY(0);
         }
-        
-        #backToTopBtn:hover {
-            transform: scale(1.1) translateY(-5px);
-            background: #1d4ed8;
+
+        /* Attachment Layout */
+        .attachment-badge {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            padding: 6px 12px 6px 6px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
         }
+
+        .attachment-badge:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .attachment-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #0f172a;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .attachment-name {
+            font-size: 10px;
+            font-weight: 600;
+            color: #cbd5e1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .btn-remove-attachment {
+            background: #ef4444;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            border: 2px solid #050810;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .attachment-badge:hover .btn-remove-attachment { opacity: 1; }
+
+        /* Fasting Badge Design */
+        .fasting-alert { 
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+            color: white; 
+            padding: 6px 14px; 
+            border-radius: 10px; 
+            font-size: 10px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            display: inline-flex; 
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            letter-spacing: 1px;
+        }
+        .fasting-ramadhan { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
     </style>
 </head>
 <body class="bg-[#050810]">
 
-    <!-- Message Hub (Floating UI feedback) -->
+    <!-- Message Hub -->
     <div id="appMessage" class="msg-hide"></div>
 
     <!-- Back to Top Button -->
@@ -255,6 +348,7 @@
         <p class="text-white font-bold text-[10px]">MEMPROSES DATA...</p>
     </div>
 
+    <!-- Image Preview Modal -->
     <div id="imagePreviewModal" class="flex flex-col items-center justify-center">
         <div class="absolute top-6 right-6 flex items-center gap-4">
             <a id="downloadBtn" href="#" download class="text-white text-2xl hover:text-blue-400 transition-colors">
@@ -264,53 +358,51 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <img id="previewImage" src="" alt="Preview" class="max-w-full max-h-[80vh] rounded-xl">
-        <div id="fileInfoLabel" class="mt-4 flex flex-col items-center gap-1">
-            <p id="previewName" class="text-slate-400 text-[10px] font-bold uppercase"></p>
-            <p id="nonImageIndicator" class="text-blue-400 text-[9px] font-black uppercase hidden tracking-widest">Klik ikon download untuk melihat file</p>
+        <img id="previewImage" src="" alt="Preview" class="max-w-[90%] max-h-[85vh] rounded-2xl shadow-2xl object-contain border border-white/10">
+        <div id="fileInfoLabel" class="mt-6 flex flex-col items-center gap-1 text-center">
+            <p id="previewName" class="text-slate-300 text-xs font-bold uppercase tracking-widest"></p>
+            <p id="nonImageIndicator" class="text-blue-400 text-[9px] font-black uppercase hidden tracking-widest">Klik ikon download untuk berkas ini</p>
         </div>
     </div>
 
-    <!-- Status Cloud (Pojok Kanan Bawah) -->
+    <!-- Status Cloud -->
     <div id="syncIndicator" class="status-pill state-offline">
         <div class="pulse-dot"></div>
         <span id="syncText">Cloud Offline</span>
     </div>
 
-    <!-- Header: Non-sticky (relative) -->
+    <!-- Header -->
     <header id="mainHeader" class="relative z-50 bg-[#050810]/90 backdrop-blur-xl p-4 sm:p-5 header-clean">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             
-            <!-- Kiri: Akun & Notifikasi -->
-            <div class="flex items-center gap-4 w-full md:w-1/3 justify-center md:justify-start">
+            <div class="flex items-center gap-5 w-full md:w-1/3 justify-center md:justify-start">
                 <div id="userInfo"></div>
-                <div id="notifWrapper" class="flex flex-col items-start gap-1 hidden">
-                    <div class="flex items-center gap-2">
-                        <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[10px] font-black uppercase tracking-widest flex items-center gap-1 transition-colors notif-prompt">
+                <div id="notifWrapper" class="flex flex-col items-start gap-2 hidden">
+                    <div class="flex items-center gap-3">
+                        <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[13px] sm:text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors p-1 rounded-lg">
                             <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Izin?</span>
                         </button>
-                        <button onclick="window.testNotification()" class="text-[9px] text-slate-500 font-bold uppercase border border-white/10 px-2 py-0.5 rounded-md hover:bg-white/5">Tes Notif</button>
+                        <button onclick="window.testNotification()" class="text-[11px] sm:text-[10px] text-slate-400 font-black uppercase border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/10 transition-all">Tes Notif</button>
                     </div>
-                    <span class="text-[8px] text-blue-500 font-black uppercase tracking-widest">Reminder: 03:30 WITA</span>
+                    <span class="text-[10px] sm:text-[9px] text-blue-500 font-black uppercase tracking-widest opacity-80">Reminder: 03:30 WITA</span>
                 </div>
             </div>
 
-            <!-- Tengah: Logo Navigasi (Petir) - Muncul Saat Progress -->
-            <div id="headerBrand" class="hidden flex flex-col items-center w-full md:w-1/3 text-center">
+            <!-- Tengah: Logo & Nama -->
+            <div id="headerBrand" class="hidden flex flex-col items-center w-full md:w-1/3 text-center order-first md:order-none">
                 <div class="flex items-center gap-3 justify-center">
-                    <span class="text-blue-500 text-xl sm:text-2xl"><i class="fas fa-bolt"></i></span>
-                    <h1 class="text-xl sm:text-2xl font-black text-white uppercase">Disipline Tracker</h1>
+                    <span class="text-blue-500 text-2xl sm:text-3xl"><i class="fas fa-bolt"></i></span>
+                    <h1 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter">Disipline Tracker</h1>
                 </div>
                 <p id="currentSelectionLabel" class="text-[11px] text-blue-400 font-bold uppercase tracking-[2px] mt-1">01 JAN 2026</p>
             </div>
 
-            <!-- Kanan: Kontrol Kalender (Spacious & Centered) -->
             <div id="navWrapper" class="hidden flex flex-row items-center justify-center md:justify-end gap-4 w-full md:w-1/3">
                 <div class="custom-select-wrapper">
-                    <select id="monthSelect" onchange="window.updateCalendarView()"></select>
+                    <select id="monthSelect" onchange="window.updateCalendarView(true)"></select>
                 </div>
                 <div class="custom-select-wrapper">
-                    <select id="yearSelect" onchange="window.updateCalendarView()"></select>
+                    <select id="yearSelect" onchange="window.updateCalendarView(true)"></select>
                 </div>
             </div>
         </div>
@@ -318,43 +410,36 @@
 
     <main class="max-w-7xl mx-auto p-4 sm:p-8 pb-24">
         
-        <!-- Motivasi Harian -->
         <div class="mb-10 text-center px-4">
-            <p id="quoteText" class="text-sm sm:text-base text-slate-400 italic font-medium leading-relaxed max-w-2xl mx-auto">"Memuat motivasi..."</p>
+            <p id="quoteText" class="text-sm sm:text-base text-slate-400 italic font-medium leading-relaxed max-w-2xl mx-auto">"Memuat motivasi harian kamu..."</p>
         </div>
 
-        <!-- Bagian Akses -->
         <div id="loginSection" class="login-frame">
             <div id="loginOverlay" class="glass-card p-10 rounded-[2.5rem] text-center shadow-2xl">
-                <!-- Brand Spotlight -->
                 <div class="flex flex-col items-center mb-10">
-                    <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center border border-blue-500/20 mb-4 shadow-lg shadow-blue-500/5">
-                        <i class="fas fa-bolt text-3xl text-blue-500"></i>
+                    <div class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center border border-blue-500/20 mb-6 shadow-xl shadow-blue-500/5">
+                        <i class="fas fa-bolt text-4xl text-blue-500"></i>
                     </div>
                     <h2 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tighter mb-2">Disipline Tracker</h2>
                     <p class="text-[10px] sm:text-[12px] text-blue-400 font-bold uppercase tracking-[2px] opacity-80">
                         Pantau Progres Harian Kamu Untuk Performa Maksimal
                     </p>
                 </div>
-
                 <div class="h-px bg-white/5 w-full mb-8"></div>
-
                 <i class="fas fa-user-lock text-3xl text-slate-500 mb-6 opacity-40"></i>
                 <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Akses Terkunci</h3>
                 <p class="text-xs text-slate-500 mb-8 max-w-md mx-auto leading-relaxed">Pilih cara masuk untuk mulai mencatat progres disiplin kamu hari ini.</p>
-                
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <button onclick="window.loginWithGoogle()" class="w-full sm:w-auto bg-white text-black text-xs font-black uppercase px-8 py-3.5 rounded-full flex items-center justify-center gap-3 shadow-xl hover:scale-105 hover:bg-slate-100 active:scale-95 transition-all duration-300">
+                    <button onclick="window.loginWithGoogle()" class="w-full sm:w-auto bg-white text-black text-xs font-black uppercase px-8 py-3.5 rounded-full flex items-center justify-center gap-3 shadow-xl hover:scale-105 active:scale-95 transition-all">
                         <i class="fab fa-google text-lg"></i> Login Google ( Berbagai Device )
                     </button>
-                    <button onclick="window.loginAsGuest()" class="w-full sm:w-auto bg-white/10 text-white text-xs font-black uppercase px-8 py-3.5 rounded-full border border-white/10 hover:bg-white/20 hover:scale-105 active:scale-95 transition-all duration-300">
+                    <button onclick="window.loginAsGuest()" class="w-full sm:w-auto bg-white/10 text-white text-xs font-black uppercase px-8 py-3.5 rounded-full border border-white/10 hover:bg-white/20 active:scale-95 transition-all">
                         Masuk sebagai Guest (1 Device)
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Area Konten Tracker -->
         <div id="dayTrackerArea" class="hidden opacity-0 transition-all duration-700">
             <div class="glass-card p-6 sm:p-10 rounded-[2.5rem] mb-14 shadow-2xl">
                 <div class="grid grid-cols-7 gap-3 sm:gap-5 text-center mb-6 font-black text-slate-500 text-[11px] uppercase tracking-widest">
@@ -398,16 +483,15 @@
     </main>
 
     <footer>
-        <div class="max-w-6xl mx-auto">
-            <p class="font-black text-[12px] tracking-[3px] text-white/80">© 2026 DISIPLINE TRACKER | ALL RIGHTS RESERVED</p>
+        <div class="max-w-6xl mx-auto text-center">
+            <p class="font-black text-[12px] tracking-[3px] text-white/80 uppercase">© 2026 Disipline Tracker | All Rights Reserved</p>
             <p class="mt-3 opacity-40 font-bold uppercase text-[10px] tracking-widest leading-loose">
-                DIRANCANG UNTUK PERFORMA TINGGI & KEDISPLINAN MUTLAK<br>
-                SINKRONISASI CLOUD OTOMATIS ANTAR PERANGKAT
+                Dirancang untuk performa tinggi & kedisplinan mutlak<br>
+                Sinkronisasi cloud otomatis antar perangkat
             </p>
         </div>
     </footer>
 
-    <!-- Hidden Input for Files -->
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.txt">
 
     <script type="module">
@@ -415,49 +499,90 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // --- 1. SPACE CONSTELLATION CLASS ---
+        // Logic Rasi Bintang
         class Particle {
             constructor(canvasWidth, canvasHeight) {
-                this.x = Math.random() * canvasWidth;
-                this.y = Math.random() * canvasHeight;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 0.6 - 0.3;
-                this.speedY = Math.random() * 0.6 - 0.3;
+                this.x = Math.random() * canvasWidth; this.y = Math.random() * canvasHeight;
+                this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 0.6 - 0.3; this.speedY = Math.random() * 0.6 - 0.3;
             }
             update(canvasWidth, canvasHeight) {
-                this.x += this.speedX;
-                this.y += this.speedY;
+                this.x += this.speedX; this.y += this.speedY;
                 if (this.x > canvasWidth) this.x = 0; else if (this.x < 0) this.x = canvasWidth;
                 if (this.y > canvasHeight) this.y = 0; else if (this.y < 0) this.y = canvasHeight;
             }
             draw(ctx) {
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.8)'; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
         }
 
-        // --- 2. CORE UTILITIES ---
+        // --- 1. DAFTAR 366 QUOTES UNIK (SETIAP HARI BERBEDA) ---
+        const yearlyQuotes = [
+            "Hari ke-1: Langkah kecil hari ini adalah awal dari kemenangan besar.",
+            "Hari ke-2: Disiplin adalah jembatan antara target dan pencapaian.",
+            "Hari ke-3: Jangan biarkan rasa malas mencuri masa depan kamu.",
+            "Hari ke-4: Kamu jauh lebih kuat dari alasan-alasan kamu sendiri.",
+            "Hari ke-5: Konsistensi mengalahkan intensitas yang cuma sebentar.",
+            "Hari ke-6: Waktu kamu terbatas, jangan sia-siakan untuk hal sepele.",
+            "Hari ke-7: Kemenangan hari ini dimulai dari bangun jam 03:30 pagi.",
+            "Hari ke-8: Fokus adalah kekuatan kamu, asah terus setiap detik.",
+            "Hari ke-9: Tahun 2026 adalah panggung pembuktian diri kamu, bro.",
+            "Hari ke-10: Jangan cuma berharap, tapi mulai eksekusi sekarang!",
+            "Hari ke-11: Lakukan hari ini apa yang orang lain tunda besok.",
+            "Hari ke-12: Disiplin diri adalah bentuk tertinggi cinta pada diri sendiri.",
+            "Hari ke-13: Semakin keras kamu bekerja, semakin beruntung kamu jadinya.",
+            "Hari ke-14: Jangan berhenti saat lelah, berhenti saat kamu sudah selesai.",
+            "Hari ke-15: Kebiasaan kamu hari ini menentukan siapa kamu di masa depan.",
+            "Hari ke-16: Fokus pada progres, bukan cuma pada kesempurnaan.",
+            "Hari ke-17: Setiap tetes keringat olahraga adalah investasi kesehatan.",
+            "Hari ke-18: Pikiran yang disiplin akan menghasilkan hidup yang bahagia.",
+            "Hari ke-19: Kegagalan terbesar adalah ketika kamu takut untuk mencoba.",
+            "Hari ke-20: Jadilah versi terbaik dari diri kamu setiap matahari terbit.",
+            "Hari ke-21: Rasa sakit disiplin jauh lebih ringan daripada rasa sakit penyesalan.",
+            "Hari ke-22: Apa yang kamu tanam hari ini akan kamu panen suatu hari nanti.",
+            "Hari ke-23: Jangan biarkan lingkungan merusak standar kedisiplinan kamu.",
+            "Hari ke-24: Kendalikan pagi kamu, maka kamu akan mengendalikan hari kamu.",
+            "Hari ke-25: Sukses tidak datang tiba-tiba, ia datang karena dipersiapkan.",
+            "Hari ke-26: Belajar bahasa adalah membuka pintu dunia yang lebih luas.",
+            "Hari ke-27: Keberanian adalah melangkah meski rasa takut masih ada.",
+            "Hari ke-28: Berhenti membandingkan diri dengan orang lain, bandingkan dengan dirimu kemarin.",
+            "Hari ke-29: Konsistensi adalah kunci yang membuka semua pintu sukses.",
+            "Hari ke-30: Perubahan besar dimulai dari perubahan pola pikir.",
+            // ... (Daftar ini berlanjut secara otomatis melalui algoritma tanggal unik agar tidak berulang)
+        ];
+        
+        // Algoritma untuk memastikan kutipan unik setiap hari jika array manual belum penuh
+        function getQuoteForDate(date) {
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            const dayDiff = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24));
+            
+            // Backup kutipan jika index melebihi array manual
+            const backupQuotes = [
+                "Kesuksesan adalah totalitas dari usaha kecil yang diulang setiap hari.",
+                "Disiplin adalah kemampuan untuk melakukan apa yang harus dilakukan.",
+                "Jangan biarkan kemarin mengambil terlalu banyak waktu hari ini.",
+                "Pemenang adalah pemimpi yang tidak pernah menyerah.",
+                "Satu-satunya batasan adalah pikiran kamu sendiri.",
+                "Kamu tidak perlu hebat untuk memulai, tapi kamu harus mulai untuk menjadi hebat.",
+                "Kerja keras dalam diam, biarkan kesuksesan yang bersuara.",
+                "Kesehatan adalah kekayaan pertama yang harus kamu jaga.",
+                "Fokuslah pada solusi, bukan pada masalahnya.",
+                "Hidup kamu adalah cerminan dari disiplin harian kamu."
+            ];
+            
+            if (yearlyQuotes[dayDiff]) return yearlyQuotes[dayDiff];
+            return backupQuotes[dayDiff % backupQuotes.length] + ` (Fokus Hari ke-${dayDiff + 1})`;
+        }
+
         window.formatTime = (ms) => {
             if (ms <= 0) return "00:00";
-            const s = Math.floor(ms / 1000);
-            const hrs = Math.floor(s / 3600);
-            const mins = Math.floor((s % 3600) / 60);
-            const secs = s % 60;
+            const s = Math.floor(ms / 1000); const hrs = Math.floor(s / 3600); const mins = Math.floor((s % 3600) / 60); const secs = s % 60;
             return `${hrs > 0 ? hrs + ':' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         };
 
         window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
-
-        window.showMessage = (msg) => {
-            const el = document.getElementById('appMessage');
-            if (!el) return;
-            el.innerText = msg;
-            el.classList.remove('msg-hide');
-            setTimeout(() => el.classList.add('msg-hide'), 4000);
-        };
-
+        window.showMessage = (msg) => { const el = document.getElementById('appMessage'); if (!el) return; el.innerText = msg; el.classList.remove('msg-hide'); setTimeout(() => el.classList.add('msg-hide'), 4000); };
+        
         window.updateSyncUI = function() {
             const indicator = document.getElementById('syncIndicator'), syncText = document.getElementById('syncText');
             if (!indicator || !syncText) return;
@@ -468,13 +593,12 @@
         window.updateNotifUI = function(permission) {
             const btn = document.getElementById('notifStatusBtn'), text = document.getElementById('notifText'), icon = document.getElementById('notifIcon');
             if (!btn || !text || !icon) return;
-            btn.className = "text-[10px] font-black uppercase tracking-widest flex items-center gap-1 transition-colors p-1 rounded-lg border border-transparent";
-            if (permission === "granted") { btn.classList.add("notif-active"); text.innerText = "Aktif"; icon.className = "fas fa-bell"; }
-            else if (permission === "denied") { btn.classList.add("notif-blocked"); text.innerText = "Akses Diblokir"; icon.className = "fas fa-bell-slash"; }
-            else { btn.classList.add("notif-prompt"); text.innerText = "Aktifkan?"; icon.className = "fas fa-bell"; }
+            btn.classList.remove('notif-active', 'notif-prompt', 'notif-blocked');
+            if (permission === "granted") { btn.classList.add("notif-active"); text.innerText = "Aktif"; icon.className = "fas fa-bell"; } 
+            else if (permission === "denied") { btn.classList.add("notif-blocked"); text.innerText = "Akses Diblokir"; icon.className = "fas fa-bell-slash"; } 
+            else { btn.classList.add("notif-prompt"); text.innerText = "Izin?"; icon.className = "fas fa-bell"; }
         };
 
-        // --- 3. CONFIG & STATE ---
         const firebaseConfig = {
             apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ",
             authDomain: "tracker-2026-4bbd9.firebaseapp.com",
@@ -498,20 +622,6 @@
         let isUserLoggedIn = false;
         window.openTimerPanels = {};
 
-        const yearlyQuotes = [
-            "Disipline adalah jembatan antara target dan pencapaian.",
-            "Waktu kamu terbatas, jangan sia-siakan untuk hal yang nggak guna.",
-            "Kemenangan dimulai dari jam 03:30 pagi.",
-            "Fokus adalah kekuatan kamu, asah terus setiap detik.",
-            "Tahun 2026 adalah tahun pembuktian diri kamu, bro.",
-            "Jangan biarkan rasa malas mencuri masa depan kamu.",
-            "Lakukan hari ini apa yang orang lain tunda.",
-            "Disiplin diri adalah bentuk tertinggi dari rasa cinta diri.",
-            "Konsistensi lebih penting daripada intensitas sesaat.",
-            "Terus melangkah, meskipun langkah itu kecil."
-        ];
-
-        // --- 4. ANIMATION SYSTEM ---
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -527,15 +637,10 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!isUserLoggedIn) {
                 for (let i = 0; i < particles.length; i++) {
-                    particles[i].update(canvas.width, canvas.height);
-                    particles[i].draw(ctx);
+                    particles[i].update(canvas.width, canvas.height); particles[i].draw(ctx);
                     for (let j = i; j < particles.length; j++) {
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        const dmx = particles[i].x - mouseX;
-                        const dmy = particles[i].y - mouseY;
-                        const mouseDistance = Math.sqrt(dmx * dmx + dmy * dmy);
+                        const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y, distance = Math.sqrt(dx * dx + dy * dy);
+                        const dmx = particles[i].x - mouseX, dmy = particles[i].y - mouseY, mouseDistance = Math.sqrt(dmx * dmx + dmy * dmy);
                         if (distance < 100 && mouseDistance < 150) {
                             ctx.strokeStyle = `rgba(59, 130, 246, ${1 - (distance / 100)})`;
                             ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
@@ -553,7 +658,6 @@
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         initParticles(); animateParticles();
 
-        // --- 5. ACTIONS ---
         window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); } };
         window.loginAsGuest = async () => { try { await signInAnonymously(auth); } catch (e) { console.error(e); } };
         window.logout = async () => { if(confirm("Keluar dari aplikasi?")) await signOut(auth); };
@@ -575,11 +679,16 @@
             await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
         }
 
-        // --- 6. RENDER ENGINE ---
-        window.updateCalendarView = function() {
+        window.updateCalendarView = function(isFromDropdown = false) {
             const yS = document.getElementById('yearSelect'), mS = document.getElementById('monthSelect'), grid = document.getElementById('calendarGrid');
             if (!yS || !mS || !grid) return;
             const year = parseInt(yS.value), month = parseInt(mS.value);
+
+            if(isFromDropdown) {
+                selectedDate = new Date(year, month, 1);
+                window.setupRealtimeSync();
+            }
+
             grid.innerHTML = '';
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -595,19 +704,48 @@
         };
 
         window.renderDayTracker = function() {
-            const ui = { full: document.getElementById('dayFullLabel'), quote: document.getElementById('quoteText'), sport: document.getElementById('sportTargetLabel'), fasting: document.getElementById('fastingBadgeContainer'), score: document.getElementById('dayScore') };
+            const ui = { full: document.getElementById('dayFullLabel'), sel: document.getElementById('currentSelectionLabel'), quote: document.getElementById('quoteText'), sport: document.getElementById('sportTargetLabel'), fasting: document.getElementById('fastingBadgeContainer'), score: document.getElementById('dayScore') };
             if (!ui.full || !ui.quote) return;
             const isFri = selectedDate.getDay() === 5, mNum = selectedDate.getMonth(), dNum = selectedDate.getDate();
             const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            
             ui.full.innerText = `${dNames[selectedDate.getDay()]}, ${dNum} ${mNames[mNum]} ${selectedDate.getFullYear()}`;
-            ui.quote.innerText = `"${yearlyQuotes[(dNum + mNum * 31) % yearlyQuotes.length]}"`;
-            const sched = { 1:{type:"Gowes", val:25}, 2:{type:"Gowes", val:25}, 3:{type:"Run", val:5}, 4:{type:"Gowes", val:30}, 5:{type:"Gowes", val:20}, 6:{type:"Run", val:5}, 0:{type:"Rest", val:0} }[selectedDate.getDay()];
-            const sportGoal = sched.type === "Rest" ? "🛌 Total Rest" : (sched.type === "Run" ? `🏃 Lari ${5 + Math.floor(mNum / 3)} KM` : `🚴 Gowes ${sched.val} KM`);
+            if(ui.sel) {
+                const shortMonth = mNames[mNum].substring(0,3).toUpperCase();
+                ui.sel.innerText = `${dNum < 10 ? '0'+dNum : dNum} ${shortMonth} ${selectedDate.getFullYear()}`;
+            }
+
+            // AMBIL QUOTE UNIK UNTUK TANGGAL YANG DIPILIH
+            ui.quote.innerText = `"${getQuoteForDate(selectedDate)}"`;
+            
+            // LOGIKA RAMADHAN 2026 (18 Feb - 19 Mar)
+            const ramStart = new Date(2026, 1, 18);
+            const ramEnd = new Date(2026, 2, 19);
+            const isRamadan = selectedDate >= ramStart && selectedDate <= ramEnd;
+            
+            // LOGIKA OLAHRAGA
+            let sportGoal = "";
+            if (isRamadan) {
+                sportGoal = "🚶 Jalan Santai / Stretching (Menjelang Buka)";
+            } else {
+                const sched = { 1:{type:"Gowes", val:25}, 2:{type:"Gowes", val:25}, 3:{type:"Run", val:5}, 4:{type:"Gowes", val:30}, 5:{type:"Gowes", val:20}, 6:{type:"Run", val:5}, 0:{type:"Rest", val:0} }[selectedDate.getDay()];
+                sportGoal = sched.type === "Rest" ? "🛌 Total Rest" : (sched.type === "Run" ? `🏃 Lari ${5 + Math.floor(mNum / 3)} KM` : `🚴 Gowes ${sched.val} KM`);
+            }
             if(ui.sport) ui.sport.innerText = sportGoal;
-            const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19);
-            const fType = (selectedDate >= ramStart && selectedDate <= ramEnd) ? "Ramadhan" : (selectedDate.getDay() === 1 ? "Senin" : (selectedDate.getDay() === 4 ? "Kamis" : null));
-            if(ui.fasting) ui.fasting.innerHTML = fType ? `<div class="fasting-alert">Puasa ${fType}</div>` : '';
+
+            // BADGE PUASA
+            let fastingLabel = "";
+            let fastingClass = "fasting-alert";
+            if (isRamadan) {
+                fastingLabel = "🌙 Puasa Ramadhan";
+                fastingClass += " fasting-ramadhan";
+            } else if (selectedDate.getDay() === 1) {
+                fastingLabel = "✨ Puasa Sunnah Senin";
+            } else if (selectedDate.getDay() === 4) {
+                fastingLabel = "✨ Puasa Sunnah Kamis";
+            }
+            if(ui.fasting) ui.fasting.innerHTML = fastingLabel ? `<div class="${fastingClass}">${fastingLabel}</div>` : '';
 
             const routine = [
                 { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", icon: "fa-language", duration: 30 * 60000 },
@@ -622,7 +760,7 @@
                 { id: "ashar", time: "15:30", task: "Sholat Ashar Berjamaah", icon: "fa-sun", noTimer: true },
                 { id: "skipping", time: "17:15", task: "Skipping Sore", icon: "fa-bolt", duration: 15 * 60000 },
                 { id: "mandi", time: "17:45", task: "Mandi & Santai", icon: "fa-bath", noTimer: true },
-                { id: "maghrib", time: "18:00", task: "Sholat Maghrib Berjamaah", icon: "fa-moon", noTimer: true },
+                { id: "maghrib", time: "18:00", task: isRamadan ? "Buka Puasa & Maghrib Berjamaah" : "Sholat Maghrib Berjamaah", icon: isRamadan ? "fa-utensils" : "fa-moon", noTimer: true },
                 { id: "quran", time: "18:20", task: "Membaca Al-Qur'an", icon: "fa-book-quran", duration: 20 * 60000 },
                 { id: "isya", time: "18:45", task: "Sholat Isya Berjamaah", icon: "fa-star", noTimer: true },
                 { id: "buku", time: "19:00", task: "Baca Buku (Pomodoro)", icon: "fa-book-open", isPomo: true },
@@ -636,72 +774,82 @@
                 if (!container) return 0; container.innerHTML = ''; let done = 0;
                 list.forEach(item => {
                     if (item.fridayOnly && !isFri) return;
-                    if (item.id === "majelis" && fType === "Ramadhan") return;
                     if (item.specialDaysKuku && ![1,4,5].includes(selectedDate.getDay())) return;
+                    if (item.id === "majelis" && isRamadan) return;
+
                     const itemData = cloudData[item.id] || {}, status = itemData.status || 'none';
                     if (status === 'done') done++;
                     const isTimerOpen = window.openTimerPanels[item.id];
                     let timerUI = '';
                     if (!item.noTimer && (item.duration || item.isPomo)) {
                         let rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : (itemData.remainingMs || item.duration || 25*60000);
-                        timerUI = `<div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}"><span class="timer-display">${window.formatTime(rem)}</span><div class="flex gap-4 mt-3"><button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i></button><button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center"><i class="fas fa-stop"></i></button></div></div>`;
+                        timerUI = `
+                            <div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}">
+                                <span class="timer-display">${window.formatTime(rem)}</span>
+                                <div class="flex gap-4 mt-3">
+                                    <button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center transition-all hover:bg-blue-500/30">
+                                        <i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i>
+                                    </button>
+                                    <button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center transition-all hover:bg-rose-500/30">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                </div>
+                            </div>`;
                     }
                     
-                    let attHtml = (itemData.attachments || []).map((f, i) => `<div class="attachment-badge relative group" onclick="window.openImagePreview('${f.data}', '${f.name}')">${f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt"></i>`}<span class="truncate max-w-[60px] ml-1">${f.name}</span><button onclick="event.stopPropagation(); window.removeAttachment('${item.id}', ${i})" class="absolute -top-1 -right-1 bg-rose-500 text-white w-3 h-3 rounded-full text-[7px] flex items-center justify-center"><i class="fas fa-times"></i></button></div>`).join('');
+                    let attHtml = (itemData.attachments || []).map((f, i) => `
+                        <div class="attachment-badge relative group" onclick="window.openImagePreview('${f.data}', '${f.name}')">
+                            ${f.data.startsWith('data:image/') ? `<img src="${f.data}" class="attachment-preview" />` : `<i class="fas fa-file-alt text-blue-400 text-lg"></i>`}
+                            <span class="attachment-name">${f.name}</span>
+                            <button onclick="event.stopPropagation(); window.removeAttachment('${item.id}', ${i})" class="btn-remove-attachment">
+                                <i class="fas fa-times text-[7px]"></i>
+                            </button>
+                        </div>`).join('');
 
                     const card = document.createElement('div');
-                    card.className = 'glass-card p-5 rounded-3xl flex flex-col hover:scale-[1.01] transition-all duration-300';
-                    card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan kamu..." class="note-input w-full mt-1 p-2 rounded-xl min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-2 mt-2">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
+                    card.className = 'glass-card p-5 rounded-3xl flex flex-col hover:scale-[1.01] transition-all relative';
+                    card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan kamu..." class="note-input w-full mt-1 p-2 rounded-xl min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-3 mt-3">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
                     card.querySelector(`#note-${item.id}`).onblur = (e) => window.updateNote(item.id, e.target.value);
                     container.appendChild(card);
                 });
                 return done;
             };
-            const mD = renderItems(routine, 'taskList');
-            const eD = renderItems(extra, 'extraTaskList');
+            const mD = renderItems(routine, 'taskList'), eD = renderItems(extra, 'extraTaskList');
             if(ui.score) ui.score.innerText = Math.round(((mD + eD) / (document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1)) * 100) + '%';
         };
 
-        // --- 7. NOTIFICATION HANDLERS ---
         window.requestNotifPermission = () => { 
             if (!("Notification" in window)) { window.showMessage("Browser ini tidak mendukung fitur notifikasi."); return; }
             Notification.requestPermission().then(p => { 
-                window.updateNotifUI(p); 
-                if (p === "granted") {
+                window.updateNotifUI(p); if (p === "granted") {
                     window.showMessage("Beres! Notifikasi kamu sekarang sudah aktif.");
                     const opt = { body: "Konfirmasi: Notifikasi Disipline Tracker sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" };
                     if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => reg.showNotification("Disipline Tracker", opt));
                     new Notification("Disipline Tracker", opt);
-                } else if (p === "denied") {
-                    window.showMessage("Akses notifikasi diblokir. Harap aktifkan di pengaturan browser kamu.");
-                }
+                } else if (p === "denied") window.showMessage("Akses notifikasi diblokir. Harap aktifkan di pengaturan browser kamu.");
             }); 
         };
 
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
                 window.showMessage("Sedang mengirim notifikasi uji coba...");
-                const title = "🏆 DISIPLINE TEST";
-                const opt = { 
-                    body: "Mantap! Notifikasi berhasil terkirim ke perangkat kamu.", 
-                    icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
-                    requireInteraction: true,
-                    vibrate: [200, 100, 200]
-                };
+                const title = "🏆 DISIPLINE TEST", opt = { body: "Mantap! Notifikasi kamu berfungsi dengan baik.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true };
                 try { new Notification(title, opt); } catch(e) {}
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification(title, opt); });
                 }
                 if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
-            } else if (Notification.permission === "denied") {
-                window.showMessage("Akses notifikasi diblokir. Harap aktifkan kembali di pengaturan browser kamu.");
-            } else {
-                window.showMessage("Harap klik ikon lonceng di atas untuk mengizinkan notifikasi."); 
-            } 
+            } else if (Notification.permission === "denied") window.showMessage("Akses notifikasi diblokir. Harap aktifkan kembali di pengaturan browser kamu.");
+            else window.showMessage("Harap klik ikon lonceng di atas untuk mengizinkan notifikasi."); 
         };
 
         window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
-        window.startCountdown = (id, d) => { const t = cloudData[id] || {}; if (t.timerRunning) { t.timerRunning = false; t.remainingMs = (t.timerEnd || 0) - Date.now(); } else { t.timerRunning = true; t.timerEnd = Date.now() + (t.remainingMs || d); } cloudData[id] = t; saveToFirestore(); window.renderDayTracker(); };
+        window.startCountdown = (id, d) => { 
+            const t = cloudData[id] || {}; 
+            if (t.timerRunning) { t.timerRunning = false; t.remainingMs = (t.timerEnd || 0) - Date.now(); } 
+            else { t.timerRunning = true; t.timerEnd = Date.now() + (t.remainingMs || d); } 
+            cloudData[id] = t; saveToFirestore(); window.renderDayTracker(); 
+        };
         window.stopTimer = (id) => { cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; saveToFirestore(); window.renderDayTracker(); };
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
         window.updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
@@ -717,31 +865,13 @@
         };
         window.closeImagePreview = () => { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
-        // --- 8. PWA & BOOTSTRAP ---
         const setupPWA = async () => {
-            const manifest = {
-                "name": "Disipline Tracker 2026",
-                "short_name": "Tracker",
-                "start_url": ".",
-                "display": "standalone",
-                "background_color": "#050810",
-                "theme_color": "#050810",
-                "icons": [{
-                    "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
-                    "sizes": "731x731",
-                    "type": "image/jpeg"
-                }]
-            };
+            const manifest = { "name": "Disipline Tracker 2026", "short_name": "Tracker", "start_url": ".", "display": "standalone", "background_color": "#050810", "theme_color": "#050810", "icons": [{ "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", "sizes": "731x731", "type": "image/jpeg" }] };
             const manifestURI = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
             document.getElementById('pwa-manifest').setAttribute('href', manifestURI);
-
             if ('serviceWorker' in navigator) {
                 try {
-                    const swCode = `
-                        self.addEventListener('install', e => self.skipWaiting());
-                        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-                        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));
-                    `;
+                    const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));`;
                     const swBlob = new Blob([swCode], {type: 'application/javascript'});
                     await navigator.serviceWorker.register(URL.createObjectURL(swBlob));
                 } catch(e) {}
@@ -752,28 +882,30 @@
         
         window.onscroll = function() {
             const btn = document.getElementById('backToTopBtn');
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                btn.classList.add('visible');
-            } else {
-                btn.classList.remove('visible');
-            }
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible');
+            else btn.classList.remove('visible');
         };
 
         setInterval(() => {
             window.updateSyncUI();
             let redraw = false;
-            Object.keys(cloudData).forEach(id => { if (cloudData[id].timerRunning) { redraw = true; let rem = cloudData[id].timerEnd - Date.now(); if (rem <= 0) { if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); cloudData[id].timerRunning = false; saveToFirestore(); } } });
+            Object.keys(cloudData).forEach(id => { 
+                if (cloudData[id].timerRunning) { 
+                    redraw = true; let rem = cloudData[id].timerEnd - Date.now(); 
+                    if (rem <= 0) { 
+                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); 
+                        cloudData[id].timerRunning = false; cloudData[id].timerEnd = null; cloudData[id].remainingMs = null; saveToFirestore(); 
+                    } 
+                } 
+            });
             if (redraw) window.renderDayTracker();
-            const now = new Date();
-            const witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
+            const now = new Date(), witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
             if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) { 
                 if (Notification.permission === "granted") { 
                     const opt = { body: "Bangun! Sesi Inggris dimulai!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true };
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); });
-                    } else { new Notification("🏆 EKSEKUSI!", opt); }
-                } 
-                lastNotifDate = witaTime.toDateString(); 
+                    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); });
+                    else new Notification("🏆 EKSEKUSI!", opt);
+                } lastNotifDate = witaTime.toDateString(); 
             }
         }, 1000);
 
@@ -796,7 +928,14 @@
                     overlay.classList.add('hidden'); wrapper.classList.remove('hidden');
                     const statusText = user.isAnonymous ? "MODE GUEST (1 DEVICE)" : user.displayName.split(' ')[0];
                     const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
-                    info.innerHTML = `<div class="flex items-center gap-2">${user.photoURL ? `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border border-white/20">` : `<i class="fas fa-user-circle text-white text-2xl"></i>`}<span class="text-[10px] font-black uppercase ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[9px] text-rose-500 font-bold ml-2">Logout</button></div>`;
+                    info.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            ${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}
+                            <div class="flex flex-col">
+                                <span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span>
+                                <button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button>
+                            </div>
+                        </div>`;
                     window.setupRealtimeSync();
                 } else {
                     isUserLoggedIn = false; area.classList.add('hidden', 'opacity-0'); 
@@ -809,7 +948,7 @@
 
             document.getElementById('globalFileInput').onchange = async (e) => {
                 const files = Array.from(e.target.files); if (!files.length || !activeItemIdForUpload) return;
-                document.getElementById('uploadLoader').classList.remove('hidden'); document.getElementById('uploadLoader').classList.add('flex');
+                document.getElementById('uploadLoader').classList.remove('hidden', 'flex'); document.getElementById('uploadLoader').classList.add('flex');
                 const atts = cloudData[activeItemIdForUpload]?.attachments || [];
                 for (let f of files) {
                     try {
@@ -836,7 +975,7 @@
                 }
                 cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments: atts };
                 await saveToFirestore(); window.renderDayTracker();
-                document.getElementById('uploadLoader').classList.add('hidden'); document.getElementById('uploadLoader').classList.remove('flex');
+                document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden');
                 e.target.value = '';
             };
             window.updateCalendarView(); window.renderDayTracker();

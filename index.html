@@ -12,10 +12,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     
     <!-- 1. Ikon Browser (Tab Laptop - Transparan) -->
-    <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png?v=FINAL_AUTO_V3">
+    <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png?v=5.2">
     
     <!-- 2. Ikon Apple (iOS - Kotak Penuh) -->
-    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png?v=FINAL_AUTO_V3">
+    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png?v=5.2">
     
     <!-- Manifest Placeholder (Akan diisi otomatis oleh Javascript) -->
     <link rel="manifest" id="pwa-manifest">
@@ -529,11 +529,11 @@
         window.loginAsGuest = async () => { try { await signInAnonymously(auth); } catch (e) { console.error(e); } };
         window.logout = async () => { 
             if(confirm("Keluar dari aplikasi?")) {
-                // Clear local data visual before signOut
                 if(dayUnsubscribe) dayUnsubscribe();
                 cloudData = {};
                 window.renderDayTracker();
                 await signOut(auth); 
+                window.location.reload(); // Force reload to clear any lingering state
             }
         };
 
@@ -720,7 +720,7 @@
             const appIconName = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
             
             // Construct Absolute URL (Wajib untuk PWA)
-            const absoluteAppIcon = base_url + appIconName;
+            const absoluteAppIcon = base_url + appIconName + "?v=FINAL_AUTO_V2";
 
             // Generate Manifest Object
             const manifest = {

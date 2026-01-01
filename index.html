@@ -265,6 +265,14 @@
         /* Install Button Pulse */
         @keyframes installPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .install-pulse { animation: installPulse 2s infinite; }
+        
+        /* Debug Error Box */
+        #imgErrorBox {
+            display: none; position: fixed; bottom: 80px; left: 20px; right: 20px;
+            background: rgba(239, 68, 68, 0.9); color: white; padding: 15px;
+            border-radius: 12px; z-index: 9999; font-size: 11px;
+            border: 1px solid #fee2e2;
+        }
     </style>
 </head>
 <body class="bg-[#050810]">
@@ -507,14 +515,12 @@
                 return;
             }
             
-            // Request permission modern way (Promise-based)
             try {
                 const permission = await Notification.requestPermission();
                 window.updateNotifUI(permission);
                 
                 if (permission === "granted") {
                     window.showMessage("Notifikasi berhasil diaktifkan!");
-                    // Test send immediate notification
                     window.testNotification();
                 } else if (permission === "denied") {
                     window.showMessage("Izin notifikasi ditolak. Cek pengaturan browser.");
@@ -527,7 +533,6 @@
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
                 window.showMessage("Mengirim notifikasi tes...");
-                
                 const title = "🔔 TES DISIPLINE TRACKER";
                 const options = {
                     body: "Sistem notifikasi berjalan dengan baik! Semangat!",
@@ -535,18 +540,16 @@
                     requireInteraction: false
                 };
 
-                // Coba lewat Service Worker dulu (lebih stabil di Android)
+                // Coba lewat Service Worker jika ada
                 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.ready.then(function(registration) {
                         registration.showNotification(title, options);
                     });
                 } else {
-                    // Fallback ke notifikasi biasa (Desktop)
                     new Notification(title, options);
                 }
 
                 if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
-
             } else {
                 window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
             }
@@ -557,11 +560,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
-        
-        // FIX: FORCE SELECT ACCOUNT
-        provider.setCustomParameters({
-            prompt: 'select_account'
-        });
+        provider.setCustomParameters({ prompt: 'select_account' });
 
         const trackerId = "discipline-tracker-2026";
         try { enableIndexedDbPersistence(db); } catch(e) {}

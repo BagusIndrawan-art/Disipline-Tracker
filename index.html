@@ -533,12 +533,33 @@
             }
         };
 
+        // --- NEW FUNCTION: Update local note immediately on input ---
+        window.updateNoteLocal = (id, n) => {
+            if (!cloudData[id]) cloudData[id] = {};
+            cloudData[id].note = n;
+        };
+
+        // --- NEW FUNCTION: Save to Firestore (only called on blur) ---
+        window.saveNoteToFirestore = async (id, n) => {
+             if (!cloudData[id]) cloudData[id] = {};
+             cloudData[id].note = n;
+             await saveToFirestore();
+        };
+
         window.setupRealtimeSync = function() {
             if (!auth.currentUser) return;
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             if (dayUnsubscribe) dayUnsubscribe();
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), (snap) => {
-                cloudData = snap.exists() ? snap.data() : {};
+                const newData = snap.exists() ? snap.data() : {};
+                const activeId = document.activeElement ? document.activeElement.id : null;
+                if (activeId && activeId.startsWith('note-')) {
+                    const editingItemId = activeId.replace('note-', '');
+                    if (cloudData[editingItemId] && cloudData[editingItemId].note !== undefined) {
+                        newData[editingItemId] = { ...newData[editingItemId], note: cloudData[editingItemId].note };
+                    }
+                }
+                cloudData = newData;
                 window.renderDayTracker();
             }, (err) => { console.error(err); window.updateSyncUI(); });
             window.updateCalendarView();
@@ -569,6 +590,14 @@
         };
 
         window.renderDayTracker = function() {
+            let activeId = document.activeElement ? document.activeElement.id : null;
+            let selectionStart = 0;
+            let selectionEnd = 0;
+            if (activeId && document.activeElement.tagName === "TEXTAREA") {
+                selectionStart = document.activeElement.selectionStart;
+                selectionEnd = document.activeElement.selectionEnd;
+            }
+
             const ui = { full: document.getElementById('dayFullLabel'), sel: document.getElementById('currentSelectionLabel'), quote: document.getElementById('quoteText'), sport: document.getElementById('sportTargetLabel'), fasting: document.getElementById('fastingBadgeContainer'), score: document.getElementById('dayScore') };
             if (!ui.full || !ui.quote) return;
             const isFri = selectedDate.getDay() === 5, mNum = selectedDate.getMonth(), dNum = selectedDate.getDate();
@@ -650,48 +679,30 @@
                     const card = document.createElement('div');
                     card.className = 'glass-card p-5 rounded-3xl flex flex-col hover:scale-[1.01] transition-all relative';
                     card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan kamu..." class="note-input w-full mt-1 p-2 rounded-xl min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-3 mt-3">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
-                    card.querySelector(`#note-${item.id}`).onblur = (e) => window.updateNote(item.id, e.target.value);
+                    
+                    const textarea = card.querySelector(`#note-${item.id}`);
+                    textarea.oninput = (e) => window.updateNoteLocal(item.id, e.target.value);
+                    textarea.onblur = (e) => window.saveNoteToFirestore(item.id, e.target.value);
+                    
                     container.appendChild(card);
                 });
                 return done;
             };
             const mD = renderItems(routine, 'taskList'), eD = renderItems(extra, 'extraTaskList');
             if(ui.score) ui.score.innerText = Math.round(((mD + eD) / (document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1)) * 100) + '%';
+
+            if (activeId) {
+                const el = document.getElementById(activeId);
+                if (el) {
+                    el.focus();
+                    if (el.tagName === "TEXTAREA" && typeof el.setSelectionRange === "function") {
+                        el.setSelectionRange(selectionStart, selectionEnd);
+                    }
+                }
+            }
         };
 
-        window.requestNotifPermission = () => { 
-            if (!("Notification" in window)) { window.showMessage("Browser ini tidak mendukung fitur notifikasi."); return; }
-            Notification.requestPermission().then(p => { 
-                window.updateNotifUI(p); if (p === "granted") {
-                    window.showMessage("Beres! Notifikasi kamu sekarang sudah aktif.");
-                    const opt = { body: "Konfirmasi: Notifikasi Disipline Tracker sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png" };
-                    if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => reg.showNotification("Disipline Tracker", opt));
-                    new Notification("Disipline Tracker", opt);
-                } else if (p === "denied") window.showMessage("Akses notifikasi diblokir. Harap aktifkan di pengaturan browser kamu.");
-            }); 
-        };
-
-        window.testNotification = () => { 
-            if (Notification.permission === "granted") { 
-                window.showMessage("Sedang mengirim notifikasi uji coba...");
-                const title = "🏆 DISIPLINE TEST", opt = { body: "Mantap! Notifikasi kamu berfungsi dengan baik.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png", requireInteraction: true };
-                try { new Notification(title, opt); } catch(e) {}
-                if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification(title, opt); });
-                if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
-            } else if (Notification.permission === "denied") window.showMessage("Akses notifikasi diblokir. Harap aktifkan kembali di pengaturan browser kamu.");
-            else window.showMessage("Harap klik ikon lonceng di atas untuk mengizinkan notifikasi."); 
-        };
-
-        window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
-        window.startCountdown = (id, d) => { 
-            const t = cloudData[id] || {}; 
-            if (t.timerRunning) { t.timerRunning = false; t.remainingMs = (t.timerEnd || 0) - Date.now(); } 
-            else { t.timerRunning = true; t.timerEnd = Date.now() + (t.remainingMs || d); } 
-            cloudData[id] = t; saveToFirestore(); window.renderDayTracker(); 
-        };
-        window.stopTimer = (id) => { cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; saveToFirestore(); window.renderDayTracker(); };
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
-        window.updateNote = async (id, n) => { if (cloudData[id]?.note === n) return; cloudData[id] = { ...cloudData[id], note: n }; saveToFirestore(); };
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
         window.openImagePreview = (data, name) => { 
@@ -709,27 +720,19 @@
 
         // Logic 1: Android/Chrome "Install App" Button
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Prevent default banner
+            e.preventDefault(); 
             deferredPrompt = e;
             installBtn.classList.remove('hidden'); 
             installBtn.classList.add('flex');
-            
-            // Enable button
-            installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
-            installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
-            installBtn.classList.remove('bg-slate-700', 'text-slate-400');
-            console.log("Install prompt intercepted");
         });
 
         window.installPWA = async () => {
             if (!deferredPrompt) {
-                // Manual fallback instructions
-                alert("Tekan tombol 'Install App' atau 'Add to Home Screen' di menu browser Anda.");
+                alert("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung.");
                 return;
             }
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            console.log("User response to install prompt:", outcome);
             deferredPrompt = null;
             installBtn.classList.add('hidden');
         };

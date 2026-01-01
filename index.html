@@ -10,14 +10,16 @@
     <meta name="apple-mobile-web-app-title" content="Disipline Tracker">
     <meta name="theme-color" content="#050810">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
     
-    <!-- Ikon Browser (Favicon) - Coba load PNG, kalau gagal browser otomatis cari favicon.ico -->
-    <link rel="shortcut icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
+    <!-- 1. IKON BROWSER (Favicon Desktop Tab) -->
+    <link rel="shortcut icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png?v=FINAL_STABLE">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon_transparent_blue_text-removebg-preview.png?v=FINAL_STABLE">
     
-    <!-- Ikon Apple (iOS) - Kita pasang JPG sebagai default aman jika PNG gagal -->
-    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
+    <!-- 2. IKON APLIKASI (iOS Home Screen) -->
+    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png?v=FINAL_STABLE">
     
-    <!-- Manifest Placeholder -->
+    <!-- Manifest Placeholder - DIISI OTOMATIS OLEH JS -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
@@ -265,26 +267,11 @@
         /* Install Button Pulse */
         @keyframes installPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .install-pulse { animation: installPulse 2s infinite; }
-        
-        /* Debug Error Box */
-        #imgErrorBox {
-            display: none; position: fixed; bottom: 80px; left: 20px; right: 20px;
-            background: rgba(239, 68, 68, 0.9); color: white; padding: 15px;
-            border-radius: 12px; z-index: 9999; font-size: 11px;
-            border: 1px solid #fee2e2;
-        }
     </style>
 </head>
 <body class="bg-[#050810]">
 
     <div id="appMessage" class="msg-hide"></div>
-    
-    <!-- Debug Error Box (Muncul jika gambar tidak ketemu) -->
-    <div id="imgErrorBox">
-        <strong class="block mb-1 text-yellow-300">⚠️ MASALAH GAMBAR</strong>
-        <p>Gambar ikon PWA tidak ditemukan. Fitur Install App mungkin tidak muncul. Cek nama file di GitHub!</p>
-        <button onclick="this.parentElement.style.display='none'" class="mt-2 bg-white text-red-600 px-3 py-1 rounded font-bold">Tutup</button>
-    </div>
 
     <div id="backToTopBtn" onclick="window.scrollToTop()"><i class="fas fa-arrow-up text-lg"></i></div>
     <canvas id="particleCanvas"></canvas>
@@ -345,7 +332,7 @@
 
             <div id="navWrapper" class="hidden flex flex-row items-center justify-center md:justify-end gap-4 w-full md:w-1/3">
                 <!-- INSTALL BUTTON FOR PWA -->
-                <button id="installAppBtn" onclick="window.installPWA()" class="hidden bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg install-pulse hover:bg-blue-500 transition-all flex items-center gap-2">
+                <button id="installAppBtn" onclick="window.installPWA()" class="hidden bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center gap-2 install-pulse">
                     <i class="fas fa-download"></i> Install App
                 </button>
 
@@ -669,7 +656,7 @@
             Notification.requestPermission().then(p => { 
                 window.updateNotifUI(p); if (p === "granted") {
                     window.showMessage("Beres! Notifikasi kamu sekarang sudah aktif.");
-                    const opt = { body: "Konfirmasi: Notifikasi Disipline Tracker sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" };
+                    const opt = { body: "Konfirmasi: Notifikasi Disipline Tracker sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png" };
                     if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => reg.showNotification("Disipline Tracker", opt));
                     new Notification("Disipline Tracker", opt);
                 } else if (p === "denied") window.showMessage("Akses notifikasi diblokir. Harap aktifkan di pengaturan browser kamu.");
@@ -679,7 +666,7 @@
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
                 window.showMessage("Sedang mengirim notifikasi uji coba...");
-                const title = "🏆 DISIPLINE TEST", opt = { body: "Mantap! Notifikasi kamu berfungsi dengan baik.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true };
+                const title = "🏆 DISIPLINE TEST", opt = { body: "Mantap! Notifikasi kamu berfungsi dengan baik.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png", requireInteraction: true };
                 try { new Notification(title, opt); } catch(e) {}
                 if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification(title, opt); });
                 if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
@@ -707,9 +694,9 @@
         };
         window.closeImagePreview = () => { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
-        // --- PWA SETUP (UNIVERSAL FIX FOR GITHUB & LOCALHOST) ---
+        // --- PWA SETUP AND MANIFEST GENERATION (UNIVERSAL FIX) ---
         const setupPWA = async () => {
-            // DETEKSI URL BASE OTOMATIS
+            // DETEKSI URL BASE OTOMATIS (Support Live Server & GitHub Pages)
             let base_url = window.location.href;
             if (base_url.endsWith('index.html')) {
                 base_url = base_url.substring(0, base_url.lastIndexOf('/') + 1);
@@ -717,60 +704,47 @@
                 base_url += '/';
             }
 
-            // Fallback Images - Jika file PNG tidak ada, gunakan JPG
-            // Ini untuk mengatasi masalah "Lupa ganti format di GitHub"
-            const appIconNamePng = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
-            const appIconNameJpg = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg"; // CADANGAN
-
-            let finalIconUrl = base_url + appIconNamePng;
+            // Nama file gambar harus SAMA PERSIS dengan yang diupload di GitHub
+            const appIconName = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
             
-            // Cek apakah PNG ada, jika tidak, pakai JPG
-            try {
-                const response = await fetch(finalIconUrl, { method: 'HEAD' });
-                if (!response.ok) throw new Error("PNG Not Found");
-            } catch (e) {
-                console.warn("PNG Icon not found, falling back to JPG...");
-                finalIconUrl = base_url + appIconNameJpg;
-                
-                // Update error box message
-                const msg = document.querySelector('#imgErrorBox p');
-                if(msg) msg.innerHTML = "Menggunakan gambar JPG sebagai cadangan. Untuk hasil terbaik di Android, harap upload versi PNG.";
-                document.getElementById('imgErrorBox').style.display = 'block';
-            }
-
-            // Buat Manifest dengan URL yang sudah divalidasi
+            // Construct Absolute URL (Wajib untuk PWA)
+            const absoluteAppIcon = base_url + appIconName;
+            
+            // Generate Manifest Object
             const manifest = {
                 "name": "Disipline Tracker 2026",
                 "short_name": "Tracker",
                 "id": base_url, 
-                "start_url": "./", 
+                "start_url": "./", // Use relative path
                 "display": "standalone",
                 "background_color": "#050810",
                 "theme_color": "#050810",
                 "orientation": "portrait",
-                "scope": "./", 
+                "scope": "./", // Use relative path
                 "icons": [
                     { 
-                        "src": finalIconUrl, 
+                        "src": absoluteAppIcon, 
                         "sizes": "192x192", 
-                        "type": "image/png", // Tetap paksa tipe image/png agar Android mau baca
+                        "type": "image/png",
                         "purpose": "any maskable" 
                     },
                     {
-                        "src": finalIconUrl, 
-                        "sizes": "512x512", 
+                        "src": absoluteAppIcon,
+                        "sizes": "512x512",
                         "type": "image/png",
                         "purpose": "any maskable"
                     }
                 ]
             };
             
+            // Inject Manifest to Head
             const manifestURI = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
             document.getElementById('pwa-manifest').setAttribute('href', manifestURI);
 
-            // Register Service Worker
+            // Register Service Worker (Minimal untuk install PWA)
             if ('serviceWorker' in navigator) {
                 try {
+                    // Create dummy SW
                     const swCode = `
                         self.addEventListener('install', e => self.skipWaiting());
                         self.addEventListener('activate', e => e.waitUntil(clients.claim()));
@@ -779,8 +753,11 @@
                     const swBlob = new Blob([swCode], {type: 'application/javascript'});
                     const swUrl = URL.createObjectURL(swBlob);
                     
+                    // Register with scope relative to index.html
                     await navigator.serviceWorker.register(swUrl, { scope: './' });
-                } catch(e) { console.warn("SW Error:", e); }
+                } catch(e) { 
+                    console.warn("SW Registration Failed (Ignore in preview):", e); 
+                }
             }
         };
 
@@ -791,21 +768,30 @@
 
         // Logic 1: Android/Chrome "Install App" Button
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Prevent default banner
             deferredPrompt = e;
-            installBtn.classList.remove('hidden'); // Show button
+            installBtn.classList.remove('hidden'); 
             installBtn.classList.add('flex');
+            
+            // Enable button
+            installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+            installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
+            installBtn.classList.remove('bg-slate-700', 'text-slate-400');
         });
 
         window.installPWA = async () => {
-            if (!deferredPrompt) return;
+            if (!deferredPrompt) {
+                // Manual fallback instructions
+                alert("Tekan tombol 'Install App' atau 'Add to Home Screen' di menu browser Anda.");
+                return;
+            }
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             deferredPrompt = null;
             installBtn.classList.add('hidden');
         };
 
-        // Logic 2: iOS Detection (Show Guide if not in standalone mode)
+        // Logic 2: iOS Detection
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
         
@@ -826,7 +812,7 @@
             Object.keys(cloudData).forEach(id => { if (cloudData[id].timerRunning) { redraw = true; let rem = cloudData[id].timerEnd - Date.now(); if (rem <= 0) { if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]); cloudData[id].timerRunning = false; cloudData[id].timerEnd = null; cloudData[id].remainingMs = null; saveToFirestore(); } } });
             if (redraw) window.renderDayTracker();
             const now = new Date(), witaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
-            if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) { if (Notification.permission === "granted") { const opt = { body: "Bangun! Sesi Inggris dimulai!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true }; if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); }); else new Notification("🏆 EKSEKUSI!", opt); } lastNotifDate = witaTime.toDateString(); }
+            if (witaTime.getHours() === 3 && witaTime.getMinutes() === 30 && lastNotifDate !== witaTime.toDateString()) { if (Notification.permission === "granted") { const opt = { body: "Bangun! Sesi Inggris dimulai!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png", requireInteraction: true }; if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); }); else new Notification("🏆 EKSEKUSI!", opt); } lastNotifDate = witaTime.toDateString(); }
         }, 1000);
 
         window.addEventListener('load', async () => {

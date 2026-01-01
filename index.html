@@ -457,7 +457,7 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
         let isLocalMode = false;
 
@@ -488,7 +488,7 @@
         }
 
         window.formatTime = (ms) => {
-            if (!ms || isNaN(ms) || ms <= 0) return "00:00"; // FIX: Handle NaN specifically
+            if (!ms || isNaN(ms) || ms <= 0) return "00:00"; 
             const s = Math.floor(ms / 1000); const hrs = Math.floor(s / 3600); const mins = Math.floor((s % 3600) / 60); const secs = s % 60;
             return `${hrs > 0 ? hrs + ':' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         };
@@ -599,18 +599,45 @@
 
         // --- NEW: Sanitize Data Function (Healer) ---
         function sanitizeCloudData(data) {
+            if (!data) return {};
             Object.keys(data).forEach(key => {
                 const item = data[key];
-                // Fix corrupted timer state
-                if (item.timerRunning && (!item.timerEnd || isNaN(item.timerEnd))) {
-                    console.warn(`Fixing corrupted timer for ${key}`);
-                    item.timerRunning = false;
-                    item.timerEnd = null;
-                    item.remainingMs = null;
+                if (typeof item !== 'object') return;
+                
+                // FORCE FIX: If timer is running but end time is invalid, RESET IT.
+                if (item.timerRunning === true) {
+                    if (!item.timerEnd || isNaN(Number(item.timerEnd))) {
+                        console.warn(`Fixing corrupted timer for ${key}`);
+                        item.timerRunning = false;
+                        item.timerEnd = null;
+                        item.remainingMs = null;
+                    }
                 }
             });
             return data;
         }
+
+        // --- NEW: HARD RESET FUNCTION ---
+        window.hardResetDay = async () => {
+            if (!confirm("⚠️ RESET DATA HARI INI?\n\nIni akan menghapus semua centang dan timer yang error khusus untuk tanggal ini. Gunakan jika timer macet.")) return;
+            
+            const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+            cloudData = {}; // Clear memory
+            
+            if (isLocalMode) {
+                localStorage.removeItem(`tracker_data_${docId}`);
+                window.renderDayTracker();
+                window.showMessage("Data lokal hari ini berhasil direset.");
+            } else if (auth.currentUser) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId));
+                    window.showMessage("Data cloud hari ini berhasil direset.");
+                } catch (e) {
+                    console.error(e);
+                    alert("Gagal reset data cloud: " + e.message);
+                }
+            }
+        };
 
         window.setupRealtimeSync = function() {
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
@@ -722,12 +749,12 @@
 
                     const itemData = cloudData[item.id] || {}, status = itemData.status || 'none';
                     if (status === 'done') done++;
-                    const isTimerOpen = window.openTimerPanels && window.openTimerPanels[item.id]; // Fix undefined access
+                    const isTimerOpen = window.openTimerPanels && window.openTimerPanels[item.id]; 
                     let timerUI = '';
                     if (!item.noTimer && (item.duration || item.isPomo)) {
                         let rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : (itemData.remainingMs || item.duration || 25*60000);
                         if (rem < 0) rem = 0;
-                        if (isNaN(rem)) rem = item.duration || 25*60000; // Extra guard against NaN
+                        if (isNaN(rem)) rem = item.duration || 25*60000; 
                         
                         timerUI = `
                             <div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}">
@@ -809,7 +836,19 @@
             if(loginSec) loginSec.classList.add('hidden'); if(hBrand) hBrand.classList.remove('hidden'); if(navWrap) navWrap.classList.remove('hidden'); if(hMain) hMain.classList.remove('header-clean'); wrapper.classList.remove('hidden');
             const statusText = user.isAnonymous ? "GUEST MODE" : user.displayName.split(' ')[0];
             const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
-            info.innerHTML = `<div class="flex items-center gap-3">${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}<div class="flex flex-col"><span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button></div></div>`;
+            
+            // TOMBOL RESET DATA BARU
+            info.innerHTML = `
+            <div class="flex items-center gap-3">
+                ${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}
+                <div class="flex flex-col">
+                    <span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span>
+                    <button onclick="window.logout()" class="text-[10px] text-slate-400 font-bold uppercase text-left hover:text-white mt-0.5">Logout</button>
+                    <button onclick="window.hardResetDay()" class="text-[9px] text-rose-500 font-black uppercase text-left hover:text-rose-400 mt-1 tracking-widest bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 w-fit">
+                        <i class="fas fa-trash-alt mr-1"></i> RESET DATA
+                    </button>
+                </div>
+            </div>`;
             window.setupRealtimeSync(); window.updateSyncUI();
         }
 
@@ -850,6 +889,16 @@
                 const itemData = cloudData[id];
                 if (itemData && itemData.timerRunning) { 
                     const rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : 0;
+                    
+                    // ANTI-CRASH: Force stop if timer is NaN
+                    if (isNaN(rem)) {
+                        console.warn("Timer NaN detected, resetting...");
+                        itemData.timerRunning = false; itemData.timerEnd = null;
+                        saveToFirestore();
+                        window.renderDayTracker();
+                        return;
+                    }
+
                     const displayEl = document.getElementById(`timer-display-${id}`);
                     if (rem <= 0) { 
                         if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]); 

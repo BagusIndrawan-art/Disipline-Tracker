@@ -1,0 +1,24 @@
+{
+  "name": "Disipline Tracker 2026",
+  "short_name": "Tracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050810",
+  "theme_color": "#050810",
+  "orientation": "portrait",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

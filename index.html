@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#050810">
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- Icon Aplikasi (Tetap menggunakan logo gambar untuk shortcut HP) -->
+    <!-- Icon Aplikasi -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     <link rel="icon" type="image/jpeg" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg">
     
@@ -108,35 +108,60 @@
         
         footer { border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; padding: 40px 20px; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1px; line-height: 1.6; }
 
+        /* Custom Spacious & Centered Select Styling */
+        .custom-select-wrapper {
+            position: relative;
+            min-width: 160px;
+            flex: 1;
+        }
+
+        /* Ikon Panah diletakkan di samping tetap, tapi teks tetap center */
+        .custom-select-wrapper::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #3b82f6;
+            pointer-events: none;
+            font-size: 10px;
+        }
+
         select { 
-            background-color: #1e293b; 
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: rgba(30, 41, 59, 0.6); 
             color: #f1f5f9; 
             border: 1px solid rgba(255, 255, 255, 0.1); 
-            padding: 12px 20px; 
-            border-radius: 14px; 
+            padding: 16px 40px 16px 40px; /* Padding lebih tinggi */
+            border-radius: 18px; 
             cursor: pointer; 
             outline: none; 
-            font-size: 16px; 
+            font-size: 14px; 
             font-weight: 800;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center; /* Memastikan teks di tengah */
+            text-align-last: center; /* Untuk kompatibilitas browser tertentu */
         }
 
-        .attachment-badge { 
-            background: rgba(59, 130, 246, 0.1); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            padding: 4px 8px; 
-            border-radius: 10px; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            font-size: 10px; 
-            color: #94a3b8; 
-            cursor: pointer;
+        select:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            background-color: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
         }
-        .attachment-preview { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: #0f172a; }
-        .fasting-alert { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
 
-        /* Bingkai Login (Pembatas Area Akses) */
+        select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Bingkai Login */
         .login-frame {
             position: relative;
             padding: 10px;
@@ -175,17 +200,54 @@
             box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
             pointer-events: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            max-width: 90%;
         }
         .msg-hide { opacity: 0; transform: translate(-50%, -20px); }
 
+        /* Header design: Non-sticky */
         #mainHeader { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .header-clean { border-bottom-color: transparent !important; background: transparent !important; }
+
+        /* Scroll to Top Button */
+        #backToTopBtn {
+            position: fixed;
+            bottom: 80px; 
+            right: 25px;
+            width: 45px;
+            height: 45px;
+            background: #2563eb;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #backToTopBtn.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-[#050810]">
 
     <!-- Message Hub (Floating UI feedback) -->
     <div id="appMessage" class="msg-hide"></div>
+
+    <!-- Back to Top Button -->
+    <div id="backToTopBtn" onclick="window.scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
 
     <!-- Star/Constellation Canvas -->
     <canvas id="particleCanvas"></canvas>
@@ -195,7 +257,6 @@
         <p class="text-white font-bold text-[10px]">MEMPROSES DATA...</p>
     </div>
 
-    <!-- Image Preview Modal -->
     <div id="imagePreviewModal" class="flex flex-col items-center justify-center">
         <div class="absolute top-6 right-6 flex items-center gap-4">
             <a id="downloadBtn" href="#" download class="text-white text-2xl hover:text-blue-400 transition-colors">
@@ -218,7 +279,8 @@
         <span id="syncText">Cloud Offline</span>
     </div>
 
-    <header id="mainHeader" class="sticky top-0 z-50 bg-[#050810]/90 backdrop-blur-xl p-4 sm:p-5 header-clean">
+    <!-- Header: Non-sticky (relative) -->
+    <header id="mainHeader" class="relative z-50 bg-[#050810]/90 backdrop-blur-xl p-4 sm:p-5 header-clean">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             
             <!-- Kiri: Akun & Notifikasi -->
@@ -244,10 +306,14 @@
                 <p id="currentSelectionLabel" class="text-[11px] text-blue-400 font-bold uppercase tracking-[2px] mt-1">01 JAN 2026</p>
             </div>
 
-            <!-- Kanan: Kontrol Kalender -->
-            <div id="navWrapper" class="hidden flex items-center justify-center md:justify-end gap-3 w-full md:w-1/3">
-                <select id="monthSelect" onchange="window.updateCalendarView()"></select>
-                <select id="yearSelect" onchange="window.updateCalendarView()"></select>
+            <!-- Kanan: Kontrol Kalender (Spacious & Centered) -->
+            <div id="navWrapper" class="hidden flex flex-row items-center justify-center md:justify-end gap-4 w-full md:w-1/3">
+                <div class="custom-select-wrapper">
+                    <select id="monthSelect" onchange="window.updateCalendarView()"></select>
+                </div>
+                <div class="custom-select-wrapper">
+                    <select id="yearSelect" onchange="window.updateCalendarView()"></select>
+                </div>
             </div>
         </div>
     </header>
@@ -384,12 +450,14 @@
             return `${hrs > 0 ? hrs + ':' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         };
 
+        window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
         window.showMessage = (msg) => {
             const el = document.getElementById('appMessage');
             if (!el) return;
             el.innerText = msg;
             el.classList.remove('msg-hide');
-            setTimeout(() => el.classList.add('msg-hide'), 3000);
+            setTimeout(() => el.classList.add('msg-hide'), 4000);
         };
 
         window.updateSyncUI = function() {
@@ -405,7 +473,7 @@
             btn.className = "text-[10px] font-black uppercase tracking-widest flex items-center gap-1 transition-colors p-1 rounded-lg border border-transparent";
             if (permission === "granted") { btn.classList.add("notif-active"); text.innerText = "Aktif"; icon.className = "fas fa-bell"; }
             else if (permission === "denied") { btn.classList.add("notif-blocked"); text.innerText = "Akses Diblokir"; icon.className = "fas fa-bell-slash"; }
-            else { btn.classList.add("notif-prompt"); text.innerText = "Izin?"; icon.className = "fas fa-bell"; }
+            else { btn.classList.add("notif-prompt"); text.innerText = "Aktifkan?"; icon.className = "fas fa-bell"; }
         };
 
         // --- 3. CONFIG & STATE ---
@@ -429,6 +497,7 @@
         let cloudData = {};
         let activeItemIdForUpload = null;
         let lastNotifDate = null;
+        let isUserLoggedIn = false;
         window.openTimerPanels = {};
 
         const yearlyQuotes = [
@@ -449,7 +518,6 @@
         const ctx = canvas.getContext('2d');
         let particles = [];
         let mouseX = -1000, mouseY = -1000;
-        let isUserLoggedIn = false;
 
         function initParticles() {
             particles = [];
@@ -598,36 +666,40 @@
 
         // --- 7. NOTIFICATION HANDLERS ---
         window.requestNotifPermission = () => { 
-            if (!("Notification" in window)) { window.showMessage("Browser tidak mendukung notifikasi."); return; }
+            if (!("Notification" in window)) { window.showMessage("Browser ini tidak mendukung fitur notifikasi."); return; }
             Notification.requestPermission().then(p => { 
                 window.updateNotifUI(p); 
                 if (p === "granted") {
-                    window.showMessage("Notifikasi Aktif!");
-                    const opt = { body: "Konfirmasi: Notifikasi kamu sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" };
+                    window.showMessage("Beres! Notifikasi kamu sekarang sudah aktif.");
+                    const opt = { body: "Konfirmasi: Notifikasi Disipline Tracker sudah aktif.", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" };
                     if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => reg.showNotification("Disipline Tracker", opt));
                     new Notification("Disipline Tracker", opt);
+                } else if (p === "denied") {
+                    window.showMessage("Akses notifikasi diblokir. Harap aktifkan di pengaturan browser kamu.");
                 }
             }); 
         };
 
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
-                window.showMessage("Mengirim Notifikasi Tes...");
+                window.showMessage("Sedang mengirim notifikasi uji coba...");
                 const title = "🏆 DISIPLINE TEST";
                 const opt = { 
-                    body: "Notifikasi Berhasil Terkirim!", 
+                    body: "Mantap! Notifikasi berhasil terkirim ke perangkat kamu.", 
                     icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg",
                     requireInteraction: true,
                     vibrate: [200, 100, 200]
                 };
                 try { new Notification(title, opt); } catch(e) {}
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistration().then(reg => {
-                        if (reg) reg.showNotification(title, opt);
-                    });
+                    navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification(title, opt); });
                 }
                 if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]); 
-            } else { window.showMessage("Izinkan notif dulu (klik ikon lonceng)."); } 
+            } else if (Notification.permission === "denied") {
+                window.showMessage("Akses notifikasi diblokir. Harap aktifkan kembali di pengaturan browser kamu.");
+            } else {
+                window.showMessage("Harap klik ikon lonceng di atas untuk mengizinkan notifikasi."); 
+            } 
         };
 
         window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
@@ -678,6 +750,15 @@
             }
         };
 
+        window.onscroll = function() {
+            const btn = document.getElementById('backToTopBtn');
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        };
+
         setInterval(() => {
             window.updateSyncUI();
             let redraw = false;
@@ -689,10 +770,7 @@
                 if (Notification.permission === "granted") { 
                     const opt = { body: "Bangun! Sesi Inggris dimulai!", icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg", requireInteraction: true };
                     if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.getRegistration().then(reg => {
-                            if (reg) reg.showNotification("🏆 EKSEKUSI!", opt);
-                            else new Notification("🏆 EKSEKUSI!", opt);
-                        });
+                        navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification("🏆 EKSEKUSI!", opt); });
                     } else { new Notification("🏆 EKSEKUSI!", opt); }
                 } 
                 lastNotifDate = witaTime.toDateString(); 
@@ -722,8 +800,7 @@
                     window.setupRealtimeSync();
                 } else {
                     isUserLoggedIn = false; area.classList.add('hidden', 'opacity-0'); 
-                    if(loginSec) loginSec.classList.remove('hidden'); 
-                    if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean');
+                    if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean');
                     overlay.classList.remove('hidden'); wrapper.classList.add('hidden');
                     info.innerHTML = ``; initParticles(); 
                 }

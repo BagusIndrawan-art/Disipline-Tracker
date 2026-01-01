@@ -24,6 +24,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- AUTO-FIX: Force Localhost for Firebase Auth Compatibility -->
+    <script>
+        if (window.location.hostname === "127.0.0.1") {
+            console.log("Redirecting 127.0.0.1 to localhost for Firebase Auth compatibility...");
+            window.location.hostname = "localhost";
+        }
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
@@ -431,12 +439,12 @@
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.txt">
 
     <script type="module">
-        // Global Error Handler for Debugging on Live Server
+        // Global Error Handler
         window.onerror = function(msg, url, line, col, error) {
             console.error("Global Error:", msg, error);
         };
 
-        // --- CLEANUP SERVICE WORKERS (SAFE VERSION) ---
+        // --- CLEANUP SERVICE WORKERS ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 try {
@@ -480,7 +488,7 @@
         }
 
         window.formatTime = (ms) => {
-            if (ms <= 0) return "00:00";
+            if (!ms || isNaN(ms) || ms <= 0) return "00:00"; // FIX: Handle NaN specifically
             const s = Math.floor(ms / 1000); const hrs = Math.floor(s / 3600); const mins = Math.floor((s % 3600) / 60); const secs = s % 60;
             return `${hrs > 0 ? hrs + ':' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         };
@@ -500,15 +508,12 @@
             }
         };
 
-        // --- IMPROVED NOTIFICATION LOGIC ---
         window.updateNotifUI = function(permission) {
             const btn = document.getElementById('notifStatusBtn');
             const text = document.getElementById('notifText');
             const icon = document.getElementById('notifIcon');
-            
             if (!btn || !text || !icon) return;
             btn.classList.remove('notif-active', 'notif-prompt', 'notif-blocked');
-            
             if (permission === "granted") {
                 btn.classList.add("notif-active");
                 text.innerText = "AKTIF";
@@ -525,39 +530,20 @@
         };
 
         window.requestNotifPermission = async () => { 
-            if (!("Notification" in window)) {
-                window.showMessage("Browser ini tidak mendukung notifikasi.");
-                return;
-            }
+            if (!("Notification" in window)) { window.showMessage("Browser ini tidak mendukung notifikasi."); return; }
             try {
                 const permission = await Notification.requestPermission();
                 window.updateNotifUI(permission);
-                if (permission === "granted") {
-                    window.showMessage("Notifikasi berhasil diaktifkan!");
-                    window.testNotification();
-                } else if (permission === "denied") {
-                    window.showMessage("Izin notifikasi ditolak. Cek pengaturan browser.");
-                }
-            } catch (error) {
-                console.error("Gagal meminta izin notifikasi:", error);
-            }
+                if (permission === "granted") { window.showMessage("Notifikasi berhasil diaktifkan!"); window.testNotification(); } 
+                else if (permission === "denied") { window.showMessage("Izin notifikasi ditolak."); }
+            } catch (error) { console.error("Gagal meminta izin notifikasi:", error); }
         };
 
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
                 window.showMessage("Mengirim notifikasi tes...");
-                const title = "🔔 TES DISIPLINE TRACKER";
-                const options = {
-                    body: "Sistem notifikasi berjalan dengan baik! Semangat!",
-                    icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png",
-                    vibrate: [200, 100, 200], // Fitur Getar
-                    requireInteraction: false
-                };
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                new Notification(title, options);
-            } else {
-                window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
-            }
+                new Notification("🔔 TES DISIPLINE TRACKER", { body: "Sistem notifikasi berjalan!", icon: "icon_transparent_blue_text-removebg-preview.png" });
+            } else { window.showMessage("Izin notifikasi belum aktif."); }
         };
 
         const firebaseConfig = { apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ", authDomain: "tracker-2026-4bbd9.firebaseapp.com", projectId: "tracker-2026-4bbd9", storageBucket: "tracker-2026-4bbd9.firebasestorage.app", messagingSenderId: "634119648342", appId: "1:634119648342:web:35aff0729cdcb37dcc37f7" };
@@ -565,14 +551,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
-        
         provider.setCustomParameters({ prompt: 'select_account' });
-
         const trackerId = "discipline-tracker-2026";
         try { enableIndexedDbPersistence(db); } catch(e) {}
 
         let dayUnsubscribe = null, selectedDate = new Date(2026, 0, 1), cloudData = {}, activeItemIdForUpload = null, lastNotifDate = null, isUserLoggedIn = false;
-        window.openTimerPanels = {};
+        
+        // --- SAFE INITIALIZATION OF TIMER STATE ---
+        if (!window.openTimerPanels) window.openTimerPanels = {};
 
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
         let particles = [], mouseX = -1000, mouseY = -1000;
@@ -585,8 +571,7 @@
                     particles[i].update(canvas.width, canvas.height); particles[i].draw(ctx);
                     for (let j = i; j < particles.length; j++) {
                         const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y, distance = Math.sqrt(dx * dx + dy * dy);
-                        const dmx = particles[i].x - mouseX, dmy = particles[i].y - mouseY, mouseDistance = Math.sqrt(dmx * dmx + dmy * dmy);
-                        if (distance < 100 && mouseDistance < 150) { ctx.strokeStyle = `rgba(59, 130, 246, ${1 - (distance / 100)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
+                        if (distance < 100) { ctx.strokeStyle = `rgba(59, 130, 246, ${1 - (distance / 100)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
                     }
                 }
             }
@@ -594,87 +579,55 @@
         }
 
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); });
-        document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
-        document.addEventListener('touchmove', (e) => { if(e.touches.length) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; } });
         canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); animateParticles();
 
-        window.loginWithGoogle = async () => { 
-            try { 
-                await signInWithPopup(auth, provider); 
-            } catch (e) { 
-                console.error(e); 
-                alert("Login Google Gagal: " + e.message + "\n\nPastikan domain '127.0.0.1' sudah terdaftar di Firebase Console Authentication -> Settings -> Authorized Domains.");
-            } 
-        };
-        
-        // --- NEW GUEST LOGIN WITH OFFLINE FALLBACK ---
+        window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (e) { console.error("Google Login Error:", e); alert("Login Gagal: " + e.message); } };
         window.loginAsGuest = async () => { 
             const btn = document.getElementById('btnGuest');
             if(btn) { btn.innerHTML = '<div class="pulse-dot inline-block mr-2"></div> Memproses...'; btn.classList.add('loading'); }
-            
-            try { 
-                await signInAnonymously(auth); 
-            } catch (e) { 
-                console.error("Firebase Guest Login Failed, falling back to local:", e);
-                // Fallback to Offline Mode
-                if (e.code === 'auth/operation-not-allowed' || e.code === 'auth/internal-error' || e.message) {
-                    if(confirm("Login Guest Firebase gagal (mungkin belum diaktifkan di console). Masuk ke Mode Offline Lokal? Data hanya tersimpan di browser ini.")) {
-                        window.startLocalGuestMode();
-                    } else {
-                        alert("Tips: Aktifkan 'Anonymous' di Firebase Console -> Authentication -> Sign-in method.");
-                    }
+            try { await signInAnonymously(auth); } catch (e) { 
+                console.error("Firebase Guest Login Failed:", e);
+                if (confirm("Login Guest Cloud gagal. Masuk ke Mode Offline Lokal?")) window.startLocalGuestMode();
+            } finally { if(btn) { btn.innerHTML = '<i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest'; btn.classList.remove('loading'); } }
+        };
+
+        window.startLocalGuestMode = () => { isLocalMode = true; handleUserLogin({ uid: "local-guest", displayName: "OFFLINE GUEST", isAnonymous: true, photoURL: null }); };
+        window.logout = async () => { if(confirm("Keluar?")) { if(dayUnsubscribe) dayUnsubscribe(); cloudData = {}; isLocalMode = false; window.renderDayTracker(); try { await signOut(auth); } catch(e) {} window.location.reload(); } };
+
+        window.updateNoteLocal = (id, n) => { if (!cloudData[id]) cloudData[id] = {}; cloudData[id].note = n; };
+        window.saveNoteToFirestore = async (id, n) => { if (!cloudData[id]) cloudData[id] = {}; cloudData[id].note = n; await saveToFirestore(); };
+
+        // --- NEW: Sanitize Data Function (Healer) ---
+        function sanitizeCloudData(data) {
+            Object.keys(data).forEach(key => {
+                const item = data[key];
+                // Fix corrupted timer state
+                if (item.timerRunning && (!item.timerEnd || isNaN(item.timerEnd))) {
+                    console.warn(`Fixing corrupted timer for ${key}`);
+                    item.timerRunning = false;
+                    item.timerEnd = null;
+                    item.remainingMs = null;
                 }
-            } finally {
-                if(btn) { btn.innerHTML = '<i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest'; btn.classList.remove('loading'); }
-            }
-        };
-
-        window.startLocalGuestMode = () => {
-            isLocalMode = true;
-            const fakeUser = { uid: "local-guest", displayName: "OFFLINE GUEST", isAnonymous: true, photoURL: null };
-            handleUserLogin(fakeUser);
-        };
-
-        window.logout = async () => { 
-            if(confirm("Keluar dari aplikasi?")) {
-                if(dayUnsubscribe) dayUnsubscribe();
-                cloudData = {};
-                isLocalMode = false;
-                window.renderDayTracker();
-                try { await signOut(auth); } catch(e) {}
-                window.location.reload(); 
-            }
-        };
-
-        window.updateNoteLocal = (id, n) => {
-            if (!cloudData[id]) cloudData[id] = {};
-            cloudData[id].note = n;
-        };
-
-        window.saveNoteToFirestore = async (id, n) => {
-             if (!cloudData[id]) cloudData[id] = {};
-             cloudData[id].note = n;
-             await saveToFirestore();
-        };
+            });
+            return data;
+        }
 
         window.setupRealtimeSync = function() {
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
-            
             if (isLocalMode) {
-                // Local Storage Sync Logic
                 const localKey = `tracker_data_${docId}`;
                 const stored = localStorage.getItem(localKey);
-                cloudData = stored ? JSON.parse(stored) : {};
-                window.renderDayTracker();
-                window.updateSyncUI();
+                cloudData = stored ? sanitizeCloudData(JSON.parse(stored)) : {};
+                window.renderDayTracker(); window.updateSyncUI();
                 return;
             }
-
             if (!auth.currentUser) return;
-            
             if (dayUnsubscribe) dayUnsubscribe();
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), (snap) => {
-                const newData = snap.exists() ? snap.data() : {};
+                const rawData = snap.exists() ? snap.data() : {};
+                const newData = sanitizeCloudData(rawData); // Apply Healer
+                
+                // Preserve active note input
                 const activeId = document.activeElement ? document.activeElement.id : null;
                 if (activeId && activeId.startsWith('note-')) {
                     const editingItemId = activeId.replace('note-', '');
@@ -684,23 +637,13 @@
                 }
                 cloudData = newData;
                 window.renderDayTracker();
-            }, (err) => { 
-                console.error(err); 
-                window.updateSyncUI(); 
-            });
+            }, (err) => { console.error(err); window.updateSyncUI(); });
             window.updateCalendarView();
         };
 
         async function saveToFirestore() { 
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
-            
-            if (isLocalMode) {
-                const localKey = `tracker_data_${docId}`;
-                localStorage.setItem(localKey, JSON.stringify(cloudData));
-                window.updateSyncUI();
-                return;
-            }
-
+            if (isLocalMode) { localStorage.setItem(`tracker_data_${docId}`, JSON.stringify(cloudData)); window.updateSyncUI(); return; }
             if (!auth.currentUser) return; 
             await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
         }
@@ -725,15 +668,14 @@
 
         window.renderDayTracker = function() {
             let activeId = document.activeElement ? document.activeElement.id : null;
-            let selectionStart = 0;
-            let selectionEnd = 0;
+            let selectionStart = 0, selectionEnd = 0;
             if (activeId && document.activeElement.tagName === "TEXTAREA") {
-                selectionStart = document.activeElement.selectionStart;
-                selectionEnd = document.activeElement.selectionEnd;
+                selectionStart = document.activeElement.selectionStart; selectionEnd = document.activeElement.selectionEnd;
             }
 
             const ui = { full: document.getElementById('dayFullLabel'), sel: document.getElementById('currentSelectionLabel'), quote: document.getElementById('quoteText'), sport: document.getElementById('sportTargetLabel'), fasting: document.getElementById('fastingBadgeContainer'), score: document.getElementById('dayScore') };
             if (!ui.full || !ui.quote) return;
+            
             const isFri = selectedDate.getDay() === 5, mNum = selectedDate.getMonth(), dNum = selectedDate.getDate();
             const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -743,19 +685,11 @@
             ui.quote.innerText = `"${getQuoteForDate(selectedDate)}"`;
             
             const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19), isRamadan = selectedDate >= ramStart && selectedDate <= ramEnd;
-            let sportGoal = "";
-            if (isRamadan) sportGoal = "🚶 Jalan Santai / Stretching (Menjelang Buka)";
-            else {
-                const sched = { 1:{type:"Gowes", val:25}, 2:{type:"Gowes", val:25}, 3:{type:"Run", val:5}, 4:{type:"Gowes", val:30}, 5:{type:"Gowes", val:20}, 6:{type:"Run", val:5}, 0:{type:"Rest", val:0} }[selectedDate.getDay()];
-                sportGoal = sched.type === "Rest" ? "🛌 Total Rest" : (sched.type === "Run" ? `🏃 Lari ${5 + Math.floor(mNum / 3)} KM` : `🚴 Gowes ${sched.val} KM`);
-            }
+            let sportGoal = isRamadan ? "🚶 Jalan Santai (Buka)" : ({ 1:"🚴 Gowes 25 KM", 2:"🚴 Gowes 25 KM", 3:"🏃 Lari 5 KM", 4:"🚴 Gowes 30 KM", 5:"🚴 Gowes 20 KM", 6:"🏃 Lari 5 KM", 0:"🛌 Total Rest" }[selectedDate.getDay()]);
             if(ui.sport) ui.sport.innerText = sportGoal;
 
-            let fastingLabel = "", fastingClass = "fasting-alert";
-            if (isRamadan) { fastingLabel = "🌙 Puasa Ramadhan"; fastingClass += " fasting-ramadhan"; } 
-            else if (selectedDate.getDay() === 1) fastingLabel = "✨ Puasa Sunnah Senin";
-            else if (selectedDate.getDay() === 4) fastingLabel = "✨ Puasa Sunnah Kamis";
-            if(ui.fasting) ui.fasting.innerHTML = fastingLabel ? `<div class="${fastingClass}">${fastingLabel}</div>` : '';
+            let fastingLabel = isRamadan ? "🌙 Puasa Ramadhan" : (selectedDate.getDay() === 1 ? "✨ Puasa Sunnah Senin" : (selectedDate.getDay() === 4 ? "✨ Puasa Sunnah Kamis" : ""));
+            if(ui.fasting) ui.fasting.innerHTML = fastingLabel ? `<div class="fasting-alert ${isRamadan ? 'fasting-ramadhan' : ''}">${fastingLabel}</div>` : '';
 
             const routine = [
                 { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", icon: "fa-language", duration: 30 * 60000 },
@@ -770,13 +704,12 @@
                 { id: "ashar", time: "15:30", task: "Sholat Ashar Berjamaah", icon: "fa-sun", noTimer: true },
                 { id: "skipping", time: "17:15", task: "Skipping Sore", icon: "fa-bolt", duration: 15 * 60000 },
                 { id: "mandi", time: "17:45", task: "Mandi & Santai", icon: "fa-bath", noTimer: true },
-                { id: "maghrib", time: "18:00", task: isRamadan ? "Buka Puasa & Maghrib Berjamaah" : "Sholat Maghrib Berjamaah", icon: isRamadan ? "fa-utensils" : "fa-moon", noTimer: true },
+                { id: "maghrib", time: "18:00", task: isRamadan ? "Buka Puasa" : "Sholat Maghrib", icon: isRamadan ? "fa-utensils" : "fa-moon", noTimer: true },
                 { id: "quran", time: "18:20", task: "Membaca Al-Qur'an", icon: "fa-book-quran", duration: 20 * 60000 },
                 { id: "isya", time: "18:45", task: "Sholat Isya Berjamaah", icon: "fa-star", noTimer: true },
                 { id: "buku", time: "19:00", task: "Baca Buku (Pomodoro)", icon: "fa-book-open", isPomo: true },
                 { id: "tidur", time: "20:30", task: "Tidur Malam", icon: "fa-bed", noTimer: true }
             ];
-
             const extra = [ { id: "siram_pagi", task: "Menyiram Tanaman (Pagi)", icon: "fa-faucet-drip" }, { id: "siram_sore", task: "Menyiram Tanaman (Sore)", icon: "fa-faucet-drip" }, { id: "kasur", task: "Membersihkan Kasur", icon: "fa-bed" }, { id: "sapu", task: "Menyapu Rumah", icon: "fa-broom" }, { id: "piring", task: "Mencuci Piring", icon: "fa-sink" }, { id: "istigfar", task: "Istigfar 1000x", icon: "fa-comment-dots" }, { id: "taubat", task: "Sholat Taubat", icon: "fa-person-praying" }, { id: "kuku", task: "Potong Kuku", icon: "fa-scissors", specialDaysKuku: true }, { id: "cuci", task: "Cuci Pakaian", icon: "fa-shirt", fridayOnly: true } ];
 
             const renderItems = (list, targetId) => {
@@ -789,13 +722,16 @@
 
                     const itemData = cloudData[item.id] || {}, status = itemData.status || 'none';
                     if (status === 'done') done++;
-                    const isTimerOpen = window.openTimerPanels[item.id];
+                    const isTimerOpen = window.openTimerPanels && window.openTimerPanels[item.id]; // Fix undefined access
                     let timerUI = '';
                     if (!item.noTimer && (item.duration || item.isPomo)) {
                         let rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : (itemData.remainingMs || item.duration || 25*60000);
+                        if (rem < 0) rem = 0;
+                        if (isNaN(rem)) rem = item.duration || 25*60000; // Extra guard against NaN
+                        
                         timerUI = `
                             <div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}">
-                                <span class="timer-display">${window.formatTime(rem)}</span>
+                                <span id="timer-display-${item.id}" class="timer-display">${window.formatTime(rem)}</span>
                                 <div class="flex gap-4 mt-3">
                                     <button onclick="window.startCountdown('${item.id}', ${item.duration || 25*60000})" class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center transition-all hover:bg-blue-500/30"><i class="fas ${itemData.timerRunning ? 'fa-pause' : 'fa-play'}"></i></button>
                                     <button onclick="window.stopTimer('${item.id}')" class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center transition-all hover:bg-rose-500/30"><i class="fas fa-stop"></i></button>
@@ -828,100 +764,53 @@
 
             if (activeId) {
                 const el = document.getElementById(activeId);
-                if (el) {
-                    el.focus();
-                    if (el.tagName === "TEXTAREA" && typeof el.setSelectionRange === "function") {
-                        el.setSelectionRange(selectionStart, selectionEnd);
-                    }
-                }
+                if (el) { el.focus(); if (el.tagName === "TEXTAREA" && typeof el.setSelectionRange === "function") el.setSelectionRange(selectionStart, selectionEnd); }
             }
         };
 
-        window.toggleTimerPanel = (id) => { window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
+        window.toggleTimerPanel = (id) => { 
+            console.log("Toggling timer for:", id); 
+            if(!window.openTimerPanels) window.openTimerPanels = {};
+            window.openTimerPanels[id] = !window.openTimerPanels[id]; 
+            window.renderDayTracker(); 
+        };
+        
         window.startCountdown = (id, d) => { 
             const t = cloudData[id] || {}; 
-            if (t.timerRunning) { 
-                t.timerRunning = false; 
-                t.remainingMs = (t.timerEnd || 0) - Date.now(); 
-                t.timerEnd = null;
-            } else { 
-                t.timerRunning = true; 
-                t.timerEnd = Date.now() + (t.remainingMs || d); 
-            } 
+            if (t.timerRunning) { t.timerRunning = false; t.remainingMs = (t.timerEnd || 0) - Date.now(); t.timerEnd = null; } 
+            else { t.timerRunning = true; t.timerEnd = Date.now() + (t.remainingMs || d); } 
             cloudData[id] = t; saveToFirestore(); window.renderDayTracker(); 
         };
 
-        window.stopTimer = (id) => { 
-            cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; 
-            saveToFirestore(); window.renderDayTracker(); 
-        };
-
+        window.stopTimer = (id) => { cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; saveToFirestore(); window.renderDayTracker(); };
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
-        window.openImagePreview = (data, name) => { 
-            const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); 
-            dBtn.href = data; dBtn.download = name;
-            if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } 
-            n.innerText = name; m.style.display = 'flex'; 
-        };
+        window.openImagePreview = (data, name) => { const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); dBtn.href = data; dBtn.download = name; if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } n.innerText = name; m.style.display = 'flex'; };
         window.closeImagePreview = () => { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
         const iosPrompt = document.getElementById('iosInstallPrompt');
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); 
-            deferredPrompt = e;
-            installBtn.classList.remove('hidden'); 
-            installBtn.classList.add('flex');
-            installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
-            installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
-            installBtn.classList.remove('bg-slate-700', 'text-slate-400');
-        });
-
-        window.installPWA = async () => {
-            if (!deferredPrompt) {
-                alert("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung.");
-                return;
-            }
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            installBtn.classList.add('hidden');
-        };
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden'); installBtn.classList.add('flex'); installBtn.classList.remove('cursor-not-allowed', 'opacity-50'); installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white'); installBtn.classList.remove('bg-slate-700', 'text-slate-400'); });
+        window.installPWA = async () => { if (!deferredPrompt) { alert("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung."); return; } deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; deferredPrompt = null; installBtn.classList.add('hidden'); };
 
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        
-        if (isIOS && !isStandalone) {
-            setTimeout(() => {
-                if(iosPrompt) {
-                    iosPrompt.classList.remove('hidden');
-                    iosPrompt.classList.add('flex');
-                }
-            }, 3000);
-        }
+        if (isIOS && !isStandalone) { setTimeout(() => { if(iosPrompt) { iosPrompt.classList.remove('hidden'); iosPrompt.classList.add('flex'); } }, 3000); }
 
         window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
         window.onscroll = function() { const btn = document.getElementById('backToTopBtn'); if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); };
         
         function handleUserLogin(user) {
             const area = document.getElementById('dayTrackerArea'), info = document.getElementById('userInfo'), wrapper = document.getElementById('notifWrapper'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader');
-            
-            isUserLoggedIn = true; 
-            area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
-            if(loginSec) loginSec.classList.add('hidden'); 
-            if(hBrand) hBrand.classList.remove('hidden'); if(navWrap) navWrap.classList.remove('hidden'); if(hMain) hMain.classList.remove('header-clean');
-            wrapper.classList.remove('hidden');
-            
+            isUserLoggedIn = true; area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
+            if(loginSec) loginSec.classList.add('hidden'); if(hBrand) hBrand.classList.remove('hidden'); if(navWrap) navWrap.classList.remove('hidden'); if(hMain) hMain.classList.remove('header-clean'); wrapper.classList.remove('hidden');
             const statusText = user.isAnonymous ? "GUEST MODE" : user.displayName.split(' ')[0];
             const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
-            
             info.innerHTML = `<div class="flex items-center gap-3">${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}<div class="flex flex-col"><span class="text-[12px] font-black uppercase tracking-wider ${statusColor}">${statusText}</span><button onclick="window.logout()" class="text-[13px] sm:text-[11px] text-rose-500 font-black uppercase text-left hover:text-rose-400 transition-colors tracking-widest mt-1">Logout</button></div></div>`;
-            window.setupRealtimeSync();
-            window.updateSyncUI();
+            window.setupRealtimeSync(); window.updateSyncUI();
         }
 
         window.addEventListener('load', async () => {
@@ -934,19 +823,11 @@
             }
 
             onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    isLocalMode = false;
-                    handleUserLogin(user);
-                } else {
-                    if (isLocalMode) return; // Don't reset if in local mode
-                    isUserLoggedIn = false; 
-                    const area = document.getElementById('dayTrackerArea'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader'), wrapper = document.getElementById('notifWrapper'), info = document.getElementById('userInfo');
-                    area.classList.add('hidden', 'opacity-0'); 
-                    if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean');
-                    wrapper.classList.add('hidden');
-                    info.innerHTML = ``; initParticles(); 
-                    cloudData = {};
-                    window.renderDayTracker();
+                if (user) { isLocalMode = false; handleUserLogin(user); } 
+                else {
+                    if (isLocalMode) return; 
+                    isUserLoggedIn = false; const area = document.getElementById('dayTrackerArea'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader'), wrapper = document.getElementById('notifWrapper'), info = document.getElementById('userInfo');
+                    area.classList.add('hidden', 'opacity-0'); if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean'); wrapper.classList.add('hidden'); info.innerHTML = ``; initParticles(); cloudData = {}; window.renderDayTracker();
                 }
                 window.updateSyncUI();
             });
@@ -955,44 +836,29 @@
                 const files = Array.from(e.target.files); if (!files.length || !activeItemIdForUpload) return;
                 document.getElementById('uploadLoader').classList.remove('hidden', 'flex'); document.getElementById('uploadLoader').classList.add('flex');
                 const atts = cloudData[activeItemIdForUpload]?.attachments || [];
-                for (let f of files) {
-                    try {
-                        let data = "";
-                        if (f.type.startsWith('image/')) {
-                            const reader = new FileReader(); data = await new Promise((r) => { reader.readAsDataURL(f); reader.onload = (ev) => { const img = new Image(); img.src = ev.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 800; if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); r(canvas.toDataURL('image/jpeg', 0.5)); }; }; });
-                        } else { if (f.size > 1024*1024) continue; data = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); }); }
-                        atts.push({ name: f.name, data: data });
-                    } catch(e) {}
-                }
+                for (let f of files) { try { let data = ""; if (f.type.startsWith('image/')) { const reader = new FileReader(); data = await new Promise((r) => { reader.readAsDataURL(f); reader.onload = (ev) => { const img = new Image(); img.src = ev.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 800; if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); r(canvas.toDataURL('image/jpeg', 0.5)); }; }; }); } else { if (f.size > 1024*1024) continue; data = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); }); } atts.push({ name: f.name, data: data }); } catch(e) {} }
                 cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments: atts };
-                await saveToFirestore(); window.renderDayTracker();
-                document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden'); e.target.value = '';
+                await saveToFirestore(); window.renderDayTracker(); document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden'); e.target.value = '';
             };
-            window.updateCalendarView(); window.renderDayTracker(); 
-            if ("Notification" in window) window.updateNotifUI(Notification.permission);
+            window.updateCalendarView(); window.renderDayTracker(); if ("Notification" in window) window.updateNotifUI(Notification.permission);
         });
 
-        // 1-SECOND TICKER
+        // 1-SECOND TICKER (OPTIMIZED FOR PERFORMANCE)
         setInterval(() => {
             window.updateSyncUI(); 
-            let redraw = false;
             Object.keys(cloudData).forEach(id => { 
-                if (cloudData[id].timerRunning) { 
-                    redraw = true; 
-                    let rem = cloudData[id].timerEnd - Date.now(); 
+                const itemData = cloudData[id];
+                if (itemData && itemData.timerRunning) { 
+                    const rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : 0;
+                    const displayEl = document.getElementById(`timer-display-${id}`);
                     if (rem <= 0) { 
-                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]); // Getar Panjang
-                        if (Notification.permission === "granted") {
-                             new Notification("⏱️ WAKTU HABIS!", { body: `Sesi ${id} telah selesai!`, icon: "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.jpg" });
-                        }
-                        cloudData[id].timerRunning = false; 
-                        cloudData[id].timerEnd = null; 
-                        cloudData[id].remainingMs = null; 
-                        saveToFirestore(); 
-                    } 
+                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]); 
+                        if (Notification.permission === "granted") new Notification("⏱️ WAKTU HABIS!", { body: `Sesi selesai!`, icon: "icon_transparent_blue_text-removebg-preview.png" });
+                        itemData.timerRunning = false; itemData.timerEnd = null; itemData.remainingMs = null; 
+                        saveToFirestore(); window.renderDayTracker(); 
+                    } else if (displayEl) { displayEl.innerText = window.formatTime(rem); }
                 } 
             });
-            if (redraw) window.renderDayTracker();
         }, 1000);
     </script>
 </body>

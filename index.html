@@ -12,10 +12,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     
-    <!-- 1. IKON BROWSER (Favicon Desktop) - Menggunakan file PNG transparan -->
-    <!-- Tambahkan ?v=2 untuk memaksa refresh cache -->
+    <!-- 1. IKON BROWSER (Favicon Desktop) -->
     <link rel="shortcut icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
-    <link rel="icon" type="image/png" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
+    <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
     
     <!-- 2. IKON APLIKASI (iOS Home Screen) -->
     <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
@@ -696,51 +695,38 @@
 
         // --- PWA SETUP AND MANIFEST GENERATION ---
         const setupPWA = async () => {
-            // FALLBACK ICON (Blue Square) - Ensure PWA works even if image is missing
-            const fallbackIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAbFBMVEUAAAD///8AAAD8/PwAAAD9/f35+fn6+vr7+/v39/f29vb09PTz8/Py8vLx8fHu7u7t7e3r6+vq6urp6enl5eXk5OTi4uLg4ODd3d3b29vW1tbT09PQ0NDMzMzJycnFxcXAwMC8vLy2traxsbGqqqq9i204AAAAIUlEQVR4nO3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAICRYyUAAXg23lAAAAAASUVORK5CYII=";
+            // Determine the base path of the application
+            // This is CRUCIAL for GitHub Pages where the app might be in a subdirectory
+            const base_url = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
-            // Load PNG Icon from URL if possible to ensure Android recognizes it
-            // We use the uploaded PNG file name.
-            let iconUrl = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
+            // Icon Filename (Must match uploaded file)
+            const iconFilename = "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png";
             
-            // MAGIC CONVERTER: Convert the icon to Base64 to force it into the manifest
-            // This bypasses some strict browser checks that fail on relative paths in blob environments.
-            try {
-               const response = await fetch(iconUrl);
-               const blob = await response.blob();
-               const reader = new FileReader();
-               iconUrl = await new Promise(resolve => {
-                   reader.onloadend = () => resolve(reader.result);
-                   reader.readAsDataURL(blob);
-               });
-            } catch(e) {
-                console.log("Icon fetch failed, using fallback");
-                iconUrl = fallbackIcon;
-            }
+            // Construct Absolute URL for the icon
+            const absoluteIconUrl = base_url + iconFilename;
 
             const manifest = {
                 "name": "Disipline Tracker 2026",
                 "short_name": "Tracker",
-                "start_url": "./?source=pwa",  // Ensure correct start path
-                "display": "standalone",       // Force standalone mode
+                "start_url": base_url, // Use absolute URL for start_url
+                "display": "standalone",
                 "background_color": "#050810",
                 "theme_color": "#050810",
                 "orientation": "portrait",
-                "id": "/?source=pwa",
-                "scope": "./",
+                "scope": base_url, // Use absolute URL for scope
                 "icons": [
                     { 
-                        "src": iconUrl, 
+                        "src": absoluteIconUrl, 
                         "sizes": "731x731", 
                         "type": "image/png" 
                     },
                     {
-                        "src": iconUrl,
+                        "src": absoluteIconUrl,
                         "sizes": "192x192", 
                         "type": "image/png" 
                     },
                     {
-                        "src": iconUrl,
+                        "src": absoluteIconUrl,
                         "sizes": "512x512",
                         "type": "image/png" 
                     }
@@ -750,7 +736,7 @@
             const manifestURI = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
             document.getElementById('pwa-manifest').setAttribute('href', manifestURI);
 
-            // Register Service Worker
+            // Register Service Worker with Absolute Path Scope
             if ('serviceWorker' in navigator) {
                 try {
                     const swCode = `
@@ -761,10 +747,10 @@
                     const swBlob = new Blob([swCode], {type: 'application/javascript'});
                     const swUrl = URL.createObjectURL(swBlob);
                     
-                    // Attempt registration
-                    await navigator.serviceWorker.register(swUrl, { scope: './' });
+                    // Add version to registration to force update
+                    await navigator.serviceWorker.register(swUrl, { scope: base_url });
                 } catch(e) { 
-                    console.warn("PWA Service Worker registration failed (common in preview environments or non-HTTPS):", e); 
+                    console.warn("PWA Service Worker registration failed:", e); 
                 }
             }
         };

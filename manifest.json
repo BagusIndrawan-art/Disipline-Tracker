@@ -1,7 +1,7 @@
 {
   "name": "Disipline Tracker 2026",
   "short_name": "Tracker",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#050810",
   "theme_color": "#050810",
@@ -21,4 +21,5 @@
       "purpose": "any maskable"
     }
   ]
+
 }

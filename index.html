@@ -11,16 +11,20 @@
     <meta name="theme-color" content="#050810">
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- 1. Ikon Browser / Tab (Tetap Menggunakan yang Lama) -->
+    <!-- 1. IKON BROWSER TAB (Favicon) -->
+    <!-- Ini yang akan muncul di tab browser laptop/chrome -->
     <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
+    <link rel="shortcut icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
     
-    <!-- 2. Ikon Aplikasi untuk iOS & Homescreen (Menggunakan Gambar Baru) -->
-    <link rel="apple-touch-icon" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png">
+    <!-- 2. IKON APLIKASI (iOS) -->
+    <!-- Ini yang akan muncul di layar iPhone/iPad -->
+    <link rel="apple-touch-icon" href="icon_aplikasi.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon_aplikasi.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon_aplikasi.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icon_aplikasi.png">
     
-    <!-- Placeholder untuk Dynamic Manifest -->
+    <!-- 3. IKON APLIKASI (Android & Desktop PWA) -->
+    <!-- Manifest ini akan diisi otomatis oleh Javascript di bawah agar menggunakan 'icon_aplikasi.png' -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
@@ -449,12 +453,43 @@
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.txt">
 
     <script type="module">
-        // Global Error Handler
+        // Global Error Handler for Debugging on Live Server
         window.onerror = function(msg, url, line, col, error) {
             console.error("Global Error:", msg, error);
         };
 
-        // --- CLEANUP SERVICE WORKERS ---
+        // --- MANIFEST GENERATION LOGIC (FIX ICON) ---
+        // Script ini membuat manifest.json secara dinamis agar Android PWA menggunakan icon_aplikasi.png
+        window.addEventListener('load', () => {
+            const manifest = {
+                "name": "Disipline Tracker",
+                "short_name": "Tracker",
+                "start_url": ".",
+                "display": "standalone",
+                "background_color": "#050810",
+                "theme_color": "#050810",
+                "orientation": "portrait",
+                "icons": [
+                    {
+                        "src": "icon_aplikasi.png", // GUNAKAN IKON APLIKASI UNTUK PWA
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "icon_aplikasi.png", // GUNAKAN IKON APLIKASI UNTUK PWA
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifest);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            const manifestLink = document.getElementById('pwa-manifest');
+            if(manifestLink) manifestLink.setAttribute('href', manifestURL);
+        });
+
+        // --- CLEANUP SERVICE WORKERS (SAFE VERSION) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 try {
@@ -464,29 +499,6 @@
                 } catch (e) { console.log("SW Cleanup failed:", e); }
             });
         }
-
-        // --- DYNAMIC MANIFEST GENERATION (PWA RESTORE) ---
-        function initManifest() {
-            const myManifest = {
-                "name": "Disipline Tracker 2026",
-                "short_name": "EliteTracker",
-                "start_url": ".",
-                "display": "standalone",
-                "background_color": "#050810",
-                "theme_color": "#050810",
-                "orientation": "portrait-primary",
-                "icons": [
-                    { "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png", "sizes": "192x192", "type": "image/png" },
-                    { "src": "bd6827df3278be14d7259f18d8717c03f160cc05-731x731.png", "sizes": "512x512", "type": "image/png" }
-                ]
-            };
-            const stringManifest = JSON.stringify(myManifest);
-            const blob = new Blob([stringManifest], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            const manifestEl = document.getElementById('pwa-manifest');
-            if(manifestEl) manifestEl.setAttribute('href', manifestURL);
-        }
-        initManifest();
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -587,7 +599,15 @@
         window.testNotification = () => { 
             if (Notification.permission === "granted") { 
                 window.showMessage("Mengirim notifikasi tes...");
-                new Notification("🔔 TES DISIPLINE TRACKER", { body: "Sistem notifikasi berjalan!", icon: "icon_transparent_blue_text-removebg-preview.png" });
+                const title = "🔔 TES DISIPLINE TRACKER";
+                const options = {
+                    body: "Sistem notifikasi berjalan dengan baik! Semangat!",
+                    icon: "icon_transparent_blue_text-removebg-preview.png",
+                    vibrate: [200, 100, 200], // Fitur Getar
+                    requireInteraction: false
+                };
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                new Notification(title, options);
             } else {
                 window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
             }
@@ -877,7 +897,7 @@
                     if (!item.noTimer && (item.duration || item.isPomo)) {
                         let rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : (itemData.remainingMs || item.duration || 25*60000);
                         if (rem < 0) rem = 0;
-                        if (isNaN(rem)) rem = item.duration || 25*60000; // Extra guard against NaN
+                        if (isNaN(rem)) rem = item.duration || 25*60000; 
                         
                         timerUI = `
                             <div id="timer-panel-${item.id}" class="timer-panel" style="display: ${isTimerOpen ? 'flex' : 'none'}">
@@ -949,31 +969,71 @@
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
-        window.openImagePreview = (data, name) => { const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); dBtn.href = data; dBtn.download = name; if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } n.innerText = name; m.style.display = 'flex'; };
+        window.openImagePreview = (data, name) => { 
+            const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); 
+            dBtn.href = data; dBtn.download = name;
+            if (data.startsWith('data:image/')) { img.src = data; img.style.display = 'block'; nonImg.classList.add('hidden'); } else { img.style.display = 'none'; nonImg.classList.remove('hidden'); } 
+            n.innerText = name; m.style.display = 'flex'; 
+        };
         window.closeImagePreview = () => { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
+        // --- PWA INSTALLATION LOGIC ---
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
         const iosPrompt = document.getElementById('iosInstallPrompt');
 
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden'); installBtn.classList.add('flex'); installBtn.classList.remove('cursor-not-allowed', 'opacity-50'); installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white'); installBtn.classList.remove('bg-slate-700', 'text-slate-400'); });
-        window.installPWA = async () => { if (!deferredPrompt) { alert("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung."); return; } deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; deferredPrompt = null; installBtn.classList.add('hidden'); };
+        // Logic 1: Android/Chrome "Install App" Button
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); 
+            deferredPrompt = e;
+            installBtn.classList.remove('hidden'); 
+            installBtn.classList.add('flex');
+            
+            // Enable button
+            installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+            installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
+            installBtn.classList.remove('bg-slate-700', 'text-slate-400');
+        });
 
+        window.installPWA = async () => {
+            if (!deferredPrompt) {
+                alert("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung.");
+                return;
+            }
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.classList.add('hidden');
+        };
+
+        // Logic 2: iOS Detection
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        if (isIOS && !isStandalone) { setTimeout(() => { if(iosPrompt) { iosPrompt.classList.remove('hidden'); iosPrompt.classList.add('flex'); } }, 3000); }
+        
+        if (isIOS && !isStandalone) {
+            setTimeout(() => {
+                if(iosPrompt) {
+                    iosPrompt.classList.remove('hidden');
+                    iosPrompt.classList.add('flex');
+                }
+            }, 3000);
+        }
 
         window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
         window.onscroll = function() { const btn = document.getElementById('backToTopBtn'); if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); };
         
         function handleUserLogin(user) {
             const area = document.getElementById('dayTrackerArea'), info = document.getElementById('userInfo'), wrapper = document.getElementById('notifWrapper'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader');
-            isUserLoggedIn = true; area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
-            if(loginSec) loginSec.classList.add('hidden'); if(hBrand) hBrand.classList.remove('hidden'); if(navWrap) navWrap.classList.remove('hidden'); if(hMain) hMain.classList.remove('header-clean'); wrapper.classList.remove('hidden');
+            
+            isUserLoggedIn = true; 
+            area.classList.remove('hidden'); setTimeout(() => area.classList.remove('opacity-0'), 10); 
+            if(loginSec) loginSec.classList.add('hidden'); 
+            if(hBrand) hBrand.classList.remove('hidden'); if(navWrap) navWrap.classList.remove('hidden'); if(hMain) hMain.classList.remove('header-clean');
+            wrapper.classList.remove('hidden');
+            
             const statusText = user.isAnonymous ? "GUEST MODE" : user.displayName.split(' ')[0];
             const statusColor = user.isAnonymous ? "text-yellow-400" : "text-emerald-400";
             
-            // TOMBOL RESET DATA BARU
             info.innerHTML = `
             <div class="flex items-center gap-3">
                 ${user.photoURL ? `<img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-white/10 shadow-lg">` : `<i class="fas fa-user-circle text-white text-4xl"></i>`}
@@ -982,7 +1042,8 @@
                     <button onclick="window.logout()" class="text-[10px] text-slate-400 font-bold uppercase text-left hover:text-white mt-0.5">Logout</button>
                 </div>
             </div>`;
-            window.setupRealtimeSync(); window.updateSyncUI();
+            window.setupRealtimeSync();
+            window.updateSyncUI();
         }
 
         window.addEventListener('load', async () => {
@@ -995,11 +1056,19 @@
             }
 
             onAuthStateChanged(auth, (user) => {
-                if (user) { isLocalMode = false; handleUserLogin(user); } 
-                else {
-                    if (isLocalMode) return; 
-                    isUserLoggedIn = false; const area = document.getElementById('dayTrackerArea'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader'), wrapper = document.getElementById('notifWrapper'), info = document.getElementById('userInfo');
-                    area.classList.add('hidden', 'opacity-0'); if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean'); wrapper.classList.add('hidden'); info.innerHTML = ``; initParticles(); cloudData = {}; window.renderDayTracker();
+                if (user) {
+                    isLocalMode = false;
+                    handleUserLogin(user);
+                } else {
+                    if (isLocalMode) return; // Don't reset if in local mode
+                    isUserLoggedIn = false; 
+                    const area = document.getElementById('dayTrackerArea'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader'), wrapper = document.getElementById('notifWrapper'), info = document.getElementById('userInfo');
+                    area.classList.add('hidden', 'opacity-0'); 
+                    if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(navWrap) navWrap.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean');
+                    wrapper.classList.add('hidden');
+                    info.innerHTML = ``; initParticles(); 
+                    cloudData = {};
+                    window.renderDayTracker();
                 }
                 window.updateSyncUI();
             });
@@ -1008,16 +1077,28 @@
                 const files = Array.from(e.target.files); if (!files.length || !activeItemIdForUpload) return;
                 document.getElementById('uploadLoader').classList.remove('hidden', 'flex'); document.getElementById('uploadLoader').classList.add('flex');
                 const atts = cloudData[activeItemIdForUpload]?.attachments || [];
-                for (let f of files) { try { let data = ""; if (f.type.startsWith('image/')) { const reader = new FileReader(); data = await new Promise((r) => { reader.readAsDataURL(f); reader.onload = (ev) => { const img = new Image(); img.src = ev.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 800; if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); r(canvas.toDataURL('image/jpeg', 0.5)); }; }; }); } else { if (f.size > 1024*1024) continue; data = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); }); } atts.push({ name: f.name, data: data }); } catch(e) {} }
+                for (let f of files) {
+                    try {
+                        let data = "";
+                        if (f.type.startsWith('image/')) {
+                            const reader = new FileReader(); data = await new Promise((r) => { reader.readAsDataURL(f); reader.onload = (ev) => { const img = new Image(); img.src = ev.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 800; if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); r(canvas.toDataURL('image/jpeg', 0.5)); }; }; });
+                        } else { if (f.size > 1024*1024) continue; data = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); }); }
+                        atts.push({ name: f.name, data: data });
+                    } catch(e) {}
+                }
                 cloudData[activeItemIdForUpload] = { ...cloudData[activeItemIdForUpload], attachments: atts };
-                await saveToFirestore(); window.renderDayTracker(); document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden'); e.target.value = '';
+                await saveToFirestore(); window.renderDayTracker();
+                document.getElementById('uploadLoader').classList.remove('flex'); document.getElementById('uploadLoader').classList.add('hidden'); e.target.value = '';
             };
-            window.updateCalendarView(); window.renderDayTracker(); if ("Notification" in window) window.updateNotifUI(Notification.permission);
+            window.updateCalendarView(); window.renderDayTracker(); 
+            if ("Notification" in window) window.updateNotifUI(Notification.permission);
         });
 
         // 1-SECOND TICKER (OPTIMIZED FOR PERFORMANCE)
         setInterval(() => {
             window.updateSyncUI(); 
+            
+            // Iterate directly over keys to avoid full re-render
             Object.keys(cloudData).forEach(id => { 
                 const itemData = cloudData[id];
                 if (itemData && itemData.timerRunning) { 
@@ -1034,11 +1115,25 @@
 
                     const displayEl = document.getElementById(`timer-display-${id}`);
                     if (rem <= 0) { 
-                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]); 
-                        if (Notification.permission === "granted") new Notification("⏱️ WAKTU HABIS!", { body: `Sesi selesai!`, icon: "icon_transparent_blue_text-removebg-preview.png" });
-                        itemData.timerRunning = false; itemData.timerEnd = null; itemData.remainingMs = null; 
-                        saveToFirestore(); window.renderDayTracker(); 
-                    } else if (displayEl) { displayEl.innerText = window.formatTime(rem); }
+                        // TIME UP LOGIC
+                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]); // Getar Panjang
+                        if (Notification.permission === "granted") {
+                             new Notification("⏱️ WAKTU HABIS!", { body: `Sesi selesai!`, icon: "icon_transparent_blue_text-removebg-preview.png" });
+                        }
+                        
+                        // Update State
+                        itemData.timerRunning = false; 
+                        itemData.timerEnd = null; 
+                        itemData.remainingMs = null; 
+                        
+                        saveToFirestore(); 
+                        window.renderDayTracker(); // Re-render to update buttons (Play -> Pause)
+                    } else {
+                        // UPDATE TEXT DIRECTLY (No Re-render)
+                        if (displayEl) {
+                            displayEl.innerText = window.formatTime(rem);
+                        }
+                    }
                 } 
             });
         }, 1000);

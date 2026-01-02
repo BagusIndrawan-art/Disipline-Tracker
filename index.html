@@ -458,47 +458,34 @@
             console.error("Global Error:", msg, error);
         };
 
-        // --- MANIFEST GENERATION LOGIC (FIX ICON - ABSOLUTE PATH FIX) ---
-        // Script ini membuat manifest.json secara dinamis agar Android PWA menggunakan icon_aplikasi.png
+        // --- MANIFEST GENERATION LOGIC (FIX ICON & APP BADGE) ---
         window.addEventListener('load', () => {
-            // 1. Dapatkan Base URL saat ini (misal: https://user.github.io/project/)
-            // Ini penting karena Manifest Blob ada di "memori" dan butuh alamat lengkap untuk mencari gambar
+            // 1. Dapatkan Base URL
             let basePath = window.location.href;
-            
-            // Bersihkan URL dari 'index.html' atau query string jika ada
-            if (basePath.indexOf('?') > -1) {
-                basePath = basePath.substring(0, basePath.indexOf('?'));
-            }
-            if (basePath.endsWith('index.html')) {
-                basePath = basePath.substring(0, basePath.lastIndexOf('index.html'));
-            }
-            // Pastikan diakhiri slash
-            if (!basePath.endsWith('/')) {
-                basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
-            }
-
-            console.log("PWA Base Path:", basePath); // Debugging
+            if (basePath.indexOf('?') > -1) basePath = basePath.substring(0, basePath.indexOf('?'));
+            if (basePath.endsWith('index.html')) basePath = basePath.substring(0, basePath.lastIndexOf('index.html'));
+            if (!basePath.endsWith('/')) basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
 
             const manifest = {
                 "name": "Disipline Tracker",
                 "short_name": "Tracker",
-                "start_url": basePath, // Gunakan Absolute Path agar tidak error di Blob
+                "start_url": basePath, 
                 "display": "standalone",
                 "background_color": "#050810",
                 "theme_color": "#050810",
                 "orientation": "portrait",
                 "icons": [
                     {
-                        "src": basePath + "icon_aplikasi.png", // Gunakan Absolute Path
+                        "src": basePath + "icon_aplikasi.png", 
                         "sizes": "192x192",
                         "type": "image/png",
-                        "purpose": "any maskable"
+                        "purpose": "any maskable" // PENTING AGAR ICON FULL
                     },
                     {
-                        "src": basePath + "icon_aplikasi.png", // Gunakan Absolute Path
+                        "src": basePath + "icon_aplikasi.png", 
                         "sizes": "512x512",
                         "type": "image/png",
-                        "purpose": "any maskable"
+                        "purpose": "any maskable" // PENTING AGAR ICON FULL
                     }
                 ]
             };
@@ -510,14 +497,25 @@
             if(manifestLink) manifestLink.setAttribute('href', manifestURL);
         });
 
-        // --- CLEANUP SERVICE WORKERS (SAFE VERSION) ---
+        // --- SERVICE WORKER REGISTRATION (REQUIRED FOR PWA NO-BADGE) ---
+        // Android tidak akan menghilangkan badge Chrome jika tidak ada Service Worker.
+        // Script ini mencoba mendaftarkan Service Worker dummy via Blob untuk "menipu" browser.
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                try {
-                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                        for(let registration of registrations) { registration.unregister(); }
-                    }).catch(e => console.log("SW Cleanup skipped:", e));
-                } catch (e) { console.log("SW Cleanup failed:", e); }
+                // 1. Coba daftar sw.js asli (jika user punya file sw.js)
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW Registered (Real file)');
+                }).catch(err => {
+                    // 2. Fallback: Daftar Dummy SW via Blob (Trik agar installable)
+                    // Catatan: Ini mungkin diblok oleh browser modern karena alasan keamanan (scope mismatch)
+                    // Tapi lebih baik daripada tidak ada sama sekali.
+                    const swCode = "self.addEventListener('fetch', () => {});";
+                    const blob = new Blob([swCode], {type: 'application/javascript'});
+                    const url = URL.createObjectURL(blob);
+                    navigator.serviceWorker.register(url)
+                        .then(() => console.log('Dummy SW Registered via Blob'))
+                        .catch(e => console.log('SW Blob Failed (Expected on some browsers):', e));
+                });
             });
         }
 

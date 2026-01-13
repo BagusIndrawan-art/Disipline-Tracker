@@ -12,19 +12,16 @@
     <meta name="mobile-web-app-capable" content="yes">
     
     <!-- 1. IKON BROWSER TAB (Favicon) -->
-    <!-- Ini yang akan muncul di tab browser laptop/chrome -->
     <link rel="icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
     <link rel="shortcut icon" type="image/png" href="icon_transparent_blue_text-removebg-preview.png">
     
     <!-- 2. IKON APLIKASI (iOS) -->
-    <!-- Ini yang akan muncul di layar iPhone/iPad -->
     <link rel="apple-touch-icon" href="icon_aplikasi.png">
     <link rel="apple-touch-icon" sizes="152x152" href="icon_aplikasi.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icon_aplikasi.png">
     <link rel="apple-touch-icon" sizes="167x167" href="icon_aplikasi.png">
     
-    <!-- 3. IKON APLIKASI (Android & Desktop PWA) -->
-    <!-- Manifest ini akan diisi otomatis oleh Javascript di bawah agar menggunakan 'icon_aplikasi.png' -->
+    <!-- 3. MANIFEST (Android & Desktop PWA) -->
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
@@ -116,9 +113,9 @@
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
         /* Notification Status Colors */
-        .notif-active { color: #10b981 !important; } 
-        .notif-prompt { color: #f59e0b !important; } 
-        .notif-blocked { color: #ef4444 !important; } 
+        .notif-active { color: #10b981 !important; border-color: rgba(16, 185, 129, 0.3) !important; background: rgba(16, 185, 129, 0.1) !important; } 
+        .notif-prompt { color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3) !important; } 
+        .notif-blocked { color: #ef4444 !important; border-color: rgba(239, 68, 68, 0.3) !important; } 
 
         .note-input {
             background-color: rgba(15, 23, 42, 0.6);
@@ -304,7 +301,7 @@
             <h3 class="text-white font-bold text-sm">Install Aplikasi</h3>
             <button onclick="document.getElementById('iosInstallPrompt').style.display='none'" class="text-slate-400"><i class="fas fa-times"></i></button>
         </div>
-        <p class="text-xs text-slate-300">Untuk performa terbaik di iPhone:</p>
+        <p class="text-xs text-slate-300">Agar icon tidak hilang saat restart:</p>
         <div class="flex items-center gap-2 text-xs text-slate-400">1. Klik tombol Share <i class="fas fa-share-from-square text-blue-500"></i></div>
         <div class="flex items-center gap-2 text-xs text-slate-400">2. Pilih "Add to Home Screen" <i class="fas fa-plus-square text-white"></i></div>
     </div>
@@ -329,8 +326,8 @@
                 <div id="userInfo"></div>
                 <div id="notifWrapper" class="flex flex-col items-start gap-2 hidden">
                     <div class="flex items-center gap-2">
-                        <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="text-[13px] sm:text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors p-1 rounded-lg">
-                            <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Izin?</span>
+                        <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="border border-white/10 text-[13px] sm:text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors px-3 py-2 rounded-lg hover:bg-white/5">
+                            <i id="notifIcon" class="fas fa-bell"></i> <span id="notifText">Alarm Izin?</span>
                         </button>
                         <button onclick="window.testNotification()" class="text-[11px] sm:text-[10px] text-slate-400 font-black uppercase border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/10 transition-all">Tes</button>
                         
@@ -339,7 +336,7 @@
                             <i class="fas fa-trash-alt text-[10px]"></i>
                         </button>
                     </div>
-                    <span class="text-[10px] sm:text-[9px] text-blue-500 font-black uppercase tracking-widest opacity-80">Reminder: 03:30 WITA</span>
+                    <span id="alarmStatusText" class="text-[10px] sm:text-[9px] text-slate-500 font-black uppercase tracking-widest opacity-80">Alarm 03:30 Siap</span>
                 </div>
             </div>
 
@@ -349,7 +346,7 @@
                     <span class="text-blue-500 text-2xl sm:text-3xl"><i class="fas fa-bolt"></i></span>
                     <h1 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter">Disipline Tracker</h1>
                 </div>
-                <p id="currentSelectionLabel" class="text-xs text-blue-400 font-bold uppercase tracking-[2px] mt-1 text-center">01 JAN 2026 <span class="opacity-50 text-[9px] ml-1">v3.0</span></p>
+                <p id="currentSelectionLabel" class="text-xs text-blue-400 font-bold uppercase tracking-[2px] mt-1 text-center">01 JAN 2026 <span class="opacity-50 text-[9px] ml-1">v3.3</span></p>
             </div>
 
             <div id="navWrapper" class="hidden flex flex-row items-center justify-center md:justify-end gap-4 w-full md:w-1/3">
@@ -395,7 +392,7 @@
                         <button id="btnGuest" onclick="window.loginAsGuest()" class="login-btn-guest"><i class="fas fa-user-secret mr-2"></i> Lanjutkan Sebagai Guest</button>
                     </div>
                     <div class="mt-8 pt-6 border-t border-slate-800/50">
-                        <p class="text-[9px] text-slate-600 uppercase font-bold tracking-wider"><i class="fas fa-shield-alt mr-1"></i> Secure Connection • v2.6</p>
+                        <p class="text-[9px] text-slate-600 uppercase font-bold tracking-wider"><i class="fas fa-shield-alt mr-1"></i> Secure Connection • v3.3</p>
                     </div>
                 </div>
             </div>
@@ -446,7 +443,7 @@
     <footer>
         <div class="max-w-6xl mx-auto text-center">
             <p class="font-black text-[12px] tracking-[3px] text-white/80 uppercase">© 2026 Disipline Tracker | All Rights Reserved</p>
-            <p class="mt-3 opacity-40 font-bold uppercase text-[10px] tracking-widest leading-loose">Dirancang untuk performa tinggi & kedisplinan mutlak<br>Sinkronisasi cloud otomatis antar perangkat</p>
+            <p class="mt-3 opacity-40 font-bold uppercase text-[10px] tracking-widest leading-loose">Dirancang untuk performa tinggi & kedisplinan mutlak<br>PWA Version 3.3 - Fitur Puasa & Kuku</p>
         </div>
     </footer>
 
@@ -458,66 +455,74 @@
             console.error("Global Error:", msg, error);
         };
 
-        // --- MANIFEST GENERATION LOGIC (FIX ICON & APP BADGE) ---
+        // --- 1. MANIFEST GENERATOR (FIX ABSOLUTE PATH) ---
+        // Membuat manifest secara dinamis agar icon tidak hilang
         window.addEventListener('load', () => {
-            // 1. Dapatkan Base URL
             let basePath = window.location.href;
             if (basePath.indexOf('?') > -1) basePath = basePath.substring(0, basePath.indexOf('?'));
             if (basePath.endsWith('index.html')) basePath = basePath.substring(0, basePath.lastIndexOf('index.html'));
             if (!basePath.endsWith('/')) basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
 
+            console.log("PWA Base Path:", basePath);
+
             const manifest = {
                 "name": "Disipline Tracker",
                 "short_name": "Tracker",
-                "start_url": basePath, 
+                "id": "/tracker2026", // Menambahkan ID untuk stabilitas PWA
+                "start_url": basePath,
                 "display": "standalone",
                 "background_color": "#050810",
                 "theme_color": "#050810",
                 "orientation": "portrait",
                 "icons": [
                     {
-                        "src": basePath + "icon_aplikasi.png", 
+                        "src": basePath + "icon_aplikasi.png",
                         "sizes": "192x192",
                         "type": "image/png",
-                        "purpose": "any maskable" // PENTING AGAR ICON FULL
+                        "purpose": "any maskable"
                     },
                     {
-                        "src": basePath + "icon_aplikasi.png", 
+                        "src": basePath + "icon_aplikasi.png",
                         "sizes": "512x512",
                         "type": "image/png",
-                        "purpose": "any maskable" // PENTING AGAR ICON FULL
+                        "purpose": "any maskable"
                     }
                 ]
             };
             
             const stringManifest = JSON.stringify(manifest);
             const blob = new Blob([stringManifest], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            const manifestLink = document.getElementById('pwa-manifest');
-            if(manifestLink) manifestLink.setAttribute('href', manifestURL);
-        });
+            document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(blob));
 
-        // --- SERVICE WORKER REGISTRATION (REQUIRED FOR PWA NO-BADGE) ---
-        // Android tidak akan menghilangkan badge Chrome jika tidak ada Service Worker.
-        // Script ini mencoba mendaftarkan Service Worker dummy via Blob untuk "menipu" browser.
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // 1. Coba daftar sw.js asli (jika user punya file sw.js)
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('SW Registered (Real file)');
-                }).catch(err => {
-                    // 2. Fallback: Daftar Dummy SW via Blob (Trik agar installable)
-                    // Catatan: Ini mungkin diblok oleh browser modern karena alasan keamanan (scope mismatch)
-                    // Tapi lebih baik daripada tidak ada sama sekali.
-                    const swCode = "self.addEventListener('fetch', () => {});";
-                    const blob = new Blob([swCode], {type: 'application/javascript'});
-                    const url = URL.createObjectURL(blob);
-                    navigator.serviceWorker.register(url)
-                        .then(() => console.log('Dummy SW Registered via Blob'))
-                        .catch(e => console.log('SW Blob Failed (Expected on some browsers):', e));
-                });
-            });
-        }
+            // --- 2. SERVICE WORKER INJECTION (FIX ICON DISAPPEARING) ---
+            // Kita buat Service Worker "Palsu" tapi valid agar browser menganggap ini App beneran
+            // Ini mencegah icon terhapus saat restart HP
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'tracker-cache-v3';
+                    self.addEventListener('install', (e) => {
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('activate', (e) => {
+                        e.waitUntil(self.clients.claim());
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        // Strategi: Network First, Fallback to Cache (Basic)
+                        e.respondWith(
+                            fetch(e.request).catch(() => {
+                                return new Response("Offline Mode active. Check internet.");
+                            })
+                        );
+                    });
+                `;
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swUrl = URL.createObjectURL(swBlob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(reg => console.log("SW Registered (PWA Mode Active):", reg))
+                    .catch(err => console.log("SW Fail:", err));
+            }
+        });
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -572,27 +577,31 @@
             }
         };
 
-        // --- IMPROVED NOTIFICATION LOGIC ---
+        // --- IMPROVED NOTIFICATION UI ---
         window.updateNotifUI = function(permission) {
             const btn = document.getElementById('notifStatusBtn');
             const text = document.getElementById('notifText');
             const icon = document.getElementById('notifIcon');
+            const statusLabel = document.getElementById('alarmStatusText');
             
             if (!btn || !text || !icon) return;
             btn.classList.remove('notif-active', 'notif-prompt', 'notif-blocked');
             
             if (permission === "granted") {
                 btn.classList.add("notif-active");
-                text.innerText = "AKTIF";
+                text.innerText = "ALARM AKTIF";
                 icon.className = "fas fa-bell";
+                if(statusLabel) statusLabel.innerText = "ALARM 03:30 SIAP (JAGA APLIKASI TERBUKA)";
             } else if (permission === "denied") {
                 btn.classList.add("notif-blocked");
-                text.innerText = "BLOKIR";
+                text.innerText = "ALARM BLOKIR";
                 icon.className = "fas fa-bell-slash";
+                if(statusLabel) statusLabel.innerText = "IZIN DITOLAK BROWSER";
             } else {
                 btn.classList.add("notif-prompt");
-                text.innerText = "IZIN?";
+                text.innerText = "IZINKAN ALARM?";
                 icon.className = "fas fa-bell";
+                if(statusLabel) statusLabel.innerText = "KLIK UNTUK AKTIFKAN ALARM";
             }
         };
 
@@ -605,32 +614,68 @@
                 const permission = await Notification.requestPermission();
                 window.updateNotifUI(permission);
                 if (permission === "granted") {
-                    window.showMessage("Notifikasi berhasil diaktifkan!");
-                    window.testNotification();
-                } else if (permission === "denied") {
-                    window.showMessage("Izin notifikasi ditolak. Cek pengaturan browser.");
+                    window.showMessage("Alarm 03:30 Diaktifkan!");
+                    window.testNotification(true); // Silent test
                 }
             } catch (error) {
                 console.error("Gagal meminta izin notifikasi:", error);
             }
         };
 
-        window.testNotification = () => { 
+        window.testNotification = (silent = false) => { 
             if (Notification.permission === "granted") { 
-                window.showMessage("Mengirim notifikasi tes...");
+                if(!silent) window.showMessage("Mengirim notifikasi tes...");
                 const title = "🔔 TES DISIPLINE TRACKER";
                 const options = {
-                    body: "Sistem notifikasi berjalan dengan baik! Semangat!",
+                    body: "Sistem alarm 03:30 siap! Pastikan HP tidak mode hening.",
                     icon: "icon_transparent_blue_text-removebg-preview.png",
-                    vibrate: [200, 100, 200], // Fitur Getar
+                    vibrate: [200, 100, 200],
+                    tag: "test-notif",
                     requireInteraction: false
                 };
+                // Trigger Sound (Simple Beep Trick if user interacts)
                 if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 new Notification(title, options);
             } else {
-                window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
+                window.showMessage("Izin notifikasi belum aktif.");
             }
         };
+
+        // --- 3. ALARM CHECK LOGIC (FIX 03:30) ---
+        let lastAlarmTrigger = null;
+        function checkDailyAlarm() {
+            if (Notification.permission !== "granted") return;
+            
+            const now = new Date();
+            // Target: 03:30
+            const targetH = 3; 
+            const targetM = 30;
+
+            // Cek apakah sekarang jam 03:30 DAN belum bunyi hari ini
+            const todayStr = now.toDateString();
+            
+            if (now.getHours() === targetH && now.getMinutes() === targetM) {
+                if (lastAlarmTrigger !== todayStr) {
+                    // TRIGGER ALARM
+                    lastAlarmTrigger = todayStr;
+                    
+                    // 1. Notifikasi Visual
+                    new Notification("⏰ WAKTUNYA BANGUN!", {
+                        body: "Jam 03:30 WITA - Disiplin dimulai sekarang! Kalahkan rasa malas!",
+                        icon: "icon_transparent_blue_text-removebg-preview.png",
+                        vibrate: [1000, 500, 1000, 500, 1000], // Getar sangat panjang
+                        requireInteraction: true,
+                        tag: "alarm-0330"
+                    });
+
+                    // 2. Getar Panjang
+                    if (navigator.vibrate) navigator.vibrate([1000, 500, 1000, 500, 1000]);
+
+                    // 3. Tampilkan pesan di layar
+                    alert("WAKTUNYA BANGUN! JAM 03:30 WITA!");
+                }
+            }
+        }
 
         const firebaseConfig = { apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ", authDomain: "tracker-2026-4bbd9.firebaseapp.com", projectId: "tracker-2026-4bbd9", storageBucket: "tracker-2026-4bbd9.firebasestorage.app", messagingSenderId: "634119648342", appId: "1:634119648342:web:35aff0729cdcb37dcc37f7" };
         const app = initializeApp(firebaseConfig);
@@ -656,14 +701,12 @@
                 for (let i = 0; i < particles.length; i++) {
                     particles[i].update(canvas.width, canvas.height); particles[i].draw(ctx);
                     
-                    // --- RESTORED INTERACTIVE MESH (TOUCH/MOUSE ANIMATION) ---
                     const dmx = particles[i].x - mouseX;
                     const dmy = particles[i].y - mouseY;
                     const mouseDistance = Math.sqrt(dmx * dmx + dmy * dmy);
 
                     for (let j = i; j < particles.length; j++) {
                         const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y, distance = Math.sqrt(dx * dx + dy * dy);
-                        // Connect if close to each other AND close to mouse (Flashlight effect)
                         if (distance < 100 && mouseDistance < 150) { 
                             ctx.strokeStyle = `rgba(59, 130, 246, ${1 - (distance / 100)})`; 
                             ctx.lineWidth = 0.5; 
@@ -692,7 +735,6 @@
             } 
         };
         
-        // --- NEW GUEST LOGIN WITH OFFLINE FALLBACK ---
         window.loginAsGuest = async () => { 
             const btn = document.getElementById('btnGuest');
             if(btn) { btn.innerHTML = '<div class="pulse-dot inline-block mr-2"></div> Memproses...'; btn.classList.add('loading'); }
@@ -701,12 +743,9 @@
                 await signInAnonymously(auth); 
             } catch (e) { 
                 console.error("Firebase Guest Login Failed, falling back to local:", e);
-                // Fallback to Offline Mode
                 if (e.code === 'auth/operation-not-allowed' || e.code === 'auth/internal-error' || e.message) {
-                    if(confirm("Login Guest Firebase gagal (mungkin belum diaktifkan di console). Masuk ke Mode Offline Lokal? Data hanya tersimpan di browser ini.")) {
+                    if(confirm("Login Guest Firebase gagal. Masuk ke Mode Offline Lokal?")) {
                         window.startLocalGuestMode();
-                    } else {
-                        alert("Tips: Aktifkan 'Anonymous' di Firebase Console -> Authentication -> Sign-in method.");
                     }
                 }
             } finally {
@@ -742,17 +781,13 @@
              await saveToFirestore();
         };
 
-        // --- NEW: Sanitize Data Function (Healer) ---
         function sanitizeCloudData(data) {
             if (!data) return {};
             Object.keys(data).forEach(key => {
                 const item = data[key];
                 if (typeof item !== 'object') return;
-                
-                // FORCE FIX: If timer is running but end time is invalid, RESET IT.
                 if (item.timerRunning === true) {
                     if (!item.timerEnd || isNaN(Number(item.timerEnd))) {
-                        console.warn(`Fixing corrupted timer for ${key}`);
                         item.timerRunning = false;
                         item.timerEnd = null;
                         item.remainingMs = null;
@@ -762,23 +797,17 @@
             return data;
         }
 
-        // --- NEW: HARD RESET FUNCTION WITH CONFIRMATION ALERT ---
         window.hardResetDay = async () => {
-            if (!confirm("⚠️ HAPUS DATA HARI INI?\n\nApakah Anda yakin ingin menghapus data hari ini? Data yang dihapus tidak dapat dikembalikan.")) return;
-            
+            if (!confirm("⚠️ HAPUS DATA HARI INI?\n\nApakah Anda yakin ingin menghapus data hari ini?")) return;
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
-            cloudData = {}; // Clear memory
-            
+            cloudData = {}; 
             if (isLocalMode) {
                 localStorage.removeItem(`tracker_data_${docId}`);
                 window.renderDayTracker();
-                window.showMessage("Data lokal hari ini berhasil direset.");
             } else if (auth.currentUser) {
                 try {
                     await deleteDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId));
-                    window.showMessage("Data cloud hari ini berhasil direset.");
                 } catch (e) {
-                    console.error(e);
                     alert("Gagal reset data cloud: " + e.message);
                 }
             }
@@ -786,9 +815,7 @@
 
         window.setupRealtimeSync = function() {
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
-            
             if (isLocalMode) {
-                // Local Storage Sync Logic
                 const localKey = `tracker_data_${docId}`;
                 const stored = localStorage.getItem(localKey);
                 cloudData = stored ? sanitizeCloudData(JSON.parse(stored)) : {};
@@ -802,9 +829,7 @@
             if (dayUnsubscribe) dayUnsubscribe();
             dayUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), (snap) => {
                 const rawData = snap.exists() ? snap.data() : {};
-                const newData = sanitizeCloudData(rawData); // Apply Healer
-                
-                // Preserve active note input
+                const newData = sanitizeCloudData(rawData); 
                 const activeId = document.activeElement ? document.activeElement.id : null;
                 if (activeId && activeId.startsWith('note-')) {
                     const editingItemId = activeId.replace('note-', '');
@@ -823,14 +848,12 @@
 
         async function saveToFirestore() { 
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
-            
             if (isLocalMode) {
                 const localKey = `tracker_data_${docId}`;
                 localStorage.setItem(localKey, JSON.stringify(cloudData));
                 window.updateSyncUI();
                 return;
             }
-
             if (!auth.currentUser) return; 
             await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
         }
@@ -855,8 +878,7 @@
 
         window.renderDayTracker = function() {
             let activeId = document.activeElement ? document.activeElement.id : null;
-            let selectionStart = 0;
-            let selectionEnd = 0;
+            let selectionStart = 0, selectionEnd = 0;
             if (activeId && document.activeElement.tagName === "TEXTAREA") {
                 selectionStart = document.activeElement.selectionStart;
                 selectionEnd = document.activeElement.selectionEnd;
@@ -880,6 +902,12 @@
             let fastingLabel = isRamadan ? "🌙 Puasa Ramadhan" : (selectedDate.getDay() === 1 ? "✨ Puasa Sunnah Senin" : (selectedDate.getDay() === 4 ? "✨ Puasa Sunnah Kamis" : ""));
             if(ui.fasting) ui.fasting.innerHTML = fastingLabel ? `<div class="fasting-alert ${isRamadan ? 'fasting-ramadhan' : ''}">${fastingLabel}</div>` : '';
 
+            // --- TENTUKAN NAMA TUGAS PUASA ---
+            let fastingTaskName = "Puasa Sunnah";
+            if (isRamadan) fastingTaskName = "Puasa Ramadhan";
+            else if (selectedDate.getDay() === 1) fastingTaskName = "Puasa Sunnah Senin";
+            else if (selectedDate.getDay() === 4) fastingTaskName = "Puasa Sunnah Kamis";
+
             const routine = [
                 { id: "english", time: "03:30", task: "Belajar Bahasa Inggris", icon: "fa-language", duration: 30 * 60000 },
                 { id: "subuh", time: "04:15", task: "Bangun & Sholat Subuh", icon: "fa-mosque", noTimer: true },
@@ -899,15 +927,39 @@
                 { id: "buku", time: "19:00", task: "Baca Buku (Pomodoro)", icon: "fa-book-open", isPomo: true },
                 { id: "tidur", time: "20:30", task: "Tidur Malam", icon: "fa-bed", noTimer: true }
             ];
-            const extra = [ { id: "siram_pagi", task: "Menyiram Tanaman (Pagi)", icon: "fa-faucet-drip" }, { id: "siram_sore", task: "Menyiram Tanaman (Sore)", icon: "fa-faucet-drip" }, { id: "kasur", task: "Membersihkan Kasur", icon: "fa-bed" }, { id: "sapu", task: "Menyapu Rumah", icon: "fa-broom" }, { id: "piring", task: "Mencuci Piring", icon: "fa-sink" }, { id: "istigfar", task: "Istigfar 1000x", icon: "fa-comment-dots" }, { id: "taubat", task: "Sholat Taubat", icon: "fa-person-praying" }, { id: "kuku", task: "Potong Kuku", icon: "fa-scissors", specialDaysKuku: true }, { id: "cuci", task: "Cuci Pakaian", icon: "fa-shirt", fridayOnly: true } ];
+            
+            const extra = [ 
+                // --- TUGAS BARU: PUASA (Hanya muncul Senin/Kamis/Ramadhan) ---
+                { id: "puasa_track", task: fastingTaskName, icon: "fa-moon", fastingOnly: true, noTimer: true }, 
+                
+                { id: "siram_pagi", task: "Menyiram Tanaman (Pagi)", icon: "fa-faucet-drip" }, 
+                { id: "siram_sore", task: "Menyiram Tanaman (Sore)", icon: "fa-faucet-drip" }, 
+                { id: "kasur", task: "Membersihkan Kasur", icon: "fa-bed" }, 
+                { id: "sapu", task: "Menyapu Rumah", icon: "fa-broom" }, 
+                { id: "piring", task: "Mencuci Piring", icon: "fa-sink" }, 
+                { id: "istigfar", task: "Istigfar 1000x", icon: "fa-comment-dots" }, 
+                { id: "taubat", task: "Sholat Taubat", icon: "fa-person-praying" }, 
+                { id: "kuku", task: "Potong Kuku", icon: "fa-scissors", specialDaysKuku: true }, 
+                { id: "cuci", task: "Cuci Pakaian", icon: "fa-shirt", fridayOnly: true } 
+            ];
 
             const renderItems = (list, targetId) => {
                 const container = document.getElementById(targetId);
                 if (!container) return 0; container.innerHTML = ''; let done = 0;
                 list.forEach(item => {
+                    // 1. Filter Jumat Only (Cuci Pakaian dll)
                     if (item.fridayOnly && !isFri) return;
-                    if (item.specialDaysKuku && ![1,4,5].includes(selectedDate.getDay())) return;
+
+                    // 2. Filter Majelis (Skip saat Ramadhan)
                     if (item.id === "majelis" && isRamadan) return;
+
+                    // 3. Filter Puasa (Senin, Kamis, Ramadhan)
+                    // Note: 1=Senin, 4=Kamis
+                    if (item.fastingOnly && !isRamadan && ![1, 4].includes(selectedDate.getDay())) return;
+
+                    // 4. Filter Potong Kuku (Hanya Senin, Kamis, Jumat)
+                    // Note: 1=Senin, 4=Kamis, 5=Jumat
+                    if (item.specialDaysKuku && ![1, 4, 5].includes(selectedDate.getDay())) return;
 
                     const itemData = cloudData[item.id] || {}, status = itemData.status || 'none';
                     if (status === 'done') done++;
@@ -938,16 +990,10 @@
                     const card = document.createElement('div');
                     card.className = 'glass-card p-5 rounded-3xl flex flex-col hover:scale-[1.01] transition-all relative';
                     
-                    // --- MODIFIED TEXTAREA LOGIC ---
                     card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 pr-2"><div class="flex items-center gap-3 mb-2">${item.time ? `<span class="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase">${item.time}</span>` : ''}<i class="fas ${item.icon} text-[10px] text-slate-500"></i><h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'}">${item.task}</h3></div><textarea id="note-${item.id}" placeholder="Catatan kamu..." class="note-input w-full mt-1 p-2 rounded-xl min-h-[40px] resize-none">${itemData.note || ''}</textarea><div class="flex flex-wrap gap-3 mt-3">${attHtml}</div><div class="flex gap-4 mt-3"><button onclick="window.triggerUpload('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-paperclip"></i> Berkas</button>${!item.noTimer && (item.duration || item.isPomo) ? `<button onclick="window.toggleTimerPanel('${item.id}')" class="text-slate-500 hover:text-blue-400 transition-colors text-[10px] font-bold uppercase tracking-wider"><i class="fas fa-clock"></i> Timer</button>` : ''}</div>${timerUI}</div><div class="flex flex-col gap-2 ml-2"><button onclick="window.updateStatus('${item.id}', '${status === 'done' ? 'none' : 'done'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'done' ? 'status-done' : 'status-none'}"><i class="fas fa-check"></i></button><button onclick="window.updateStatus('${item.id}', '${status === 'fail' ? 'none' : 'fail'}')" class="w-10 h-10 rounded-2xl flex items-center justify-center status-btn ${status === 'fail' ? 'status-fail' : 'status-none'}"><i class="fas fa-times"></i></button></div></div>`;
                     
-                    // Attach event listeners manually to elements inside card
                     const textarea = card.querySelector(`#note-${item.id}`);
-                    
-                    // 1. Update local state immediately on typing (prevents loss on re-render)
                     textarea.oninput = (e) => window.updateNoteLocal(item.id, e.target.value);
-                    
-                    // 2. Save to Firestore only when user is done (blur)
                     textarea.onblur = (e) => window.saveNoteToFirestore(item.id, e.target.value);
                     
                     container.appendChild(card);
@@ -957,12 +1003,10 @@
             const mD = renderItems(routine, 'taskList'), eD = renderItems(extra, 'extraTaskList');
             if(ui.score) ui.score.innerText = Math.round(((mD + eD) / (document.querySelectorAll('#taskList .glass-card, #extraTaskList .glass-card').length || 1)) * 100) + '%';
 
-            // --- RESTORE FOCUS ---
             if (activeId) {
                 const el = document.getElementById(activeId);
                 if (el) {
                     el.focus();
-                    // Restore cursor position if possible
                     if (el.tagName === "TEXTAREA" && typeof el.setSelectionRange === "function") {
                         el.setSelectionRange(selectionStart, selectionEnd);
                     }
@@ -971,7 +1015,6 @@
         };
 
         window.toggleTimerPanel = (id) => { 
-            console.log("Toggling timer for:", id); 
             if(!window.openTimerPanels) window.openTimerPanels = {};
             window.openTimerPanels[id] = !window.openTimerPanels[id]; 
             window.renderDayTracker(); 
@@ -1001,17 +1044,13 @@
         const installBtn = document.getElementById('installAppBtn');
         const iosPrompt = document.getElementById('iosInstallPrompt');
 
-        // Logic 1: Android/Chrome "Install App" Button
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); 
             deferredPrompt = e;
             installBtn.classList.remove('hidden'); 
             installBtn.classList.add('flex');
-            
-            // Enable button
             installBtn.classList.remove('cursor-not-allowed', 'opacity-50');
             installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white');
-            installBtn.classList.remove('bg-slate-700', 'text-slate-400');
         });
 
         window.installPWA = async () => {
@@ -1025,7 +1064,6 @@
             installBtn.classList.add('hidden');
         };
 
-        // Logic 2: iOS Detection
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
         
@@ -1038,9 +1076,6 @@
             }, 3000);
         }
 
-        window.scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
-        window.onscroll = function() { const btn = document.getElementById('backToTopBtn'); if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); };
-        
         function handleUserLogin(user) {
             const area = document.getElementById('dayTrackerArea'), info = document.getElementById('userInfo'), wrapper = document.getElementById('notifWrapper'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader');
             
@@ -1079,7 +1114,7 @@
                     isLocalMode = false;
                     handleUserLogin(user);
                 } else {
-                    if (isLocalMode) return; // Don't reset if in local mode
+                    if (isLocalMode) return; 
                     isUserLoggedIn = false; 
                     const area = document.getElementById('dayTrackerArea'), loginSec = document.getElementById('loginSection'), hBrand = document.getElementById('headerBrand'), navWrap = document.getElementById('navWrapper'), hMain = document.getElementById('mainHeader'), wrapper = document.getElementById('notifWrapper'), info = document.getElementById('userInfo');
                     area.classList.add('hidden', 'opacity-0'); 
@@ -1113,19 +1148,17 @@
             if ("Notification" in window) window.updateNotifUI(Notification.permission);
         });
 
-        // 1-SECOND TICKER (OPTIMIZED FOR PERFORMANCE)
+        // 1-SECOND TICKER (UPDATED FOR ALARM)
         setInterval(() => {
             window.updateSyncUI(); 
+            // Cek Alarm 03:30 Setiap Detik
+            checkDailyAlarm();
             
-            // Iterate directly over keys to avoid full re-render
             Object.keys(cloudData).forEach(id => { 
                 const itemData = cloudData[id];
                 if (itemData && itemData.timerRunning) { 
                     const rem = itemData.timerEnd ? itemData.timerEnd - Date.now() : 0;
-                    
-                    // ANTI-CRASH: Force stop if timer is NaN
                     if (isNaN(rem)) {
-                        console.warn("Timer NaN detected, resetting...");
                         itemData.timerRunning = false; itemData.timerEnd = null;
                         saveToFirestore();
                         window.renderDayTracker();
@@ -1134,24 +1167,14 @@
 
                     const displayEl = document.getElementById(`timer-display-${id}`);
                     if (rem <= 0) { 
-                        // TIME UP LOGIC
-                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]); // Getar Panjang
+                        if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
                         if (Notification.permission === "granted") {
                              new Notification("⏱️ WAKTU HABIS!", { body: `Sesi selesai!`, icon: "icon_transparent_blue_text-removebg-preview.png" });
                         }
-                        
-                        // Update State
-                        itemData.timerRunning = false; 
-                        itemData.timerEnd = null; 
-                        itemData.remainingMs = null; 
-                        
-                        saveToFirestore(); 
-                        window.renderDayTracker(); // Re-render to update buttons (Play -> Pause)
+                        itemData.timerRunning = false; itemData.timerEnd = null; itemData.remainingMs = null; 
+                        saveToFirestore(); window.renderDayTracker();
                     } else {
-                        // UPDATE TEXT DIRECTLY (No Re-render)
-                        if (displayEl) {
-                            displayEl.innerText = window.formatTime(rem);
-                        }
+                        if (displayEl) displayEl.innerText = window.formatTime(rem);
                     }
                 } 
             });

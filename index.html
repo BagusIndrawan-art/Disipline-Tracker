@@ -743,7 +743,7 @@
                 if(!financeData.incomes) financeData.incomes = [];
                 if(!financeData.expenses) financeData.expenses = [];
                 window.renderFinance();
-            });
+            }, (err) => { console.error("Firebase Finance Sync Error:", err); });
 
             // Sync Catatan (Notes)
             if (notesUnsubscribe) notesUnsubscribe();
@@ -751,7 +751,7 @@
                 notesData = snap.exists() ? snap.data() : { notesList: [] };
                 if(!notesData.notesList) notesData.notesList = [];
                 window.renderNotes();
-            });
+            }, (err) => { console.error("Firebase Notes Sync Error:", err); });
 
             window.updateCalendarView();
         };
@@ -760,7 +760,11 @@
             const docId = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
             if (isLocalMode) { localStorage.setItem(`tracker_data_${docId}`, JSON.stringify(cloudData)); window.updateSyncUI(); return; }
             if (!auth.currentUser) return; 
-            await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
+            try {
+                await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar', docId), cloudData); 
+            } catch (err) {
+                console.error("Gagal sinkron jadwal:", err);
+            }
         }
 
         window.updateCalendarView = function(isFromDropdown = false) {
@@ -975,7 +979,12 @@
             const finDocId = `finance-${selectedDate.getFullYear()}-${selectedDate.getMonth()}`;
             if (isLocalMode) { localStorage.setItem(`tracker_fin_${finDocId}`, JSON.stringify(financeData)); window.updateSyncUI(); return; }
             if (!auth.currentUser) return; 
-            await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance', finDocId), financeData);
+            try {
+                await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance', finDocId), financeData);
+            } catch (err) {
+                console.error("Firebase Finance Save Error:", err);
+                window.showMessage("Gagal menyimpan keuangan ke Cloud!");
+            }
         };
 
         window.addTransaction = async (type) => {
@@ -1053,7 +1062,12 @@
         window.saveNotesToFirestore = async () => {
             if (isLocalMode) { localStorage.setItem(`tracker_notes_global`, JSON.stringify(notesData)); window.updateSyncUI(); return; }
             if (!auth.currentUser) return;
-            await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'notes', 'global'), notesData);
+            try {
+                await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'notes', 'global'), notesData);
+            } catch (err) {
+                console.error("Firebase Notes Save Error:", err);
+                window.showMessage("Gagal menyimpan catatan ke Cloud!");
+            }
         };
 
         window.openNoteModal = (id = null) => {

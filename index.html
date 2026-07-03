@@ -20,8 +20,11 @@
     <link rel="manifest" id="pwa-manifest">
 
     <title>Disipline Tracker 2026</title>
+    
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
         if (window.location.hostname === "127.0.0.1") {
@@ -80,7 +83,7 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-        #syncIndicator { position: fixed; bottom: 100px; right: 25px; z-index: 100; transition: all 0.3s ease; } /* Adjusted to avoid bottom nav */
+        #syncIndicator { position: fixed; bottom: 100px; right: 25px; z-index: 100; transition: all 0.3s ease; }
         .state-online { background: #064e3b; color: #34d399; }
         .state-offline { background: #450a0a; color: #f87171; }
         .state-local { background: #d97706; color: #fcd34d; }
@@ -146,11 +149,9 @@
         .fasting-alert { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 6px 14px; border-radius: 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); border: 1px solid rgba(255,255,255,0.1); letter-spacing: 1px; }
         .fasting-ramadhan { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 
-        /* Install Button Pulse */
         @keyframes installPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .install-pulse { animation: installPulse 2s infinite; }
 
-        /* Modifikasi nav-pb untuk padding bawah yg pas di HP */
         .nav-pb { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); padding-top: 16px; }
     </style>
 </head>
@@ -165,7 +166,7 @@
         <p class="text-white font-bold text-[10px]">MEMPROSES DATA...</p>
     </div>
 
-    <!-- PWA Install Guide for iOS (Floating) -->
+    <!-- PWA Install Guide for iOS -->
     <div id="iosInstallPrompt" class="hidden fixed bottom-24 left-4 right-4 z-[9000] bg-slate-900/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl flex-col gap-3">
         <div class="flex justify-between items-start">
             <h3 class="text-white font-bold text-sm">Install Aplikasi</h3>
@@ -188,7 +189,7 @@
         </div>
     </div>
 
-    <!-- MODAL CATATAN BARU DENGAN TANGGAL -->
+    <!-- MODAL CATATAN BARU -->
     <div id="noteModal" class="hidden fixed inset-0 z-[30000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-4">
         <div class="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative">
             <button onclick="window.closeNoteModal()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-400 transition-colors"><i class="fas fa-times text-xl"></i></button>
@@ -214,7 +215,7 @@
         </div>
     </div>
 
-    <!-- MODAL BULK EDIT (DAFTAR JADWAL) -->
+    <!-- MODAL BULK EDIT (JADWAL) -->
     <div id="bulkEditModal" class="hidden fixed inset-0 z-[30000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-2 sm:p-4">
         <div class="bg-slate-900 border border-blue-500/30 rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl relative flex flex-col max-h-[90vh]">
             <button onclick="window.closeBulkEdit()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-400 transition-colors"><i class="fas fa-times text-xl"></i></button>
@@ -234,32 +235,23 @@
 
             <div id="bulkEditContainer" class="flex-1 overflow-y-auto pr-2 space-y-2 mb-4 custom-scrollbar pb-10"></div>
 
-            <div class="flex gap-3 pt-4 border-t border-white/10 mt-auto bg-slate-900">
-                <button onclick="window.addBulkEditRow()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all border border-white/5"><i class="fas fa-plus mr-1 text-blue-400"></i> Tambah Baris</button>
-                <button onclick="window.promptSaveBulkEdit()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all shadow-lg shadow-blue-900/50"><i class="fas fa-save mr-1"></i> Simpan Semua</button>
+            <div class="flex flex-col gap-3 pt-4 border-t border-white/10 mt-auto bg-slate-900">
+                <button onclick="window.addBulkEditRow()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all border border-white/5"><i class="fas fa-plus mr-1 text-blue-400"></i> Tambah Baris</button>
+                <div class="flex gap-2">
+                    <button onclick="window.saveBulkEdit('today')" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all shadow-lg shadow-blue-900/50"><i class="fas fa-save mr-1"></i> Simpan (Hanya Hari Ini)</button>
+                    <!-- Tombol ini bersifat placeholder untuk konsep override global. Saat ini hanya mengubah hari terpilih agar aman. -->
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL KONFIRMASI SAVE JADWAL -->
-    <div id="bulkEditConfirmModal" class="hidden fixed inset-0 z-[40000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-4">
-        <div class="bg-slate-900 border border-blue-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
-            <h3 class="text-white font-black uppercase tracking-wider mb-4 text-sm text-center">Simpan Jadwal</h3>
-            <p class="text-[11px] text-slate-400 mb-6 text-center">Terapkan perubahan jadwal ini untuk waktu kapan?</p>
-            <div class="space-y-3">
-                <button onclick="window.confirmSaveBulkEdit('once')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] py-4 rounded-xl transition-all border border-white/5">Hanya Hari Ini (<span id="lblScopeOnce"></span>)</button>
-                <button onclick="window.confirmSaveBulkEdit('dayOfWeek')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] py-4 rounded-xl transition-all border border-white/5">Setiap Hari <span id="lblScopeDay"></span></button>
-                <button onclick="window.confirmSaveBulkEdit('all')" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-[11px] py-4 rounded-xl transition-all shadow-lg shadow-blue-900/50">Semua Hari (Default)</button>
-            </div>
-            <button onclick="document.getElementById('bulkEditConfirmModal').classList.replace('flex', 'hidden')" class="w-full mt-4 text-[10px] text-slate-500 hover:text-slate-300 font-bold uppercase tracking-wider py-2">Batal</button>
         </div>
     </div>
 
     <div id="syncIndicator" class="status-pill state-offline"><div class="pulse-dot"></div><span id="syncText">Cloud Offline</span></div>
 
     <header id="mainHeader" class="relative z-50 bg-[#050810]/90 backdrop-blur-xl p-4 sm:p-5 header-clean">
-        <div class="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-4 justify-start flex-1">
+        <div class="max-w-7xl mx-auto flex flex-row items-center justify-between relative">
+            
+            <!-- LEFT AREA: User & Notif -->
+            <div class="flex items-center gap-4 justify-start relative z-10">
                 <div id="userInfo"></div>
                 <div id="notifWrapper" class="hidden sm:flex flex-col items-start gap-2">
                     <div class="flex items-center gap-2">
@@ -273,19 +265,35 @@
                 </div>
             </div>
 
-            <div id="headerBrand" class="hidden flex items-center justify-center flex-1 text-center">
-                <div class="flex items-center gap-2 justify-center">
-                    <span class="text-blue-500 text-xl sm:text-2xl"><i class="fas fa-bolt"></i></span>
-                    <h1 class="text-lg sm:text-xl font-black text-white uppercase tracking-tighter">Tracker</h1>
+            <!-- CENTER AREA: Premium Absolute Logo -->
+            <div id="headerBrand" class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none z-0">
+                <div class="relative group pointer-events-auto transition-transform hover:scale-105 cursor-pointer">
+                    <!-- Glow Effect Background -->
+                    <div class="absolute -inset-1.5 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full blur opacity-25 group-hover:opacity-60 transition duration-500"></div>
+                    
+                    <!-- Logo Container -->
+                    <div class="relative flex items-center gap-2 sm:gap-3 bg-[#0a0f1a] border border-blue-500/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-2xl">
+                        <!-- Icon Circle -->
+                        <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.6)] relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/20 blur-[2px] rounded-full"></div>
+                            <i class="fas fa-bolt text-white text-[10px] sm:text-[12px] relative z-10 drop-shadow-md"></i>
+                        </div>
+                        <!-- Text Area -->
+                        <div class="flex flex-col items-start justify-center pr-1 sm:pr-2">
+                            <span class="text-[6px] sm:text-[7px] text-cyan-400 font-black uppercase tracking-[0.4em] leading-none mb-0.5 sm:mb-1">Disipline</span>
+                            <span class="text-[12px] sm:text-[15px] font-black text-white uppercase tracking-widest leading-none drop-shadow-sm">Tracker</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="navWrapper" class="hidden flex flex-row items-center justify-center md:justify-end gap-4 w-full md:w-1/3">
-                <!-- INSTALL BUTTON FOR PWA -->
+            <!-- RIGHT AREA: App Install Button -->
+            <div id="navWrapper" class="hidden flex flex-row items-center justify-end relative z-10">
                 <button id="installAppBtn" onclick="window.installPWA()" class="hidden bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center gap-2 install-pulse">
                     <i class="fas fa-download"></i> Install App
                 </button>
             </div>
+            
         </div>
     </header>
 
@@ -380,93 +388,127 @@
                     </div>
                     <div id="extraTaskList" class="flex flex-col gap-3"></div>
                 </div>
-            </div> <!-- PENUTUP TAB 1 JADWAL -->
+            </div>
 
-            <!-- TAB 2: KEUANGAN BULANAN -->
+            <!-- TAB 2: KEUANGAN (KOMPLEKS - 3 KOLOM - FREKUENSI BULANAN) -->
             <div id="tabKeuanganContent" class="hidden opacity-0 transition-all duration-500">
-                <div class="glass-card p-6 sm:p-10 rounded-[2.5rem] mb-10 relative overflow-hidden shadow-2xl border border-white/5 bg-[#0a0f1a]">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none transform translate-x-1/2 -translate-y-1/2"></div>
-                    
-                    <div class="flex items-center gap-3 mb-10 relative z-10">
-                        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center"><i class="fas fa-chart-pie text-blue-400 text-sm"></i></div>
-                        <h3 id="financeMonthLabel" class="text-[11px] font-black text-slate-300 uppercase tracking-[4px] leading-tight">Ringkasan Keuangan<br>Bulan Ini</h3>
+                <div class="flex items-center gap-3 mb-6 px-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center"><i class="fas fa-chart-pie text-blue-400 text-sm"></i></div>
+                    <h3 id="financeMonthLabel" class="text-[12px] font-black text-slate-300 uppercase tracking-[4px] leading-tight">Ringkasan Keuangan<br>Bulan Ini</h3>
+                </div>
+
+                <!-- Dashboard Stats Grid (4 Kolom) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                    <!-- Sisa Saldo -->
+                    <div class="bg-gradient-to-br from-[#0d1322] to-[#080b13] p-4 rounded-3xl border border-blue-500/20 shadow-2xl relative overflow-hidden group">
+                        <div class="absolute -right-2 -top-2 text-blue-500/5 text-5xl transition-transform group-hover:scale-110"><i class="fas fa-wallet"></i></div>
+                        <p class="text-[8px] text-slate-400 font-black uppercase tracking-[3px] mb-1 relative z-10">Sisa Saldo</p>
+                        <p id="saldoTxt" class="text-lg sm:text-xl font-black text-white relative z-10 drop-shadow-lg" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                    </div>
+
+                    <!-- Total Pemasukan -->
+                    <div class="bg-[#0b101e] p-4 rounded-3xl border border-emerald-500/10 shadow-xl relative overflow-hidden group">
+                        <div class="absolute -right-2 -bottom-2 text-emerald-500/5 text-5xl transition-transform group-hover:scale-110"><i class="fas fa-arrow-down"></i></div>
+                        <p class="text-[8px] text-emerald-500/80 font-black uppercase tracking-[3px] mb-1 relative z-10">Pemasukan</p>
+                        <p id="totalIncomeTxt" class="text-lg sm:text-xl font-black text-emerald-400 relative z-10" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                    </div>
+
+                    <!-- Total Pengeluaran -->
+                    <div class="bg-[#0b101e] p-4 rounded-3xl border border-rose-500/10 shadow-xl relative overflow-hidden group">
+                        <div class="absolute -right-2 -bottom-2 text-rose-500/5 text-5xl transition-transform group-hover:scale-110"><i class="fas fa-arrow-up"></i></div>
+                        <p class="text-[8px] text-rose-500/80 font-black uppercase tracking-[3px] mb-1 relative z-10">Pengeluaran</p>
+                        <p id="totalExpenseTxt" class="text-lg sm:text-xl font-black text-rose-400 relative z-10" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                    </div>
+
+                    <!-- Total Investasi -->
+                    <div class="bg-[#0b101e] p-4 rounded-3xl border border-indigo-500/10 shadow-xl relative overflow-hidden group">
+                        <div class="absolute -right-2 -bottom-2 text-indigo-500/5 text-5xl transition-transform group-hover:scale-110"><i class="fas fa-chart-line"></i></div>
+                        <p class="text-[8px] text-indigo-500/80 font-black uppercase tracking-[3px] mb-1 relative z-10">Investasi</p>
+                        <p id="totalInvestmentTxt" class="text-lg sm:text-xl font-black text-indigo-400 relative z-10" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- Donut Chart -->
+                    <div class="bg-[#0b101e] rounded-[2rem] p-5 border border-white/5 flex flex-col items-center justify-center relative shadow-xl lg:col-span-1 min-h-[200px]">
+                        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-[3px] absolute top-5 left-6 w-full text-left">Rasio Alokasi</p>
+                        <div class="w-[120px] h-[120px] relative mt-6">
+                            <canvas id="ratioChart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
+                                <span id="centerRatioText" class="text-xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">0%</span>
+                                <span class="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Tersisa</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="relative z-10 flex flex-col gap-6">
-                        <!-- Total Saldo (Focus Center) -->
-                        <div class="text-center bg-[#0d1322] p-8 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden">
-                            <div class="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent"></div>
-                            <p class="text-[11px] text-slate-500 font-black uppercase tracking-[4px] mb-3 relative z-10">Sisa Saldo</p>
-                            <p id="saldoTxt" class="text-5xl sm:text-6xl font-black text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] relative z-10" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                        </div>
-
-                        <!-- Panel Pemasukan & Pengeluaran (Inner Shadow style) -->
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-[#080b13] rounded-3xl p-5 sm:p-6 shadow-[inset_0_2px_15px_rgba(0,0,0,0.8)] border border-white/5 gap-4">
-                            <!-- Pemasukan -->
-                            <div class="flex-1 flex flex-col items-center sm:items-start pl-2">
-                                <span class="text-[10px] text-emerald-500/80 font-black uppercase tracking-[3px] mb-1"><i class="fas fa-arrow-down mr-1"></i> Pemasukan</span>
-                                <p id="totalIncomeTxt" class="text-2xl sm:text-3xl font-black text-emerald-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                            </div>
-                            
-                            <!-- Divider -->
-                            <div class="w-full sm:w-px h-px sm:h-12 bg-gradient-to-r sm:bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
-                            
-                            <!-- Pengeluaran -->
-                            <div class="flex-1 flex flex-col items-center sm:items-end pr-2">
-                                <span class="text-[10px] text-rose-500/80 font-black uppercase tracking-[3px] mb-1"><i class="fas fa-arrow-up mr-1"></i> Pengeluaran</span>
-                                <p id="totalExpenseTxt" class="text-2xl sm:text-3xl font-black text-rose-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                    <!-- Line Chart -->
+                    <div class="bg-[#0b101e] rounded-[2rem] p-5 border border-white/5 flex flex-col lg:col-span-3 shadow-xl min-h-[200px]">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-[3px]">Tren Arus Kas (Per Bulan)</span>
+                            <div class="flex flex-wrap gap-3 text-[8px] font-black uppercase tracking-widest">
+                                <span class="text-emerald-500 flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div> Masuk</span>
+                                <span class="text-rose-500 flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]"></div> Keluar</span>
+                                <span class="text-indigo-500 flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_5px_#6366f1]"></div> Investasi</span>
                             </div>
                         </div>
-
-                        <!-- Thin Progress Bar Rasio -->
-                        <div class="bg-[#0b101e] rounded-3xl p-5 border border-white/5">
-                            <div class="flex justify-between items-center mb-3 px-1">
-                                <div class="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded text-[9px] font-black" id="incomePercentTxt">0%</div>
-                                <span class="text-[8px] font-bold text-slate-500 uppercase tracking-[4px]">Rasio Pemasukan vs Pengeluaran</span>
-                                <div class="bg-rose-500/10 text-rose-400 px-2 py-1 rounded text-[9px] font-black" id="expensePercentTxt">0%</div>
-                            </div>
-                            <div class="h-1.5 w-full bg-[#050810] rounded-full overflow-hidden flex gap-0.5">
-                                <div id="incomeBar" class="h-full bg-emerald-400 transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)] rounded-r-full" style="width: 50%;"></div>
-                                <div id="expenseBar" class="h-full bg-rose-400 transition-all duration-1000 shadow-[0_0_10px_rgba(244,63,94,0.5)] rounded-l-full" style="width: 50%;"></div>
-                            </div>
+                        <div class="w-full flex-1 relative min-h-[140px]">
+                            <canvas id="trendChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tabel Transaksi 2 Kolom -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Tabel Transaksi 3 Kolom -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     <!-- Kolom Pemasukan -->
-                    <div class="glass-card p-5 sm:p-8 rounded-[2.5rem] flex flex-col h-[550px] border-t-2 border-t-emerald-500/20">
-                        <h3 class="text-[12px] font-black text-emerald-400 uppercase tracking-[3px] mb-6 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center"><i class="fas fa-arrow-down"></i></div> Pemasukan
+                    <div class="glass-card p-4 sm:p-5 rounded-[2rem] flex flex-col h-[400px] border-t-2 border-t-emerald-500/30 shadow-lg">
+                        <h3 class="text-[10px] font-black text-emerald-400 uppercase tracking-[3px] mb-3 flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center"><i class="fas fa-arrow-down text-[10px]"></i></div> Riwayat Masuk
                         </h3>
-                        <div class="flex gap-2 mb-6 bg-[#0b101e] p-2 rounded-2xl border border-white/5 items-center">
-                            <input type="text" id="incomeDesc" placeholder="Keterangan..." class="bg-transparent text-white text-[11px] p-2 w-full outline-none flex-1">
-                            <div class="w-px bg-white/10 h-6"></div>
+                        <div class="flex gap-2 mb-3 bg-[#080b13] p-1.5 rounded-2xl border border-white/5 items-center shadow-inner">
+                            <input type="text" id="incomeDesc" placeholder="Keterangan..." class="bg-transparent text-white text-[9px] p-2 w-full outline-none flex-1 font-medium">
+                            <div class="w-px bg-white/10 h-4"></div>
                             <div class="flex items-center">
-                                <span class="text-emerald-500/80 text-[11px] font-black pl-2">Rp</span>
-                                <input type="number" inputmode="numeric" pattern="[0-9]*" id="incomeAmt" placeholder="Nominal" class="bg-transparent text-white text-[11px] py-2 pr-1 pl-1 w-20 sm:w-24 outline-none text-right">
+                                <span class="text-emerald-500/80 text-[9px] font-black pl-1">Rp</span>
+                                <input type="number" inputmode="numeric" pattern="[0-9]*" id="incomeAmt" placeholder="0" class="bg-transparent text-white text-[10px] py-2 pr-1 pl-1 w-16 sm:w-20 outline-none text-right font-bold" style="font-family: 'JetBrains Mono', monospace;">
                             </div>
-                            <button onclick="window.addTransaction('income')" class="bg-emerald-500 hover:bg-emerald-400 text-white w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-lg shadow-emerald-500/30 flex-shrink-0"><i class="fas fa-plus"></i></button>
+                            <button onclick="window.addTransaction('income')" class="bg-emerald-500 hover:bg-emerald-400 text-white w-7 h-7 rounded-xl flex items-center justify-center transition-all shadow-lg shadow-emerald-500/30 flex-shrink-0"><i class="fas fa-plus text-[9px]"></i></button>
                         </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3" id="incomeList"></div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2" id="incomeList"></div>
                     </div>
 
                     <!-- Kolom Pengeluaran -->
-                    <div class="glass-card p-5 sm:p-8 rounded-[2.5rem] flex flex-col h-[550px] border-t-2 border-t-rose-500/20">
-                        <h3 class="text-[12px] font-black text-rose-400 uppercase tracking-[3px] mb-6 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center"><i class="fas fa-arrow-up"></i></div> Pengeluaran
+                    <div class="glass-card p-4 sm:p-5 rounded-[2rem] flex flex-col h-[400px] border-t-2 border-t-rose-500/30 shadow-lg">
+                        <h3 class="text-[10px] font-black text-rose-400 uppercase tracking-[3px] mb-3 flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-rose-500/10 flex items-center justify-center"><i class="fas fa-arrow-up text-[10px]"></i></div> Riwayat Keluar
                         </h3>
-                        <div class="flex gap-2 mb-6 bg-[#0b101e] p-2 rounded-2xl border border-white/5 items-center">
-                            <input type="text" id="expenseDesc" placeholder="Keterangan..." class="bg-transparent text-white text-[11px] p-2 w-full outline-none flex-1">
-                            <div class="w-px bg-white/10 h-6"></div>
+                        <div class="flex gap-2 mb-3 bg-[#080b13] p-1.5 rounded-2xl border border-white/5 items-center shadow-inner">
+                            <input type="text" id="expenseDesc" placeholder="Keterangan..." class="bg-transparent text-white text-[9px] p-2 w-full outline-none flex-1 font-medium">
+                            <div class="w-px bg-white/10 h-4"></div>
                             <div class="flex items-center">
-                                <span class="text-rose-500/80 text-[11px] font-black pl-2">Rp</span>
-                                <input type="number" inputmode="numeric" pattern="[0-9]*" id="expenseAmt" placeholder="Nominal" class="bg-transparent text-white text-[11px] py-2 pr-1 pl-1 w-20 sm:w-24 outline-none text-right">
+                                <span class="text-rose-500/80 text-[9px] font-black pl-1">Rp</span>
+                                <input type="number" inputmode="numeric" pattern="[0-9]*" id="expenseAmt" placeholder="0" class="bg-transparent text-white text-[10px] py-2 pr-1 pl-1 w-16 sm:w-20 outline-none text-right font-bold" style="font-family: 'JetBrains Mono', monospace;">
                             </div>
-                            <button onclick="window.addTransaction('expense')" class="bg-rose-500 hover:bg-rose-400 text-white w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-lg shadow-rose-500/30 flex-shrink-0"><i class="fas fa-plus"></i></button>
+                            <button onclick="window.addTransaction('expense')" class="bg-rose-500 hover:bg-rose-400 text-white w-7 h-7 rounded-xl flex items-center justify-center transition-all shadow-lg shadow-rose-500/30 flex-shrink-0"><i class="fas fa-plus text-[9px]"></i></button>
                         </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3" id="expenseList"></div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2" id="expenseList"></div>
+                    </div>
+
+                    <!-- Kolom Investasi -->
+                    <div class="glass-card p-4 sm:p-5 rounded-[2rem] flex flex-col h-[400px] border-t-2 border-t-indigo-500/30 shadow-lg">
+                        <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-[3px] mb-3 flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-indigo-500/10 flex items-center justify-center"><i class="fas fa-chart-line text-[10px]"></i></div> Riwayat Investasi
+                        </h3>
+                        <div class="flex gap-2 mb-3 bg-[#080b13] p-1.5 rounded-2xl border border-white/5 items-center shadow-inner">
+                            <input type="text" id="investmentDesc" placeholder="Keterangan..." class="bg-transparent text-white text-[9px] p-2 w-full outline-none flex-1 font-medium">
+                            <div class="w-px bg-white/10 h-4"></div>
+                            <div class="flex items-center">
+                                <span class="text-indigo-500/80 text-[9px] font-black pl-1">Rp</span>
+                                <input type="number" inputmode="numeric" pattern="[0-9]*" id="investmentAmt" placeholder="0" class="bg-transparent text-white text-[10px] py-2 pr-1 pl-1 w-16 sm:w-20 outline-none text-right font-bold" style="font-family: 'JetBrains Mono', monospace;">
+                            </div>
+                            <button onclick="window.addTransaction('investment')" class="bg-indigo-500 hover:bg-indigo-400 text-white w-7 h-7 rounded-xl flex items-center justify-center transition-all shadow-lg shadow-indigo-500/30 flex-shrink-0"><i class="fas fa-plus text-[9px]"></i></button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2" id="investmentList"></div>
                     </div>
                 </div>
             </div>
@@ -490,7 +532,7 @@
         </div>
     </main>
 
-    <!-- BOTTOM NAVIGATION (Pengganti Tab Lama) -->
+    <!-- BOTTOM NAVIGATION -->
     <nav id="bottomNav" class="fixed bottom-0 left-0 w-full z-[100] bg-[#050810]/95 backdrop-blur-xl border-t border-white/5 nav-pb hidden transition-all duration-700 opacity-0 translate-y-full">
         <div class="max-w-md mx-auto flex justify-between items-center px-8">
             <button id="btnTabJadwal" onclick="window.switchTab('jadwal')" class="flex flex-col items-center gap-1 text-blue-500 w-16 transition-all transform scale-110 -translate-y-1">
@@ -511,7 +553,6 @@
     <input type="file" id="globalFileInput" class="hidden" multiple accept="image/*,.pdf,.txt">
 
     <script type="module">
-        // --- STREAMING_CHUNK:Javascript Logic Start... ---
         window.onerror = function(msg, url, line, col, error) { console.error("Global Error:", msg, error); };
 
         window.addEventListener('load', () => {
@@ -546,7 +587,7 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
         let isLocalMode = false;
 
@@ -623,7 +664,6 @@
             } else window.showMessage("Izin notifikasi belum aktif. Klik tombol IZIN di atas.");
         };
 
-        // --- STREAMING_CHUNK:Firebase Setup & State... ---
         const firebaseConfig = { apiKey: "AIzaSyD6eXPEfB8aonq7M0c6pU4sVPlGoRJtYCQ", authDomain: "tracker-2026-4bbd9.firebaseapp.com", projectId: "tracker-2026-4bbd9", storageBucket: "tracker-2026-4bbd9.firebasestorage.app", messagingSenderId: "634119648342", appId: "1:634119648342:web:35aff0729cdcb37dcc37f7" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -635,11 +675,9 @@
         try { enableIndexedDbPersistence(db); } catch(e) {}
 
         let dayUnsubscribe = null, selectedDate = new Date(2026, 0, 1), cloudData = {}, activeItemIdForUpload = null, isUserLoggedIn = false;
-        let financeUnsubscribe = null, financeData = { incomes: [], expenses: [] };
+        let financeUnsubscribe = null, financeData = { incomes: [], expenses: [], investments: [] };
+        let yearlyFinanceStats = Array(12).fill(null).map(() => ({ inc: 0, exp: 0, inv: 0 }));
         let notesUnsubscribe = null, notesData = { notesList: [] };
-        let settingsUnsubscribe = null, globalSettings = { globalTasks: null, dayTasks: {} };
-        window.tempNewCatTasks = null;
-        window.tempEditCategory = null;
         window.openTimerPanels = {};
 
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
@@ -687,14 +725,40 @@
             if(dayUnsubscribe) dayUnsubscribe(); 
             if(financeUnsubscribe) financeUnsubscribe(); 
             if(notesUnsubscribe) notesUnsubscribe();
-            if(settingsUnsubscribe) settingsUnsubscribe();
-            cloudData = {}; financeData = {incomes:[], expenses:[]}; notesData = {notesList: []}; globalSettings = { globalTasks: null, dayTasks: {} };
+            cloudData = {}; financeData = {incomes:[], expenses:[], investments:[]}; notesData = {notesList: []};
             isLocalMode = false; window.renderDayTracker(); window.renderFinance(); window.renderNotes();
             try { await signOut(auth); } catch(e) {} window.location.reload(); 
         };
 
         window.updateNoteLocal = (id, n) => { if (!cloudData[id]) cloudData[id] = {}; cloudData[id].note = n; };
         window.saveNoteToFirestore = async (id, n) => { if (!cloudData[id]) cloudData[id] = {}; cloudData[id].note = n; await saveToFirestore(); };
+
+        window.processFinanceData = (allFin) => {
+            const currentFinDocId = `finance-${selectedDate.getFullYear()}-${selectedDate.getMonth()}`;
+            financeData = allFin[currentFinDocId] || { incomes: [], expenses: [], investments: [] };
+            if(!financeData.incomes) financeData.incomes = [];
+            if(!financeData.expenses) financeData.expenses = [];
+            if(!financeData.investments) financeData.investments = [];
+
+            yearlyFinanceStats = Array(12).fill(null).map(() => ({ inc: 0, exp: 0, inv: 0 }));
+            const prefix = `finance-${selectedDate.getFullYear()}-`;
+            
+            Object.keys(allFin).forEach(key => {
+                if (key.startsWith(prefix)) {
+                    const monthStr = key.split('-')[2];
+                    const monthIdx = parseInt(monthStr);
+                    if (monthIdx >= 0 && monthIdx <= 11) {
+                        const data = allFin[key];
+                        let mInc = 0, mExp = 0, mInv = 0;
+                        (data.incomes || []).forEach(i => mInc += i.amount);
+                        (data.expenses || []).forEach(i => mExp += i.amount);
+                        (data.investments || []).forEach(i => mInv += i.amount);
+                        yearlyFinanceStats[monthIdx] = { inc: mInc, exp: mExp, inv: mInv };
+                    }
+                }
+            });
+            window.renderFinance();
+        };
 
         function sanitizeCloudData(data) {
             if (!data) return {};
@@ -725,17 +789,18 @@
                 // Fetch Day Data
                 const stored = localStorage.getItem(`tracker_data_${docId}`); 
                 cloudData = stored ? sanitizeCloudData(JSON.parse(stored)) : {}; 
-                
-                // Fetch Settings Data
-                const storedSettings = localStorage.getItem('tracker_settings_global');
-                globalSettings = storedSettings ? JSON.parse(storedSettings) : { globalTasks: null, dayTasks: {} };
-
                 window.renderDayTracker(); 
 
-                // Fetch Finance Data
-                const storedFin = localStorage.getItem(`tracker_fin_${finDocId}`);
-                financeData = storedFin ? JSON.parse(storedFin) : { incomes: [], expenses: [] };
-                window.renderFinance();
+                // Fetch Finance Data (All months for current year chart)
+                let allFinLocal = {};
+                for(let i=0; i<localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if(key.startsWith('tracker_fin_')) {
+                        const id = key.replace('tracker_fin_', '');
+                        allFinLocal[id] = JSON.parse(localStorage.getItem(key));
+                    }
+                }
+                window.processFinanceData(allFinLocal);
 
                 // Fetch Notes Data
                 const storedNotes = localStorage.getItem(`tracker_notes_global`);
@@ -759,13 +824,12 @@
                 cloudData = newData; window.renderDayTracker();
             }, (err) => { console.error(err); window.updateSyncUI(); });
 
-            // Sync Keuangan
+            // Sync Keuangan Seluruh Tahun (Koleksi)
             if (financeUnsubscribe) financeUnsubscribe();
-            financeUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance', finDocId), (snap) => {
-                financeData = snap.exists() ? snap.data() : { incomes: [], expenses: [] };
-                if(!financeData.incomes) financeData.incomes = [];
-                if(!financeData.expenses) financeData.expenses = [];
-                window.renderFinance();
+            financeUnsubscribe = onSnapshot(collection(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance'), (snap) => {
+                let allFin = {};
+                snap.forEach(docSnap => { allFin[docSnap.id] = docSnap.data(); });
+                window.processFinanceData(allFin);
             }, (err) => { console.error("Firebase Finance Sync Error:", err); });
 
             // Sync Catatan (Notes)
@@ -776,21 +840,7 @@
                 window.renderNotes();
             }, (err) => { console.error("Firebase Notes Sync Error:", err); });
 
-            // Sync Settings (Jadwal Global)
-            if (settingsUnsubscribe) settingsUnsubscribe();
-            settingsUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'schedule'), (snap) => {
-                globalSettings = snap.exists() ? snap.data() : { globalTasks: null, dayTasks: {} };
-                window.renderDayTracker();
-            }, (err) => { console.error("Firebase Settings Sync Error:", err); });
-
             window.updateCalendarView();
-        };
-
-        window.saveSettingsToFirestore = async () => {
-            if (isLocalMode) { localStorage.setItem('tracker_settings_global', JSON.stringify(globalSettings)); return; }
-            if (!auth.currentUser) return;
-            try { await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'schedule'), globalSettings); }
-            catch (err) { console.error("Gagal sinkron settings:", err); }
         };
 
         async function saveToFirestore() { 
@@ -820,7 +870,6 @@
             }
         };
 
-        // --- STREAMING_CHUNK:Tasks Definition... ---
         function getDefaultTasks(date) {
             const isFri = date.getDay() === 5;
             const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19);
@@ -862,14 +911,6 @@
             return [...routine, ...extra];
         }
 
-        window.getEffectiveTasks = function(date) {
-            if (cloudData.taskConfig) return cloudData.taskConfig;
-            const d = date.getDay();
-            if (globalSettings.dayTasks && globalSettings.dayTasks[d]) return globalSettings.dayTasks[d];
-            if (globalSettings.globalTasks) return globalSettings.globalTasks;
-            return getDefaultTasks(date);
-        };
-
         window.renderDayTracker = function() {
             let activeId = document.activeElement ? document.activeElement.id : null;
             let selectionStart = 0, selectionEnd = 0;
@@ -893,7 +934,7 @@
             let fastingLabel = isRamadan ? "🌙 Puasa Ramadhan" : (selectedDate.getDay() === 1 ? "✨ Puasa Sunnah Senin" : (selectedDate.getDay() === 4 ? "✨ Puasa Sunnah Kamis" : ""));
             if(ui.fasting) ui.fasting.innerHTML = fastingLabel ? `<div class="fasting-alert ${isRamadan ? 'fasting-ramadhan' : ''}">${fastingLabel}</div>` : '';
 
-            let dayTasks = window.getEffectiveTasks(selectedDate);
+            let dayTasks = cloudData.taskConfig || getDefaultTasks(selectedDate);
             
             const renderItems = (list, targetId) => {
                 const container = document.getElementById(targetId);
@@ -987,7 +1028,6 @@
             }
         };
 
-        // --- STREAMING_CHUNK:Finance & Tabs Logic... ---
         window.formatRupiah = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number || 0);
 
         window.switchTab = (tab) => {
@@ -995,11 +1035,8 @@
             const dateArea = document.getElementById('dateSelectorArea');
             
             if (dateArea) {
-                if (tab === 'catatan') {
-                    dateArea.style.display = 'none';
-                } else {
-                    dateArea.style.display = 'flex';
-                }
+                if (tab === 'catatan') dateArea.style.display = 'none';
+                else dateArea.style.display = 'flex';
             }
             
             tabs.forEach(t => {
@@ -1031,7 +1068,21 @@
 
         window.saveFinanceToFirestore = async () => {
             const finDocId = `finance-${selectedDate.getFullYear()}-${selectedDate.getMonth()}`;
-            if (isLocalMode) { localStorage.setItem(`tracker_fin_${finDocId}`, JSON.stringify(financeData)); window.updateSyncUI(); return; }
+            if (isLocalMode) { 
+                localStorage.setItem(`tracker_fin_${finDocId}`, JSON.stringify(financeData)); 
+                
+                let allFinLocal = {};
+                for(let i=0; i<localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if(key.startsWith('tracker_fin_')) {
+                        const id = key.replace('tracker_fin_', '');
+                        allFinLocal[id] = JSON.parse(localStorage.getItem(key));
+                    }
+                }
+                window.processFinanceData(allFinLocal);
+                window.updateSyncUI(); 
+                return; 
+            }
             if (!auth.currentUser) return; 
             try {
                 await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance', finDocId), financeData);
@@ -1042,14 +1093,16 @@
         };
 
         window.addTransaction = async (type) => {
-            const descEl = document.getElementById(type === 'income' ? 'incomeDesc' : 'expenseDesc');
-            const amtEl = document.getElementById(type === 'income' ? 'incomeAmt' : 'expenseAmt');
+            const descEl = document.getElementById(type + 'Desc');
+            const amtEl = document.getElementById(type + 'Amt');
             const desc = descEl.value.trim(), amt = parseInt(amtEl.value);
             
             if(!desc || isNaN(amt) || amt <= 0) return window.showMessage("Isi keterangan dan nominal yang valid!");
             
             const item = { id: 'trx_' + Date.now(), desc, amount: amt, date: selectedDate.getDate() };
-            if(type === 'income') financeData.incomes.push(item); else financeData.expenses.push(item);
+            if(type === 'income') financeData.incomes.push(item); 
+            else if (type === 'expense') financeData.expenses.push(item);
+            else if (type === 'investment') financeData.investments.push(item);
             
             descEl.value = ''; amtEl.value = '';
             await window.saveFinanceToFirestore();
@@ -1059,14 +1112,15 @@
 
         window.removeTransaction = async (type, id) => {
             if(type === 'income') financeData.incomes = financeData.incomes.filter(i => i.id !== id);
-            else financeData.expenses = financeData.expenses.filter(i => i.id !== id);
+            else if (type === 'expense') financeData.expenses = financeData.expenses.filter(i => i.id !== id);
+            else if (type === 'investment') financeData.investments = financeData.investments.filter(i => i.id !== id);
             await window.saveFinanceToFirestore();
             window.renderFinance();
         };
 
         window.renderFinance = () => {
-            const incList = document.getElementById('incomeList'), expList = document.getElementById('expenseList');
-            if(!incList || !expList) return;
+            const incList = document.getElementById('incomeList'), expList = document.getElementById('expenseList'), invList = document.getElementById('investmentList');
+            if(!incList || !expList || !invList) return;
             
             const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const finTitle = document.getElementById('financeMonthLabel');
@@ -1074,51 +1128,107 @@
                 finTitle.innerHTML = `Ringkasan Keuangan<br>${mNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
             }
 
-            let tInc = 0, tExp = 0;
+            let tInc = 0, tExp = 0, tInv = 0;
             
-            incList.innerHTML = financeData.incomes.sort((a,b) => b.date - a.date).map(i => {
-                tInc += i.amount;
-                return `<div class="flex items-center justify-between bg-[#0b101e] p-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-colors group">
-                    <div class="flex flex-col">
-                        <span class="text-[12px] font-bold text-slate-200">${i.desc}</span>
-                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"><i class="far fa-calendar-alt"></i> Tgl ${i.date}</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-[12px] font-black text-emerald-400">+${window.formatRupiah(i.amount)}</span>
-                        <button onclick="window.removeTransaction('income', '${i.id}')" class="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"><i class="fas fa-trash text-[10px]"></i></button>
-                    </div>
-                </div>`;
-            }).join('') || `<div class="flex flex-col items-center justify-center h-32 opacity-50"><i class="fas fa-box-open text-2xl mb-2"></i><p class="text-[10px] uppercase font-bold tracking-widest">Belum ada data</p></div>`;
+            const itemTemplate = (i, type, color, icon) => `<div class="flex items-center justify-between bg-[#0b101e] p-3 rounded-xl border border-white/5 hover:border-${color}-500/30 transition-colors group mb-2">
+                <div class="flex flex-col overflow-hidden">
+                    <span class="text-[10px] font-bold text-slate-200 truncate pr-2">${i.desc}</span>
+                    <span class="text-[8px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"><i class="far fa-calendar-alt"></i> Tgl ${i.date}</span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-[10px] font-black text-${color}-400">${type === 'income' ? '+' : '-'}${window.formatRupiah(i.amount)}</span>
+                    <button onclick="window.removeTransaction('${type}', '${i.id}')" class="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"><i class="fas fa-trash text-[8px]"></i></button>
+                </div>
+            </div>`;
+
+            const emptyTemplate = `<div class="flex flex-col items-center justify-center h-24 opacity-50"><i class="fas fa-box-open text-xl mb-2 text-slate-600"></i><p class="text-[8px] uppercase font-bold tracking-[2px] text-slate-500">Belum ada data</p></div>`;
+
+            incList.innerHTML = financeData.incomes.sort((a,b) => b.date - a.date).map(i => { tInc += i.amount; return itemTemplate(i, 'income', 'emerald'); }).join('') || emptyTemplate;
+            expList.innerHTML = financeData.expenses.sort((a,b) => b.date - a.date).map(i => { tExp += i.amount; return itemTemplate(i, 'expense', 'rose'); }).join('') || emptyTemplate;
+            invList.innerHTML = financeData.investments.sort((a,b) => b.date - a.date).map(i => { tInv += i.amount; return itemTemplate(i, 'investment', 'indigo'); }).join('') || emptyTemplate;
             
-            expList.innerHTML = financeData.expenses.sort((a,b) => b.date - a.date).map(i => {
-                tExp += i.amount;
-                return `<div class="flex items-center justify-between bg-[#0b101e] p-4 rounded-2xl border border-white/5 hover:border-rose-500/30 transition-colors group">
-                    <div class="flex flex-col">
-                        <span class="text-[12px] font-bold text-slate-200">${i.desc}</span>
-                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"><i class="far fa-calendar-alt"></i> Tgl ${i.date}</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-[12px] font-black text-rose-400">-${window.formatRupiah(i.amount)}</span>
-                        <button onclick="window.removeTransaction('expense', '${i.id}')" class="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"><i class="fas fa-trash text-[10px]"></i></button>
-                    </div>
-                </div>`;
-            }).join('') || `<div class="flex flex-col items-center justify-center h-32 opacity-50"><i class="fas fa-box-open text-2xl mb-2"></i><p class="text-[10px] uppercase font-bold tracking-widest">Belum ada data</p></div>`;
-            
+            const sisaSaldo = tInc - tExp - tInv;
+
             document.getElementById('totalIncomeTxt').innerText = window.formatRupiah(tInc);
             document.getElementById('totalExpenseTxt').innerText = window.formatRupiah(tExp);
-            document.getElementById('saldoTxt').innerText = window.formatRupiah(tInc - tExp);
+            document.getElementById('totalInvestmentTxt').innerText = window.formatRupiah(tInv);
+            document.getElementById('saldoTxt').innerText = window.formatRupiah(sisaSaldo);
             
-            const totalFlow = tInc + tExp;
-            const incPct = totalFlow === 0 ? 50 : Math.round((tInc / totalFlow) * 100);
-            const expPct = totalFlow === 0 ? 50 : 100 - incPct;
+            const sisaDonut = Math.max(0, sisaSaldo);
+            const totalOut = tExp + tInv + sisaDonut; 
+            const sisaPct = tInc === 0 ? 0 : Math.round((sisaDonut / tInc) * 100);
             
-            document.getElementById('incomePercentTxt').innerText = `${totalFlow === 0 ? 0 : incPct}%`;
-            document.getElementById('expensePercentTxt').innerText = `${totalFlow === 0 ? 0 : expPct}%`;
-            document.getElementById('incomeBar').style.width = `${incPct}%`;
-            document.getElementById('expenseBar').style.width = `${expPct}%`;
+            document.getElementById('centerRatioText').innerText = `${sisaPct}%`;
+
+            // Chart.js Render: Rasio Presentase (Donut)
+            if (window.ratioChart) window.ratioChart.destroy();
+            const ctxRatio = document.getElementById('ratioChart').getContext('2d');
+            window.ratioChart = new Chart(ctxRatio, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pengeluaran', 'Investasi', 'Tersisa'],
+                    datasets: [{
+                        data: [tExp, tInv, sisaDonut],
+                        backgroundColor: ['#f43f5e', '#6366f1', '#10b981'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: { label: function(context) { return context.label + ': ' + window.formatRupiah(context.raw); } } } }
+                }
+            });
+
+            // Chart.js Render: Tren Frekuensi Bulanan (Line Chart)
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            const mInc = yearlyFinanceStats.map(s => s.inc);
+            const mExp = yearlyFinanceStats.map(s => s.exp);
+            const mInv = yearlyFinanceStats.map(s => s.inv);
+
+            if (window.trendChart) window.trendChart.destroy();
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            
+            let gradientInc = ctxTrend.createLinearGradient(0, 0, 0, 140);
+            gradientInc.addColorStop(0, 'rgba(16, 185, 129, 0.5)');
+            gradientInc.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+            
+            let gradientExp = ctxTrend.createLinearGradient(0, 0, 0, 140);
+            gradientExp.addColorStop(0, 'rgba(244, 63, 94, 0.5)');
+            gradientExp.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
+
+            let gradientInv = ctxTrend.createLinearGradient(0, 0, 0, 140);
+            gradientInv.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+            gradientInv.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            window.trendChart = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Pengeluaran', data: mExp, borderColor: '#f43f5e', backgroundColor: gradientExp, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#f43f5e' },
+                        { label: 'Investasi', data: mInv, borderColor: '#6366f1', backgroundColor: gradientInv, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#6366f1' },
+                        { label: 'Pemasukan', data: mInc, borderColor: '#10b981', backgroundColor: gradientInc, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#10b981' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" }, bodyFont: { size: 11, family: "'JetBrains Mono', monospace", weight: 'bold' }, padding: 10, callbacks: { label: function(context) { return context.dataset.label + ': ' + window.formatRupiah(context.raw); } } } 
+                    },
+                    scales: {
+                        x: { display: true, grid: { display: false }, ticks: { color: '#64748b', font: { size: 9, weight: 'bold' } } },
+                        y: { display: false, beginAtZero: true } 
+                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                }
+            });
         };
 
-        // --- STREAMING_CHUNK:Notes Feature Logic... ---
         window.saveNotesToFirestore = async () => {
             if (isLocalMode) { localStorage.setItem(`tracker_notes_global`, JSON.stringify(notesData)); window.updateSyncUI(); return; }
             if (!auth.currentUser) return;
@@ -1154,7 +1264,7 @@
             } else {
                 document.getElementById('noteIdInput').value = '';
                 document.getElementById('noteTitleInput').value = '';
-                document.getElementById('noteContentInput').value = ''; // DIKOSONGKAN
+                document.getElementById('noteContentInput').value = ''; 
                 document.getElementById('noteDateDisplay').value = dateYMD;
             }
             
@@ -1172,7 +1282,7 @@
             const content = document.getElementById('noteContentInput').value.trim();
             
             let dateStr = "";
-            const rawDate = document.getElementById('noteDateDisplay').value; // Mengambil tanggal dari kalender (YYYY-MM-DD)
+            const rawDate = document.getElementById('noteDateDisplay').value; 
             if (rawDate && rawDate.includes('-')) {
                 const p = rawDate.split('-');
                 if (p.length === 3) dateStr = `${p[2]}/${p[1]}/${p[0]}`;
@@ -1237,7 +1347,6 @@
             `;
         };
 
-        // --- STREAMING_CHUNK:Bulk Edit & Utilities... ---
         window.openBulkEdit = (category) => {
             document.getElementById('bulkEditCategory').value = category;
             document.getElementById('bulkEditTitle').innerText = category === 'main' ? "Atur Jadwal Utama" : "Atur Rutin & Ibadah";
@@ -1245,7 +1354,7 @@
             const container = document.getElementById('bulkEditContainer');
             container.innerHTML = '';
             
-            let tasks = window.getEffectiveTasks(selectedDate);
+            let tasks = cloudData.taskConfig || getDefaultTasks(selectedDate);
             let catTasks = tasks.filter(t => t.category === category);
             
             catTasks.sort((a, b) => (a.time || "25:00").localeCompare((b.time || "25:00")));
@@ -1286,7 +1395,7 @@
             if(!taskData) container.scrollTop = container.scrollHeight;
         };
 
-        window.promptSaveBulkEdit = () => {
+        window.saveBulkEdit = async (saveType = 'today') => {
             const category = document.getElementById('bulkEditCategory').value;
             const container = document.getElementById('bulkEditContainer');
             const rows = container.querySelectorAll('.bulk-edit-row');
@@ -1295,68 +1404,33 @@
             rows.forEach(row => {
                 const taskName = row.querySelector('.row-task').value.trim();
                 if (!taskName) return;
+                
                 const time = row.querySelector('.row-time').value;
                 const durVal = row.querySelector('.row-dur').value;
                 const hasTimer = durVal !== "" && parseInt(durVal) > 0;
+                
                 newCatTasks.push({
                     id: row.querySelector('.row-id').value,
-                    task: taskName, time: time, category: category,
+                    task: taskName,
+                    time: time,
+                    category: category,
                     icon: row.querySelector('.row-icon').value,
-                    noTimer: !hasTimer, duration: hasTimer ? parseInt(durVal) * 60000 : null
+                    noTimer: !hasTimer,
+                    duration: hasTimer ? parseInt(durVal) * 60000 : null
                 });
             });
-
-            window.tempNewCatTasks = newCatTasks;
-            window.tempEditCategory = category;
-
-            const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const mNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
             
-            document.getElementById('lblScopeOnce').innerText = `${selectedDate.getDate()} ${mNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
-            document.getElementById('lblScopeDay').innerText = dNames[selectedDate.getDay()];
+            if (!cloudData.taskConfig) cloudData.taskConfig = getDefaultTasks(selectedDate);
+            let otherTasks = cloudData.taskConfig.filter(t => t.category !== category);
             
-            const confirmModal = document.getElementById('bulkEditConfirmModal');
-            confirmModal.classList.remove('hidden'); confirmModal.classList.add('flex');
-        };
-
-        window.confirmSaveBulkEdit = async (scope) => {
-            const category = window.tempEditCategory;
-            const newCatTasks = window.tempNewCatTasks;
-            const currentDayOfWeek = selectedDate.getDay();
+            // Note: Saat ini logic masih "Hanya Hari Ini" (today).
+            // Logic "Semua Hari" (all) memerlukan modifikasi koleksi global settings di masa depan.
+            cloudData.taskConfig = [...otherTasks, ...newCatTasks];
             
-            let baseConfig;
-            if (scope === 'once') {
-                baseConfig = cloudData.taskConfig || window.getEffectiveTasks(selectedDate);
-            } else if (scope === 'dayOfWeek') {
-                baseConfig = (globalSettings.dayTasks && globalSettings.dayTasks[currentDayOfWeek]) || globalSettings.globalTasks || getDefaultTasks(selectedDate);
-            } else if (scope === 'all') {
-                baseConfig = globalSettings.globalTasks || getDefaultTasks(selectedDate);
-            }
-
-            let otherTasks = baseConfig.filter(t => t.category !== category);
-            let mergedTasks = [...otherTasks, ...newCatTasks];
-
-            if (scope === 'once') {
-                cloudData.taskConfig = mergedTasks;
-                await saveToFirestore();
-            } else if (scope === 'dayOfWeek') {
-                if (!globalSettings.dayTasks) globalSettings.dayTasks = {};
-                globalSettings.dayTasks[currentDayOfWeek] = mergedTasks;
-                await window.saveSettingsToFirestore();
-                delete cloudData.taskConfig; 
-                await saveToFirestore();
-            } else if (scope === 'all') {
-                globalSettings.globalTasks = mergedTasks;
-                await window.saveSettingsToFirestore();
-                delete cloudData.taskConfig; 
-                await saveToFirestore();
-            }
-
-            document.getElementById('bulkEditConfirmModal').classList.add('hidden');
-            document.getElementById('bulkEditConfirmModal').classList.remove('flex');
             window.closeBulkEdit();
+            await saveToFirestore();
             window.renderDayTracker();
-            window.showMessage("Jadwal berhasil diperbarui!");
+            window.showMessage("Jadwal " + (category === 'main' ? "Utama" : "Rutin") + " (Hanya Hari Ini) berhasil diperbarui!");
         };
 
         window.toggleTimerPanel = (id) => { if(!window.openTimerPanels) window.openTimerPanels = {}; window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
@@ -1365,6 +1439,7 @@
         window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
+        
         window.openImagePreview = (data, name) => { 
             const m = document.getElementById('imagePreviewModal'), img = document.getElementById('previewImage'), n = document.getElementById('previewName'), dBtn = document.getElementById('downloadBtn'), nonImg = document.getElementById('nonImageIndicator'); 
             dBtn.href = data; dBtn.download = name;
@@ -1376,6 +1451,7 @@
         let deferredPrompt; const installBtn = document.getElementById('installAppBtn'), iosPrompt = document.getElementById('iosInstallPrompt');
         window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden'); installBtn.classList.add('flex'); installBtn.classList.remove('cursor-not-allowed', 'opacity-50'); installBtn.classList.add('hover:bg-blue-500', 'bg-blue-600', 'text-white'); installBtn.classList.remove('bg-slate-700', 'text-slate-400'); });
         window.installPWA = async () => { if (!deferredPrompt) { window.showMessage("Aplikasi mungkin sudah terinstall, atau browser tidak mendukung."); return; } deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.classList.add('hidden'); };
+        
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream, isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
         if (isIOS && !isStandalone) { setTimeout(() => { if(iosPrompt) { iosPrompt.classList.remove('hidden'); iosPrompt.classList.add('flex'); } }, 3000); }
         window.onscroll = function() { const btn = document.getElementById('backToTopBtn'); if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); };
@@ -1413,7 +1489,7 @@
                     setTimeout(() => bottomNav.classList.add('hidden'), 500);
 
                     area.classList.add('hidden', 'opacity-0'); if(loginSec) loginSec.classList.remove('hidden'); if(hBrand) hBrand.classList.add('hidden'); if(hMain) hMain.classList.add('header-clean'); wrapper.classList.add('hidden');
-                    info.innerHTML = ``; initParticles(); cloudData = {}; financeData = { incomes: [], expenses: [] }; notesData = { notesList: [] };
+                    info.innerHTML = ``; initParticles(); cloudData = {}; financeData = { incomes: [], expenses: [], investments: [] }; notesData = { notesList: [] };
                     window.renderDayTracker(); window.renderFinance(); window.renderNotes();
                 }
                 window.updateSyncUI();

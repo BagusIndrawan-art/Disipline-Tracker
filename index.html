@@ -230,12 +230,19 @@
                 <div class="w-8"></div>
             </div>
 
-            <div id="bulkEditContainer" class="flex-1 overflow-y-auto pr-2 space-y-2 mb-4 custom-scrollbar pb-10"></div>
+            <div id="bulkEditContainer" class="flex-1 overflow-y-auto pr-2 space-y-2 mb-4 custom-scrollbar pb-6"></div>
 
             <div class="flex flex-col gap-3 pt-4 border-t border-white/10 mt-auto bg-slate-900">
                 <button onclick="window.addBulkEditRow()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all border border-white/5"><i class="fas fa-plus mr-1 text-blue-400"></i> Tambah Baris</button>
-                <div class="flex gap-2">
-                    <button onclick="window.saveBulkEdit('today')" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all shadow-lg shadow-blue-900/50"><i class="fas fa-save mr-1"></i> Simpan (Hanya Hari Ini)</button>
+                
+                <div class="flex flex-col gap-2 mt-2 border border-blue-500/20 p-3 rounded-2xl bg-[#080b13]">
+                    <label class="text-[9px] text-blue-400 font-bold uppercase tracking-widest px-1"><i class="fas fa-cog"></i> Opsi Penyimpanan:</label>
+                    <select id="bulkSaveOption" class="modal-input !text-[11px] !bg-black/30 !py-2.5 cursor-pointer">
+                        <option value="today">Hanya Hari Ini Saja</option>
+                        <option value="dayOfWeek">Setiap Hari <span id="saveDayName"></span></option>
+                        <option value="everyday">Setiap Hari</option>
+                    </select>
+                    <button onclick="window.saveBulkEdit()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all shadow-lg shadow-blue-900/50 mt-1"><i class="fas fa-save mr-1"></i> Konfirmasi & Simpan</button>
                 </div>
             </div>
         </div>
@@ -396,78 +403,101 @@
                     <h3 id="financeMonthLabel" class="text-[12px] font-black text-slate-300 uppercase tracking-[4px] leading-tight">Ringkasan Keuangan<br>Bulan Ini</h3>
                 </div>
 
-                <!-- 4 Stats Cards (2x2 Grid) -->
-                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
-                    <div class="bg-[#0b101e] p-4 sm:p-5 rounded-[2rem] border border-blue-500/20 shadow-xl flex flex-col justify-center">
-                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-[3px] mb-2">Sisa Saldo</p>
-                        <p id="saldoTxt" class="text-xl sm:text-2xl font-black text-white" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                    </div>
-                    <div class="bg-[#0b101e] p-4 sm:p-5 rounded-[2rem] border border-emerald-500/10 shadow-xl flex flex-col justify-center">
-                        <p class="text-[9px] text-emerald-500/80 font-black uppercase tracking-[3px] mb-2">Pemasukan</p>
-                        <p id="totalIncomeTxt" class="text-xl sm:text-2xl font-black text-emerald-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                    </div>
-                    <div class="bg-[#0b101e] p-4 sm:p-5 rounded-[2rem] border border-rose-500/10 shadow-xl flex flex-col justify-center">
-                        <p class="text-[9px] text-rose-500/80 font-black uppercase tracking-[3px] mb-2">Pengeluaran</p>
-                        <p id="totalExpenseTxt" class="text-xl sm:text-2xl font-black text-rose-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                    </div>
-                    <div class="bg-[#0b101e] p-4 sm:p-5 rounded-[2rem] border border-indigo-500/10 shadow-xl flex flex-col justify-center">
-                        <p class="text-[9px] text-indigo-500/80 font-black uppercase tracking-[3px] mb-2">Investasi</p>
-                        <p id="totalInvestmentTxt" class="text-xl sm:text-2xl font-black text-indigo-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                    </div>
-                </div>
+                <!-- MASTER DASHBOARD RINGKASAN -->
+                <div class="glass-card p-4 sm:p-6 rounded-[2.5rem] mb-8 shadow-2xl border border-blue-500/10 flex flex-col gap-4 sm:gap-6 relative overflow-hidden">
+                    <!-- Subtle Glow Effect -->
+                    <div class="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
 
-                <!-- Rasio Alokasi -->
-                <div class="bg-[#0b101e] p-5 sm:p-6 rounded-[2rem] mb-4 border border-white/5 shadow-xl flex flex-col items-center justify-center min-h-[200px]">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[3px] w-full text-left mb-4">Rasio Alokasi</p>
-                    <div class="w-[140px] h-[140px] relative">
-                        <canvas id="ratioChart"></canvas>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
-                            <span id="centerRatioText" class="text-2xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">0%</span>
-                            <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Tersisa</span>
+                    <!-- 4 Stats Cards Grid -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative z-10">
+                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-blue-500/20 shadow-inner flex flex-col justify-center hover:border-blue-500/40 transition-colors">
+                            <p class="text-[9px] text-slate-400 font-black uppercase tracking-[3px] mb-2">Sisa Saldo</p>
+                            <p id="saldoTxt" class="text-xl sm:text-2xl font-black text-white" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                        </div>
+                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-emerald-500/10 shadow-inner flex flex-col justify-center hover:border-emerald-500/30 transition-colors">
+                            <p class="text-[9px] text-emerald-500/80 font-black uppercase tracking-[3px] mb-2">Pemasukan</p>
+                            <p id="totalIncomeTxt" class="text-xl sm:text-2xl font-black text-emerald-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                        </div>
+                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-rose-500/10 shadow-inner flex flex-col justify-center hover:border-rose-500/30 transition-colors">
+                            <p class="text-[9px] text-rose-500/80 font-black uppercase tracking-[3px] mb-2">Pengeluaran</p>
+                            <p id="totalExpenseTxt" class="text-xl sm:text-2xl font-black text-rose-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                        </div>
+                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-indigo-500/10 shadow-inner flex flex-col justify-center hover:border-indigo-500/30 transition-colors">
+                            <p class="text-[9px] text-indigo-500/80 font-black uppercase tracking-[3px] mb-2">Investasi</p>
+                            <p id="totalInvestmentTxt" class="text-xl sm:text-2xl font-black text-indigo-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 relative z-10">
+                        <!-- Rasio Alokasi -->
+                        <div class="bg-[#080b13] p-5 sm:p-6 rounded-[1.5rem] border border-white/5 shadow-inner flex flex-col items-center justify-center min-h-[200px]">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[3px] w-full text-left mb-4">Rasio Alokasi</p>
+                            <div class="w-[140px] h-[140px] relative">
+                                <canvas id="ratioChart"></canvas>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
+                                    <span id="centerRatioText" class="text-2xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">0%</span>
+                                    <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Tersisa</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tren Arus Kas -->
+                        <div class="bg-[#080b13] p-5 sm:p-6 rounded-[1.5rem] border border-white/5 shadow-inner min-h-[220px] flex flex-col lg:col-span-2">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 w-full">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-[3px]">Tren Arus Kas (Per Bulan)</span>
+                                <div class="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-widest">
+                                    <span class="text-emerald-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div> Masuk</span>
+                                    <span class="text-rose-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]"></div> Keluar</span>
+                                    <span class="text-indigo-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_5px_#6366f1]"></div> Investasi</span>
+                                </div>
+                            </div>
+                            <div class="w-full flex-1 relative min-h-[160px]">
+                                <canvas id="trendChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tren Arus Kas -->
-                <div class="bg-[#0b101e] p-5 sm:p-6 rounded-[2rem] mb-8 border border-white/5 shadow-xl min-h-[220px] flex flex-col">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 w-full">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-[3px]">Tren Arus Kas (Per Bulan)</span>
-                        <div class="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-widest">
-                            <span class="text-emerald-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div> Masuk</span>
-                            <span class="text-rose-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]"></div> Keluar</span>
-                            <span class="text-indigo-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_5px_#6366f1]"></div> Investasi</span>
+                <!-- 3 Tabel Terpisah -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <!-- Pemasukan -->
+                    <div class="glass-card p-4 sm:p-5 rounded-[2rem] border border-emerald-500/10 flex flex-col">
+                        <h3 class="text-[11px] font-black text-emerald-500 uppercase tracking-[3px] mb-4 flex items-center gap-2"><i class="fas fa-arrow-down"></i> Pemasukan</h3>
+                        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                            <input type="text" id="incDesc" placeholder="Keterangan..." class="bg-[#0b101e] text-white text-[11px] p-2.5 rounded-xl flex-1 border border-white/5 outline-none focus:border-emerald-500/50">
+                            <div class="flex gap-2">
+                                <input type="number" id="incAmt" placeholder="Nominal" class="bg-[#0b101e] text-white text-[11px] p-2.5 rounded-xl w-full sm:w-24 border border-white/5 outline-none focus:border-emerald-500/50" style="font-family: 'JetBrains Mono', monospace;">
+                                <button onclick="window.addFinance('income')" class="bg-emerald-600/20 text-emerald-500 w-10 shrink-0 rounded-xl flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors border border-emerald-500/20"><i class="fas fa-plus"></i></button>
+                            </div>
                         </div>
+                        <div id="incomeList" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2 max-h-[300px]"></div>
                     </div>
-                    <div class="w-full flex-1 relative min-h-[160px]">
-                        <canvas id="trendChart"></canvas>
-                    </div>
-                </div>
 
-                <!-- Kompleks 2: Pusat Transaksi Gabungan -->
-                <div class="glass-card p-5 sm:p-6 rounded-[2.5rem] flex flex-col shadow-2xl relative border border-white/5">
-                    <h3 class="text-[11px] font-black text-slate-300 uppercase tracking-[4px] mb-5 flex items-center gap-2">
-                        <i class="fas fa-exchange-alt text-blue-500"></i> Manajemen Kas
-                    </h3>
-
-                    <!-- Input Form Gabungan -->
-                    <div class="flex flex-col sm:flex-row gap-3 mb-6 bg-[#080b13] p-2 rounded-2xl border border-white/5 items-center shadow-inner">
-                        <select id="trxType" class="bg-slate-800 text-white text-[10px] sm:text-[11px] font-black p-3 rounded-xl outline-none border border-white/5 uppercase tracking-wider w-full sm:w-auto text-center cursor-pointer shadow-md">
-                            <option value="income" class="text-emerald-400">Pemasukan (+)</option>
-                            <option value="expense" class="text-rose-400">Pengeluaran (-)</option>
-                            <option value="investment" class="text-indigo-400">Investasi (*)</option>
-                        </select>
-                        <input type="text" id="trxDesc" placeholder="Keterangan transaksi..." class="bg-transparent text-white text-[11px] p-3 w-full outline-none flex-1 font-medium transition-colors">
-                        <div class="hidden sm:block w-px bg-white/10 h-8"></div>
-                        <div class="flex items-center w-full sm:w-auto px-3">
-                            <span class="text-blue-500/80 text-[12px] font-black mr-1">Rp</span>
-                            <input type="number" inputmode="numeric" pattern="[0-9]*" id="trxAmt" placeholder="0" class="bg-transparent text-white text-[12px] py-3 w-full sm:w-28 outline-none text-right font-bold" style="font-family: 'JetBrains Mono', monospace;">
+                    <!-- Pengeluaran -->
+                    <div class="glass-card p-4 sm:p-5 rounded-[2rem] border border-rose-500/10 flex flex-col">
+                        <h3 class="text-[11px] font-black text-rose-500 uppercase tracking-[3px] mb-4 flex items-center gap-2"><i class="fas fa-arrow-up"></i> Pengeluaran</h3>
+                        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                            <input type="text" id="expDesc" placeholder="Keterangan..." class="bg-[#0b101e] text-white text-[11px] p-2.5 rounded-xl flex-1 border border-white/5 outline-none focus:border-rose-500/50">
+                            <div class="flex gap-2">
+                                <input type="number" id="expAmt" placeholder="Nominal" class="bg-[#0b101e] text-white text-[11px] p-2.5 rounded-xl w-full sm:w-24 border border-white/5 outline-none focus:border-rose-500/50" style="font-family: 'JetBrains Mono', monospace;">
+                                <button onclick="window.addFinance('expense')" class="bg-rose-600/20 text-rose-500 w-10 shrink-0 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors border border-rose-500/20"><i class="fas fa-plus"></i></button>
+                            </div>
                         </div>
-                        <button onclick="window.addUnifiedTransaction()" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white w-full sm:w-12 h-12 rounded-xl flex items-center justify-center transition-all shadow-lg shadow-blue-600/40 flex-shrink-0"><i class="fas fa-plus text-sm"></i></button>
+                        <div id="expenseList" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2 max-h-[300px]"></div>
                     </div>
 
-                    <!-- List Gabungan -->
-                    <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2 max-h-[400px]" id="unifiedTrxList">
-                        <!-- Transaksi dirender di sini -->
+                    <!-- Investasi -->
+                    <div class="glass-card p-4 sm:p-5 rounded-[2rem] border border-indigo-500/10 flex flex-col">
+                        <h3 class="text-[11px] font-black text-indigo-400 uppercase tracking-[3px] mb-4 flex items-center gap-2"><i class="fas fa-seedling"></i> Investasi</h3>
+                        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                            <input type="text" id="invDesc" placeholder="Keterangan..." class="bg-[#0b101e] text-white text-[11px] p-2.5 rounded-xl flex-1 border border-white/5 outline-none focus:border-indigo-500/50">
+                            <div class="flex gap-2">
+                                <input type="number" id="invAmt" placeholder="Nominal" class="bg-[#0b101e] text-white text-[11px] p-2.5 rounded-xl w-full sm:w-24 border border-white/5 outline-none focus:border-indigo-500/50" style="font-family: 'JetBrains Mono', monospace;">
+                                <button onclick="window.addFinance('investment')" class="bg-indigo-600/20 text-indigo-400 w-10 shrink-0 rounded-xl flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-colors border border-indigo-500/20"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div id="investmentList" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2 max-h-[300px]"></div>
                     </div>
                 </div>
             </div>
@@ -648,6 +678,7 @@
         let financeUnsubscribe = null, financeData = { incomes: [], expenses: [], investments: [] };
         let yearlyFinanceStats = Array(12).fill(null).map(() => ({ inc: 0, exp: 0, inv: 0 }));
         let notesUnsubscribe = null, notesData = { notesList: [] };
+        let settingsUnsubscribe = null, globalSettings = { templateEveryday: null, templateDays: {} };
         window.openTimerPanels = {};
 
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
@@ -695,12 +726,14 @@
             if(dayUnsubscribe) dayUnsubscribe(); 
             if(financeUnsubscribe) financeUnsubscribe(); 
             if(notesUnsubscribe) notesUnsubscribe();
+            if(settingsUnsubscribe) settingsUnsubscribe();
             
             try { 
                 if(auth.currentUser) await signOut(auth); 
             } catch(e) { console.error("Logout error", e); }
             
             cloudData = {}; financeData = {incomes:[], expenses:[], investments:[]}; notesData = {notesList: []};
+            globalSettings = { templateEveryday: null, templateDays: {} };
             isLocalMode = false; 
             isUserLoggedIn = false;
             
@@ -784,6 +817,11 @@
                 // Fetch Day Data
                 const stored = localStorage.getItem(`tracker_data_${docId}`); 
                 cloudData = stored ? sanitizeCloudData(JSON.parse(stored)) : {}; 
+
+                // Fetch Global Settings
+                const storedSettings = localStorage.getItem(`tracker_settings_global`);
+                if (storedSettings) globalSettings = JSON.parse(storedSettings);
+                
                 window.renderDayTracker(); 
 
                 // Fetch Finance Data (All months for current year chart)
@@ -819,6 +857,14 @@
                 }
                 cloudData = newData; window.renderDayTracker();
             }, (err) => { console.error(err); window.updateSyncUI(); });
+
+            // Sync Settings (Global Jadwal)
+            if (settingsUnsubscribe) settingsUnsubscribe();
+            settingsUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'global'), (snap) => {
+                globalSettings = snap.exists() ? snap.data() : { templateEveryday: null, templateDays: {} };
+                if (!globalSettings.templateDays) globalSettings.templateDays = {};
+                window.renderDayTracker();
+            }, (err) => { console.error("Firebase Settings Sync Error:", err); });
 
             // Sync Keuangan Seluruh Tahun (Koleksi)
             if (financeUnsubscribe) financeUnsubscribe();
@@ -867,6 +913,17 @@
         };
 
         function getDefaultTasks(date) {
+            // Prioritas 1: Format per hari khusus (misal: Setiap Senin)
+            if (globalSettings && globalSettings.templateDays && globalSettings.templateDays[date.getDay()]) {
+                return globalSettings.templateDays[date.getDay()];
+            }
+            
+            // Prioritas 2: Format Setiap Hari
+            if (globalSettings && globalSettings.templateEveryday) {
+                return globalSettings.templateEveryday;
+            }
+
+            // Prioritas 3: Format Default Bawaan (Hardcoded)
             const isFri = date.getDay() === 5;
             const ramStart = new Date(2026, 1, 18), ramEnd = new Date(2026, 2, 19);
             const isRamadan = date >= ramStart && date <= ramEnd;
@@ -1094,8 +1151,16 @@
 
         window.saveFinanceToFirestore = async () => {
             const finDocId = `finance-${selectedDate.getFullYear()}-${selectedDate.getMonth()}`;
+            
+            // Explicit payload to prevent undefined arrays crashing Firebase
+            const payload = {
+                incomes: financeData.incomes || [],
+                expenses: financeData.expenses || [],
+                investments: financeData.investments || []
+            };
+
             if (isLocalMode) { 
-                localStorage.setItem(`tracker_fin_${finDocId}`, JSON.stringify(financeData)); 
+                localStorage.setItem(`tracker_fin_${finDocId}`, JSON.stringify(payload)); 
                 
                 let allFinLocal = {};
                 for(let i=0; i<localStorage.length; i++) {
@@ -1111,22 +1176,26 @@
             }
             if (!auth.currentUser) return; 
             try {
-                await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance', finDocId), financeData);
+                await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance', finDocId), payload);
             } catch (err) {
                 console.error("Firebase Finance Save Error:", err);
                 window.showMessage("Gagal menyimpan keuangan ke Cloud!");
             }
         };
 
-        // Fungsi Gabungan untuk Transaksi
-        window.addUnifiedTransaction = async () => {
-            const type = document.getElementById('trxType').value;
-            const descEl = document.getElementById('trxDesc');
-            const amtEl = document.getElementById('trxAmt');
+        // Fungsi Transaksi Terpisah (Pemasukan, Pengeluaran, Investasi)
+        window.addFinance = async (type) => {
+            const descEl = document.getElementById(type === 'income' ? 'incDesc' : (type === 'expense' ? 'expDesc' : 'invDesc'));
+            const amtEl = document.getElementById(type === 'income' ? 'incAmt' : (type === 'expense' ? 'expAmt' : 'invAmt'));
             const desc = descEl.value.trim(), amt = parseInt(amtEl.value);
             
             if(!desc || isNaN(amt) || amt <= 0) return window.showMessage("Isi keterangan dan nominal yang valid!");
             
+            // Ensure arrays exist
+            if(!financeData.incomes) financeData.incomes = [];
+            if(!financeData.expenses) financeData.expenses = [];
+            if(!financeData.investments) financeData.investments = [];
+
             const item = { id: 'trx_' + Date.now(), desc, amount: amt, date: selectedDate.getDate() };
             if(type === 'income') financeData.incomes.push(item); 
             else if (type === 'expense') financeData.expenses.push(item);
@@ -1147,9 +1216,6 @@
         };
 
         window.renderFinance = () => {
-            const unifiedList = document.getElementById('unifiedTrxList');
-            if(!unifiedList) return;
-            
             const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const finTitle = document.getElementById('financeMonthLabel');
             if(finTitle) {
@@ -1157,33 +1223,37 @@
             }
 
             let tInc = 0, tExp = 0, tInv = 0;
-            financeData.incomes.forEach(i => tInc += i.amount);
-            financeData.expenses.forEach(i => tExp += i.amount);
-            financeData.investments.forEach(i => tInv += i.amount);
+            if(financeData.incomes) financeData.incomes.forEach(i => tInc += i.amount);
+            if(financeData.expenses) financeData.expenses.forEach(i => tExp += i.amount);
+            if(financeData.investments) financeData.investments.forEach(i => tInv += i.amount);
             
-            // Gabungkan semua riwayat menjadi satu array
-            let allTrx = [];
-            financeData.incomes.forEach(i => allTrx.push({...i, type: 'income', color: 'emerald', sign: '+'}));
-            financeData.expenses.forEach(i => allTrx.push({...i, type: 'expense', color: 'rose', sign: '-'}));
-            financeData.investments.forEach(i => allTrx.push({...i, type: 'investment', color: 'indigo', sign: '*'}));
-            
-            // Sortir berdasarkan tanggal & ID terbaru
-            allTrx.sort((a,b) => b.date - a.date || b.id.localeCompare(a.id));
+            // Render lists terpisah
+            const renderList = (data, containerId, colorCls, type) => {
+                const container = document.getElementById(containerId);
+                if(!container) return;
+                
+                const validData = data || [];
+                const sortedData = [...validData].sort((a,b) => b.date - a.date || b.id.localeCompare(a.id));
+                const emptyTemplate = `<div class="flex flex-col items-center justify-center py-8 opacity-50"><i class="fas fa-box-open text-2xl mb-2 text-slate-600"></i><p class="text-[9px] uppercase font-bold tracking-[3px] text-slate-500">Kosong</p></div>`;
+                
+                const html = sortedData.map(i => `
+                    <div class="flex items-center justify-between bg-[#0b101e] p-3 rounded-xl border border-white/5 hover:border-${colorCls}-500/30 transition-colors group">
+                        <div class="flex flex-col overflow-hidden flex-1 pr-2">
+                            <span class="text-[11px] font-bold text-slate-200 truncate">${i.desc}</span>
+                            <span class="text-[8px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"><i class="far fa-calendar-alt"></i> Tgl ${i.date}</span>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="text-[11px] font-black text-${colorCls}-400">${window.formatRupiah(i.amount)}</span>
+                            <button onclick="window.removeTransaction('${type}', '${i.id}')" class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center opacity-100 sm:opacity-0 group-hover:opacity-100"><i class="fas fa-trash text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+                container.innerHTML = html || emptyTemplate;
+            };
 
-            const emptyTemplate = `<div class="flex flex-col items-center justify-center h-32 opacity-50"><i class="fas fa-box-open text-3xl mb-3 text-slate-600"></i><p class="text-[9px] uppercase font-bold tracking-[3px] text-slate-500">Belum ada transaksi</p></div>`;
-
-            const itemTemplate = (i) => `<div class="flex items-center justify-between bg-[#0b101e] p-3 sm:p-4 rounded-xl border border-white/5 hover:border-${i.color}-500/30 transition-colors group">
-                <div class="flex flex-col overflow-hidden flex-1 pr-2">
-                    <span class="text-[11px] sm:text-[12px] font-bold text-slate-200 truncate">${i.desc}</span>
-                    <span class="text-[8px] sm:text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"><i class="far fa-calendar-alt"></i> Tgl ${i.date} • ${i.type === 'income' ? 'Pemasukan' : (i.type === 'expense' ? 'Pengeluaran' : 'Investasi')}</span>
-                </div>
-                <div class="flex items-center gap-3 shrink-0">
-                    <span class="text-[11px] sm:text-[12px] font-black text-${i.color}-400">${i.sign}${window.formatRupiah(i.amount)}</span>
-                    <button onclick="window.removeTransaction('${i.type}', '${i.id}')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center opacity-100 sm:opacity-0 group-hover:opacity-100"><i class="fas fa-trash text-[10px]"></i></button>
-                </div>
-            </div>`;
-
-            unifiedList.innerHTML = allTrx.length ? allTrx.map(i => itemTemplate(i)).join('') : emptyTemplate;
+            renderList(financeData.incomes, 'incomeList', 'emerald', 'income');
+            renderList(financeData.expenses, 'expenseList', 'rose', 'expense');
+            renderList(financeData.investments, 'investmentList', 'indigo', 'investment');
             
             const sisaSaldo = tInc - tExp - tInv;
 
@@ -1400,6 +1470,14 @@
             catTasks.forEach(t => window.addBulkEditRow(t));
             if(catTasks.length === 0) window.addBulkEditRow();
             
+            const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const saveDayNameEl = document.getElementById('saveDayName');
+            if (saveDayNameEl) saveDayNameEl.innerText = dNames[selectedDate.getDay()];
+
+            // Reset selection to today
+            const saveSelect = document.getElementById('bulkSaveOption');
+            if(saveSelect) saveSelect.value = 'today';
+
             const modal = document.getElementById('bulkEditModal');
             modal.classList.remove('hidden'); modal.classList.add('flex');
         };
@@ -1452,8 +1530,9 @@
             if(!taskData) container.scrollTop = container.scrollHeight;
         };
 
-        window.saveBulkEdit = async (saveType = 'today') => {
+        window.saveBulkEdit = async () => {
             const category = document.getElementById('bulkEditCategory').value;
+            const saveOption = document.getElementById('bulkSaveOption').value;
             const container = document.getElementById('bulkEditContainer');
             const rows = container.querySelectorAll('.bulk-edit-row');
             
@@ -1477,21 +1556,73 @@
                 });
             });
             
-            if (!cloudData.taskConfig) cloudData.taskConfig = getDefaultTasks(selectedDate);
-            let otherTasks = cloudData.taskConfig.filter(t => t.category !== category);
-            
-            cloudData.taskConfig = [...otherTasks, ...newCatTasks];
+            // Dapatkan tasks lama sesuai dengan jenis penyimpanannya
+            let baseTasks = [];
+            if (saveOption === 'today') {
+                baseTasks = cloudData.taskConfig || getDefaultTasks(selectedDate);
+            } else if (saveOption === 'dayOfWeek') {
+                baseTasks = (globalSettings.templateDays && globalSettings.templateDays[selectedDate.getDay()]) || getDefaultTasks(selectedDate);
+            } else if (saveOption === 'everyday') {
+                baseTasks = globalSettings.templateEveryday || getDefaultTasks(selectedDate);
+            }
+
+            // Gabungkan tugas baru dengan jadwal lama yang BUKAN dari kategori yang sedang di-edit (agar jadwal kategori lain tidak hilang)
+            let otherTasks = baseTasks.filter(t => t.category !== category);
+            let finalTasks = [...otherTasks, ...newCatTasks];
             
             window.closeBulkEdit();
-            await saveToFirestore();
+
+            if (saveOption === 'today') {
+                // Simpan hanya ke file hari ini
+                cloudData.taskConfig = finalTasks;
+                await saveToFirestore();
+                window.showMessage("Jadwal (Hanya Hari Ini) berhasil diperbarui!");
+            } else {
+                // Simpan ke konfigurasi Global
+                if (saveOption === 'dayOfWeek') {
+                    if(!globalSettings.templateDays) globalSettings.templateDays = {};
+                    globalSettings.templateDays[selectedDate.getDay()] = finalTasks;
+                } else if (saveOption === 'everyday') {
+                    globalSettings.templateEveryday = finalTasks;
+                }
+
+                if (isLocalMode) {
+                    localStorage.setItem(`tracker_settings_global`, JSON.stringify(globalSettings));
+                } else if (auth.currentUser) {
+                    try {
+                        await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'global'), globalSettings);
+                    } catch (err) {
+                        console.error("Gagal simpan settings", err);
+                    }
+                }
+
+                // Hapus konfigurasi hari ini agar ia mengambil langsung dari template Global yang baru dibuat
+                if (cloudData.taskConfig) {
+                    delete cloudData.taskConfig;
+                    await saveToFirestore();
+                }
+
+                const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                window.showMessage(`Jadwal (${saveOption === 'everyday' ? 'Setiap Hari' : 'Setiap ' + dNames[selectedDate.getDay()]}) berhasil diperbarui!`);
+            }
+            
             window.renderDayTracker();
-            window.showMessage("Jadwal " + (category === 'main' ? "Utama" : "Rutin") + " (Hanya Hari Ini) berhasil diperbarui!");
         };
 
         window.toggleTimerPanel = (id) => { if(!window.openTimerPanels) window.openTimerPanels = {}; window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };
         window.startCountdown = (id, d) => { const t = cloudData[id] || {}; if (t.timerRunning) { t.timerRunning = false; t.remainingMs = (t.timerEnd || 0) - Date.now(); t.timerEnd = null; } else { t.timerRunning = true; t.timerEnd = Date.now() + (t.remainingMs || d); } cloudData[id] = t; saveToFirestore(); window.renderDayTracker(); };
         window.stopTimer = (id) => { cloudData[id] = { ...cloudData[id], timerRunning: false, timerEnd: null, remainingMs: null }; saveToFirestore(); window.renderDayTracker(); };
-        window.updateStatus = async (id, s) => { cloudData[id] = { ...cloudData[id], status: s }; window.renderDayTracker(); saveToFirestore(); };
+        
+        window.updateStatus = async (id, s) => { 
+            // Membekukan/Mengunci jadwal untuk hari ini, ketika aktivitas pertama dicentang!
+            if (!cloudData.taskConfig) {
+                cloudData.taskConfig = getDefaultTasks(selectedDate);
+            }
+            cloudData[id] = { ...cloudData[id], status: s }; 
+            window.renderDayTracker(); 
+            saveToFirestore(); 
+        };
+        
         window.triggerUpload = (id) => { activeItemIdForUpload = id; document.getElementById('globalFileInput').click(); };
         window.removeAttachment = async (id, i) => { if(cloudData[id]?.attachments) { cloudData[id].attachments.splice(i, 1); window.renderDayTracker(); saveToFirestore(); } };
         

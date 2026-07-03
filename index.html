@@ -236,8 +236,22 @@
 
             <div class="flex gap-3 pt-4 border-t border-white/10 mt-auto bg-slate-900">
                 <button onclick="window.addBulkEditRow()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all border border-white/5"><i class="fas fa-plus mr-1 text-blue-400"></i> Tambah Baris</button>
-                <button onclick="window.saveBulkEdit()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all shadow-lg shadow-blue-900/50"><i class="fas fa-save mr-1"></i> Simpan Semua</button>
+                <button onclick="window.promptSaveBulkEdit()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all shadow-lg shadow-blue-900/50"><i class="fas fa-save mr-1"></i> Simpan Semua</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI SAVE JADWAL -->
+    <div id="bulkEditConfirmModal" class="hidden fixed inset-0 z-[40000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
+            <h3 class="text-white font-black uppercase tracking-wider mb-4 text-sm text-center">Simpan Jadwal</h3>
+            <p class="text-[11px] text-slate-400 mb-6 text-center">Terapkan perubahan jadwal ini untuk waktu kapan?</p>
+            <div class="space-y-3">
+                <button onclick="window.confirmSaveBulkEdit('once')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] py-4 rounded-xl transition-all border border-white/5">Hanya Hari Ini (<span id="lblScopeOnce"></span>)</button>
+                <button onclick="window.confirmSaveBulkEdit('dayOfWeek')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] py-4 rounded-xl transition-all border border-white/5">Setiap Hari <span id="lblScopeDay"></span></button>
+                <button onclick="window.confirmSaveBulkEdit('all')" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-[11px] py-4 rounded-xl transition-all shadow-lg shadow-blue-900/50">Semua Hari (Default)</button>
+            </div>
+            <button onclick="document.getElementById('bulkEditConfirmModal').classList.replace('flex', 'hidden')" class="w-full mt-4 text-[10px] text-slate-500 hover:text-slate-300 font-bold uppercase tracking-wider py-2">Batal</button>
         </div>
     </div>
 
@@ -310,8 +324,8 @@
 
         <div id="dayTrackerArea" class="hidden opacity-0 transition-all duration-700">
             
-            <!-- TANGGAL/BULAN/TAHUN SELECTOR (Dikembalikan ke area konten) -->
-            <div class="flex items-center justify-center gap-3 mb-8 px-4">
+            <!-- TANGGAL/BULAN/TAHUN SELECTOR -->
+            <div id="dateSelectorArea" class="flex items-center justify-center gap-3 mb-8 px-4 transition-all duration-300">
                 <div class="custom-select-wrapper max-w-[160px]">
                     <select id="monthSelect" class="header-select" onchange="window.updateCalendarView(true)"></select>
                 </div>
@@ -375,7 +389,7 @@
                     
                     <div class="flex items-center gap-3 mb-10 relative z-10">
                         <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center"><i class="fas fa-chart-pie text-blue-400 text-sm"></i></div>
-                        <h3 class="text-[11px] font-black text-slate-300 uppercase tracking-[4px] leading-tight">Ringkasan Keuangan<br>Bulanan</h3>
+                        <h3 id="financeMonthLabel" class="text-[11px] font-black text-slate-300 uppercase tracking-[4px] leading-tight">Ringkasan Keuangan<br>Bulan Ini</h3>
                     </div>
                     
                     <div class="relative z-10 flex flex-col gap-6">
@@ -623,6 +637,9 @@
         let dayUnsubscribe = null, selectedDate = new Date(2026, 0, 1), cloudData = {}, activeItemIdForUpload = null, isUserLoggedIn = false;
         let financeUnsubscribe = null, financeData = { incomes: [], expenses: [] };
         let notesUnsubscribe = null, notesData = { notesList: [] };
+        let settingsUnsubscribe = null, globalSettings = { globalTasks: null, dayTasks: {} };
+        window.tempNewCatTasks = null;
+        window.tempEditCategory = null;
         window.openTimerPanels = {};
 
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
@@ -670,7 +687,8 @@
             if(dayUnsubscribe) dayUnsubscribe(); 
             if(financeUnsubscribe) financeUnsubscribe(); 
             if(notesUnsubscribe) notesUnsubscribe();
-            cloudData = {}; financeData = {incomes:[], expenses:[]}; notesData = {notesList: []};
+            if(settingsUnsubscribe) settingsUnsubscribe();
+            cloudData = {}; financeData = {incomes:[], expenses:[]}; notesData = {notesList: []}; globalSettings = { globalTasks: null, dayTasks: {} };
             isLocalMode = false; window.renderDayTracker(); window.renderFinance(); window.renderNotes();
             try { await signOut(auth); } catch(e) {} window.location.reload(); 
         };
@@ -707,6 +725,11 @@
                 // Fetch Day Data
                 const stored = localStorage.getItem(`tracker_data_${docId}`); 
                 cloudData = stored ? sanitizeCloudData(JSON.parse(stored)) : {}; 
+                
+                // Fetch Settings Data
+                const storedSettings = localStorage.getItem('tracker_settings_global');
+                globalSettings = storedSettings ? JSON.parse(storedSettings) : { globalTasks: null, dayTasks: {} };
+
                 window.renderDayTracker(); 
 
                 // Fetch Finance Data
@@ -753,7 +776,21 @@
                 window.renderNotes();
             }, (err) => { console.error("Firebase Notes Sync Error:", err); });
 
+            // Sync Settings (Jadwal Global)
+            if (settingsUnsubscribe) settingsUnsubscribe();
+            settingsUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'schedule'), (snap) => {
+                globalSettings = snap.exists() ? snap.data() : { globalTasks: null, dayTasks: {} };
+                window.renderDayTracker();
+            }, (err) => { console.error("Firebase Settings Sync Error:", err); });
+
             window.updateCalendarView();
+        };
+
+        window.saveSettingsToFirestore = async () => {
+            if (isLocalMode) { localStorage.setItem('tracker_settings_global', JSON.stringify(globalSettings)); return; }
+            if (!auth.currentUser) return;
+            try { await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'schedule'), globalSettings); }
+            catch (err) { console.error("Gagal sinkron settings:", err); }
         };
 
         async function saveToFirestore() { 
@@ -825,6 +862,14 @@
             return [...routine, ...extra];
         }
 
+        window.getEffectiveTasks = function(date) {
+            if (cloudData.taskConfig) return cloudData.taskConfig;
+            const d = date.getDay();
+            if (globalSettings.dayTasks && globalSettings.dayTasks[d]) return globalSettings.dayTasks[d];
+            if (globalSettings.globalTasks) return globalSettings.globalTasks;
+            return getDefaultTasks(date);
+        };
+
         window.renderDayTracker = function() {
             let activeId = document.activeElement ? document.activeElement.id : null;
             let selectionStart = 0, selectionEnd = 0;
@@ -848,7 +893,7 @@
             let fastingLabel = isRamadan ? "🌙 Puasa Ramadhan" : (selectedDate.getDay() === 1 ? "✨ Puasa Sunnah Senin" : (selectedDate.getDay() === 4 ? "✨ Puasa Sunnah Kamis" : ""));
             if(ui.fasting) ui.fasting.innerHTML = fastingLabel ? `<div class="fasting-alert ${isRamadan ? 'fasting-ramadhan' : ''}">${fastingLabel}</div>` : '';
 
-            let dayTasks = cloudData.taskConfig || getDefaultTasks(selectedDate);
+            let dayTasks = window.getEffectiveTasks(selectedDate);
             
             const renderItems = (list, targetId) => {
                 const container = document.getElementById(targetId);
@@ -947,6 +992,15 @@
 
         window.switchTab = (tab) => {
             const tabs = ['jadwal', 'keuangan', 'catatan'];
+            const dateArea = document.getElementById('dateSelectorArea');
+            
+            if (dateArea) {
+                if (tab === 'catatan') {
+                    dateArea.style.display = 'none';
+                } else {
+                    dateArea.style.display = 'flex';
+                }
+            }
             
             tabs.forEach(t => {
                 const content = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}Content`);
@@ -1014,6 +1068,12 @@
             const incList = document.getElementById('incomeList'), expList = document.getElementById('expenseList');
             if(!incList || !expList) return;
             
+            const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const finTitle = document.getElementById('financeMonthLabel');
+            if(finTitle) {
+                finTitle.innerHTML = `Ringkasan Keuangan<br>${mNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+            }
+
             let tInc = 0, tExp = 0;
             
             incList.innerHTML = financeData.incomes.sort((a,b) => b.date - a.date).map(i => {
@@ -1185,7 +1245,7 @@
             const container = document.getElementById('bulkEditContainer');
             container.innerHTML = '';
             
-            let tasks = cloudData.taskConfig || getDefaultTasks(selectedDate);
+            let tasks = window.getEffectiveTasks(selectedDate);
             let catTasks = tasks.filter(t => t.category === category);
             
             catTasks.sort((a, b) => (a.time || "25:00").localeCompare((b.time || "25:00")));
@@ -1226,7 +1286,7 @@
             if(!taskData) container.scrollTop = container.scrollHeight;
         };
 
-        window.saveBulkEdit = async () => {
+        window.promptSaveBulkEdit = () => {
             const category = document.getElementById('bulkEditCategory').value;
             const container = document.getElementById('bulkEditContainer');
             const rows = container.querySelectorAll('.bulk-edit-row');
@@ -1235,31 +1295,68 @@
             rows.forEach(row => {
                 const taskName = row.querySelector('.row-task').value.trim();
                 if (!taskName) return;
-                
                 const time = row.querySelector('.row-time').value;
                 const durVal = row.querySelector('.row-dur').value;
                 const hasTimer = durVal !== "" && parseInt(durVal) > 0;
-                
                 newCatTasks.push({
                     id: row.querySelector('.row-id').value,
-                    task: taskName,
-                    time: time,
-                    category: category,
+                    task: taskName, time: time, category: category,
                     icon: row.querySelector('.row-icon').value,
-                    noTimer: !hasTimer,
-                    duration: hasTimer ? parseInt(durVal) * 60000 : null
+                    noTimer: !hasTimer, duration: hasTimer ? parseInt(durVal) * 60000 : null
                 });
             });
+
+            window.tempNewCatTasks = newCatTasks;
+            window.tempEditCategory = category;
+
+            const dNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const mNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
             
-            if (!cloudData.taskConfig) cloudData.taskConfig = getDefaultTasks(selectedDate);
-            let otherTasks = cloudData.taskConfig.filter(t => t.category !== category);
+            document.getElementById('lblScopeOnce').innerText = `${selectedDate.getDate()} ${mNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+            document.getElementById('lblScopeDay').innerText = dNames[selectedDate.getDay()];
             
-            cloudData.taskConfig = [...otherTasks, ...newCatTasks];
+            const confirmModal = document.getElementById('bulkEditConfirmModal');
+            confirmModal.classList.remove('hidden'); confirmModal.classList.add('flex');
+        };
+
+        window.confirmSaveBulkEdit = async (scope) => {
+            const category = window.tempEditCategory;
+            const newCatTasks = window.tempNewCatTasks;
+            const currentDayOfWeek = selectedDate.getDay();
             
+            let baseConfig;
+            if (scope === 'once') {
+                baseConfig = cloudData.taskConfig || window.getEffectiveTasks(selectedDate);
+            } else if (scope === 'dayOfWeek') {
+                baseConfig = (globalSettings.dayTasks && globalSettings.dayTasks[currentDayOfWeek]) || globalSettings.globalTasks || getDefaultTasks(selectedDate);
+            } else if (scope === 'all') {
+                baseConfig = globalSettings.globalTasks || getDefaultTasks(selectedDate);
+            }
+
+            let otherTasks = baseConfig.filter(t => t.category !== category);
+            let mergedTasks = [...otherTasks, ...newCatTasks];
+
+            if (scope === 'once') {
+                cloudData.taskConfig = mergedTasks;
+                await saveToFirestore();
+            } else if (scope === 'dayOfWeek') {
+                if (!globalSettings.dayTasks) globalSettings.dayTasks = {};
+                globalSettings.dayTasks[currentDayOfWeek] = mergedTasks;
+                await window.saveSettingsToFirestore();
+                delete cloudData.taskConfig; 
+                await saveToFirestore();
+            } else if (scope === 'all') {
+                globalSettings.globalTasks = mergedTasks;
+                await window.saveSettingsToFirestore();
+                delete cloudData.taskConfig; 
+                await saveToFirestore();
+            }
+
+            document.getElementById('bulkEditConfirmModal').classList.add('hidden');
+            document.getElementById('bulkEditConfirmModal').classList.remove('flex');
             window.closeBulkEdit();
-            await saveToFirestore();
             window.renderDayTracker();
-            window.showMessage("Jadwal " + (category === 'main' ? "Utama" : "Rutin") + " berhasil diperbarui!");
+            window.showMessage("Jadwal berhasil diperbarui!");
         };
 
         window.toggleTimerPanel = (id) => { if(!window.openTimerPanels) window.openTimerPanels = {}; window.openTimerPanels[id] = !window.openTimerPanels[id]; window.renderDayTracker(); };

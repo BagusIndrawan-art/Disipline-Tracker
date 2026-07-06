@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- PWA Setup Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Disipline Tracker">
@@ -20,6 +21,7 @@
 
     <title>Disipline Tracker 2026</title>
     
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -74,6 +76,18 @@
             border: 1px solid rgba(255,255,255,0.2);
         }
 
+        .calendar-dot {
+            width: 4px; height: 4px; border-radius: 50%; background-color: #10b981;
+            position: absolute; bottom: 6px; box-shadow: 0 0 5px rgba(16, 185, 129, 0.6);
+        }
+        
+        .editable-title {
+            cursor: pointer; transition: all 0.2s; border-bottom: 1px dashed transparent;
+        }
+        .editable-title:hover {
+            color: white; border-bottom-color: currentColor;
+        }
+
         .status-pill {
             padding: 8px 16px; border-radius: 99px; font-size: 10px;
             font-weight: 800; text-transform: uppercase; display: flex;
@@ -81,10 +95,13 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-        #syncIndicator { position: fixed; bottom: 100px; right: 25px; z-index: 100; transition: all 0.3s ease; }
+        #syncIndicator { position: fixed; bottom: 100px; left: 25px; z-index: 100; transition: all 0.3s ease; }
         .state-online { background: #064e3b; color: #34d399; }
         .state-offline { background: #450a0a; color: #f87171; }
         .state-local { background: #d97706; color: #fcd34d; }
+
+        /* Jarak aman di bawah agar konten tidak tertabrak navbar */
+        main { padding-bottom: 140px !important; }
 
         .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; position: relative; }
         .pulse-dot::after {
@@ -122,7 +139,7 @@
         .login-btn-guest:hover { color: #94a3b8; border-color: rgba(100, 116, 139, 0.6); background: rgba(255,255,255,0.02); }
 
         #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        #appMessage { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 40000; background: #2563eb; color: white; padding: 12px 24px; border-radius: 99px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4); pointer-events: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; max-width: 90%; }
+        #appMessage { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 70000; background: #2563eb; color: white; padding: 12px 24px; border-radius: 99px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4); pointer-events: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; max-width: 90%; }
         .msg-hide { opacity: 0; transform: translate(-50%, -20px); }
 
         #mainHeader { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
@@ -145,8 +162,6 @@
 
         @keyframes installPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .install-pulse { animation: installPulse 2s infinite; }
-
-        .nav-pb { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); padding-top: 16px; }
     </style>
 </head>
 <body class="bg-[#050810]">
@@ -160,6 +175,7 @@
         <p class="text-white font-bold text-[10px]">MEMPROSES DATA...</p>
     </div>
 
+    <!-- PWA Install Guide for iOS -->
     <div id="iosInstallPrompt" class="hidden fixed bottom-24 left-4 right-4 z-[9000] bg-slate-900/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl flex-col gap-3">
         <div class="flex justify-between items-start">
             <h3 class="text-white font-bold text-sm">Install Aplikasi</h3>
@@ -170,6 +186,7 @@
         <div class="flex items-center gap-2 text-xs text-slate-400">2. Pilih "Add to Home Screen" <i class="fas fa-plus-square text-white"></i></div>
     </div>
 
+    <!-- Image Preview Modal -->
     <div id="imagePreviewModal" class="flex flex-col items-center justify-center">
         <div class="absolute top-6 right-6 flex items-center gap-4">
             <a id="downloadBtn" href="#" download class="text-white text-2xl hover:text-blue-400 transition-colors"><i class="fas fa-download"></i></a>
@@ -182,7 +199,8 @@
         </div>
     </div>
 
-    <div id="noteModal" class="hidden fixed inset-0 z-[30000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-4">
+    <!-- MODAL RENCANA (CRUD) -->
+    <div id="noteModal" class="hidden fixed inset-0 z-[60000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-4">
         <div class="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative">
             <button onclick="window.closeNoteModal()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-400 transition-colors"><i class="fas fa-times text-xl"></i></button>
             <h3 class="text-white font-black uppercase tracking-wider mb-6 text-sm flex items-center gap-2">
@@ -207,7 +225,25 @@
         </div>
     </div>
 
-    <div id="bulkEditModal" class="hidden fixed inset-0 z-[30000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-2 sm:p-4">
+    <!-- MODAL ATUR KATEGORI (CRUD) -->
+    <div id="categoryModal" class="hidden fixed inset-0 z-[60000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-2 sm:p-4">
+        <div class="bg-slate-900 border border-slate-500/30 rounded-3xl p-4 sm:p-6 w-full max-w-lg shadow-2xl relative flex flex-col max-h-[90vh]">
+            <button onclick="window.closeCategoryModal()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-400 transition-colors"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-white font-black uppercase tracking-wider mb-4 text-sm flex items-center gap-2">
+                <i class="fas fa-layer-group text-slate-400"></i> <span>Atur Kategori Jadwal</span>
+            </h3>
+            
+            <div id="categoryEditContainer" class="flex-1 overflow-y-auto pr-2 space-y-2 mb-4 custom-scrollbar max-h-[50vh]"></div>
+
+            <div class="flex flex-col gap-3 pt-4 border-t border-white/10 mt-auto bg-slate-900">
+                <button onclick="window.addCategoryRow()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all border border-white/5"><i class="fas fa-plus mr-1 text-slate-400"></i> Tambah Kategori Baru</button>
+                <button onclick="window.saveCategories()" class="w-full bg-white text-slate-900 hover:bg-slate-200 font-black uppercase tracking-widest text-[10px] py-3.5 rounded-xl transition-all shadow-lg mt-1"><i class="fas fa-save mr-1"></i> Simpan Kategori</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BULK EDIT (JADWAL) -->
+    <div id="bulkEditModal" class="hidden fixed inset-0 z-[60000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-2 sm:p-4">
         <div class="bg-slate-900 border border-blue-500/30 rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl relative flex flex-col max-h-[90vh]">
             <button onclick="window.closeBulkEdit()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-400 transition-colors"><i class="fas fa-times text-xl"></i></button>
             <h3 class="text-white font-black uppercase tracking-wider mb-1 text-sm flex items-center gap-2">
@@ -243,14 +279,14 @@
         </div>
     </div>
 
+    <!-- Sync Indicator -->
     <div id="syncIndicator" class="status-pill state-offline"><div class="pulse-dot"></div><span id="syncText">Cloud Offline</span></div>
 
-    <header id="mainHeader" class="relative z-50 bg-[#050810]/90 backdrop-blur-xl p-3 sm:p-5 header-clean">
+    <!-- MAIN HEADER (Kini Sticky) -->
+    <header id="mainHeader" class="sticky top-0 z-[100] bg-[#050810]/90 backdrop-blur-xl p-3 sm:p-5 transition-all duration-300 border-b border-white/5 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-row items-center justify-between gap-2">
-            
             <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0 z-10">
                 <div id="userInfo"></div>
-                
                 <div id="notifWrapper" class="hidden flex items-center gap-1.5 sm:gap-2">
                     <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition-colors border border-white/5 shadow-lg group relative">
                         <i id="notifIcon" class="fas fa-bell text-[11px] text-slate-400 group-hover:text-white"></i>
@@ -260,7 +296,6 @@
             </div>
 
             <div class="flex items-center gap-3 justify-end flex-shrink min-w-0 z-10">
-                
                 <div id="navWrapper" class="hidden">
                     <button id="installAppBtn" onclick="window.installPWA()" class="hidden bg-blue-600 text-white px-3 py-2 rounded-xl text-[9px] sm:text-xs font-black uppercase tracking-wider shadow-lg items-center gap-1.5 install-pulse whitespace-nowrap">
                         <i class="fas fa-download"></i> <span class="hidden sm:inline">Install</span>
@@ -269,7 +304,6 @@
 
                 <div id="headerBrand" class="hidden relative group pointer-events-auto transition-transform hover:scale-105 cursor-pointer">
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-                    
                     <div class="relative flex items-center gap-1.5 sm:gap-2 bg-[#0a0f1a] border border-blue-500/20 px-2 py-1.5 sm:px-3 sm:py-2 rounded-full shadow-2xl">
                         <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-[0_0_10px_rgba(59,130,246,0.6)] relative overflow-hidden flex-shrink-0">
                             <div class="absolute inset-0 bg-white/20 blur-[2px] rounded-full"></div>
@@ -281,13 +315,12 @@
                         </div>
                     </div>
                 </div>
-
             </div>
-            
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-4 sm:p-8 pb-24">
+    <main class="max-w-7xl mx-auto p-4 sm:p-8">
+        
         <div class="mb-10 text-center px-4 flex flex-col items-center">
             <p id="quoteText" class="text-sm sm:text-base text-slate-400 italic font-medium leading-relaxed max-w-2xl mx-auto">"Memuat motivasi harian kamu..."</p>
             <div class="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0a0f1a] border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] relative overflow-hidden group">
@@ -336,12 +369,13 @@
                 </div>
             </div>
 
+            <!-- TAB 1: JADWAL -->
             <div id="tabJadwalContent" class="block transition-all duration-500">
                 <div class="glass-card p-6 sm:p-10 rounded-[2.5rem] mb-14 shadow-2xl">
                     <div class="grid grid-cols-7 gap-3 sm:gap-5 text-center mb-6 font-black text-slate-500 text-[11px] uppercase tracking-widest">
                         <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
                     </div>
-                    <div id="calendarGrid" class="grid grid-cols-7 gap-3 sm:gap-5"></div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-3 sm:gap-5 relative"></div>
                 </div>
 
                 <div id="dayHeader" class="flex flex-col sm:flex-row items-center justify-between mb-12 px-2 gap-6">
@@ -358,31 +392,17 @@
                     </div>
                 </div>
 
-                <div class="mb-14">
-                    <div class="flex items-center justify-between mb-6 px-2">
-                        <h3 class="text-[12px] font-black text-blue-500 uppercase tracking-[4px] flex items-center gap-2">
-                            <i class="fas fa-briefcase text-slate-500"></i> Jadwal Utama
-                        </h3>
-                        <button id="btnEditMain" onclick="window.openBulkEdit('main')" class="text-[9px] font-bold text-blue-400 hover:text-white bg-blue-500/10 hover:bg-blue-500 border border-blue-500/20 px-4 py-2 rounded-xl uppercase tracking-wider transition-all shadow-lg flex items-center gap-2">
-                            <i class="fas fa-pen"></i> Edit Jadwal
-                        </button>
-                    </div>
-                    <div id="taskList" class="flex flex-col gap-3"></div>
+                <!-- Bagian Kontrol Kategori Global -->
+                <div class="flex justify-between items-center mb-6 px-2 border-b border-white/5 pb-4">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><i class="fas fa-layer-group"></i> Daftar Kategori</h3>
+                    <button onclick="window.openCategoryModal()" class="text-[9px] font-bold bg-slate-800 text-white px-4 py-2.5 rounded-xl border border-white/10 hover:bg-slate-700 transition-colors shadow-lg uppercase tracking-wider flex items-center gap-2"><i class="fas fa-cog"></i> Atur Kategori</button>
                 </div>
 
-                <div class="mt-20">
-                    <div class="flex items-center justify-between mb-6 px-2">
-                        <h3 class="text-[12px] font-black text-emerald-500 uppercase tracking-[4px] flex items-center gap-2">
-                            <i class="fas fa-leaf text-slate-500"></i> Rutin & Ibadah
-                        </h3>
-                        <button id="btnEditExtra" onclick="window.openBulkEdit('extra')" class="text-[9px] font-bold text-emerald-400 hover:text-white bg-emerald-500/10 hover:bg-emerald-500 border border-emerald-500/20 px-4 py-2 rounded-xl uppercase tracking-wider transition-all shadow-lg flex items-center gap-2">
-                            <i class="fas fa-pen"></i> Edit Jadwal
-                        </button>
-                    </div>
-                    <div id="extraTaskList" class="flex flex-col gap-3"></div>
-                </div>
+                <!-- Container Dinamis Kategori Jadwal -->
+                <div id="dynamicCategoriesContainer"></div>
             </div>
 
+            <!-- TAB 2: KEUANGAN (KOMPLEKS MASTER COMMAND CENTER) -->
             <div id="tabKeuanganContent" class="hidden opacity-0 transition-all duration-500">
                 <div class="glass-card p-5 sm:p-8 rounded-[2.5rem] mb-10 shadow-2xl border border-blue-500/20 flex flex-col gap-8 relative overflow-hidden">
                     <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -512,6 +532,7 @@
                 </div>
             </div>
 
+            <!-- TAB 3: RENCANA (CRUD) -->
             <div id="tabRencanaContent" class="hidden opacity-0 transition-all duration-500">
                 <div class="flex items-center justify-between mb-8 px-2">
                     <h3 class="text-[12px] font-black text-amber-500 uppercase tracking-[4px] flex items-center gap-2">
@@ -523,13 +544,15 @@
                 </div>
                 
                 <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    </div>
+                    <!-- List rencana akan dirender di sini -->
+                </div>
             </div>
 
         </div>
     </main>
 
-    <nav id="bottomNav" class="fixed bottom-0 left-0 w-full z-[100] bg-[#050810]/95 backdrop-blur-xl border-t border-white/5 nav-pb hidden transition-all duration-700 opacity-0 translate-y-full">
+    <!-- BOTTOM NAVIGATION -->
+    <nav id="bottomNav" class="fixed bottom-0 left-0 w-full z-[100] bg-[#050810]/95 backdrop-blur-xl border-t border-white/5 py-3 hidden transition-all duration-700 opacity-0 translate-y-full" style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));">
         <div class="max-w-md mx-auto flex justify-between items-center px-8">
             <button id="btnTabJadwal" onclick="window.switchTab('jadwal')" class="flex flex-col items-center gap-1 text-blue-500 w-16 transition-all transform scale-110 -translate-y-1">
                 <i class="fas fa-calendar-check text-[20px] mb-1"></i>
@@ -685,7 +708,7 @@
         let financeUnsubscribe = null, financeData = { incomes: [], expenses: [], investments: [] };
         let yearlyFinanceStats = Array(12).fill(null).map(() => ({ inc: 0, exp: 0, inv: 0 }));
         let notesUnsubscribe = null, notesData = { notesList: [] };
-        let settingsUnsubscribe = null, globalSettings = { templateEveryday: null, templateDays: {} };
+        let settingsUnsubscribe = null, globalSettings = { templateEveryday: null, templateDays: {}, categories: null };
         window.openTimerPanels = {};
 
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
@@ -740,7 +763,7 @@
             } catch(e) { console.error("Logout error", e); }
             
             cloudData = {}; financeData = {incomes:[], expenses:[], investments:[]}; notesData = {notesList: []};
-            globalSettings = { templateEveryday: null, templateDays: {} };
+            globalSettings = { templateEveryday: null, templateDays: {}, categories: null };
             isLocalMode = false; 
             isUserLoggedIn = false;
             
@@ -865,10 +888,10 @@
                 cloudData = newData; window.renderDayTracker();
             }, (err) => { console.error(err); window.updateSyncUI(); });
 
-            // Sync Settings (Global Jadwal)
+            // Sync Settings (Global Jadwal & Kategori)
             if (settingsUnsubscribe) settingsUnsubscribe();
             settingsUnsubscribe = onSnapshot(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'global'), (snap) => {
-                globalSettings = snap.exists() ? snap.data() : { templateEveryday: null, templateDays: {} };
+                globalSettings = snap.exists() ? snap.data() : { templateEveryday: null, templateDays: {}, categories: null };
                 if (!globalSettings.templateDays) globalSettings.templateDays = {};
                 window.renderDayTracker();
             }, (err) => { console.error("Firebase Settings Sync Error:", err); });
@@ -910,10 +933,29 @@
             if(isFromDropdown) { selectedDate = new Date(year, month, 1); window.setupRealtimeSync(); }
             grid.innerHTML = ''; const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
             for(let i=0; i<firstDay; i++) grid.innerHTML += '<div></div>';
+            
             for(let d=1; d<=daysInMonth; d++) {
                 const dayEl = document.createElement('div');
                 const isSelected = selectedDate.getDate() === d && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
-                dayEl.className = `calendar-day glass-card ${isSelected ? 'active' : ''}`; dayEl.innerText = d;
+                dayEl.className = `calendar-day glass-card relative ${isSelected ? 'active' : ''}`; dayEl.innerText = d;
+                
+                // Cek progress untuk menampilkan indikator Titik Hijau
+                const checkDocId = `${year}-${month}-${d}`;
+                let hasProgress = false;
+                
+                if (isLocalMode) {
+                    const localDayData = localStorage.getItem(`tracker_data_${checkDocId}`);
+                    if(localDayData && (localDayData.includes('"status":"done"') || localDayData.includes('"status":"fail"'))) hasProgress = true;
+                } else if(cloudData && isSelected) {
+                     Object.values(cloudData).forEach(item => { if(item && (item.status === 'done' || item.status === 'fail')) hasProgress = true; });
+                }
+                
+                if (hasProgress) {
+                    const dot = document.createElement('div');
+                    dot.className = "calendar-dot";
+                    dayEl.appendChild(dot);
+                }
+
                 dayEl.onclick = () => { selectedDate = new Date(year, month, d); window.setupRealtimeSync(); };
                 grid.appendChild(dayEl);
             }
@@ -1004,32 +1046,14 @@
                 }
             });
 
-            const btnEditMain = document.getElementById('btnEditMain');
-            const btnEditExtra = document.getElementById('btnEditExtra');
-
-            if (btnEditMain) {
-                if (hasActivity) {
-                    btnEditMain.innerHTML = '<i class="fas fa-lock"></i> Terkunci';
-                    btnEditMain.className = 'text-[9px] font-bold text-slate-500 bg-slate-800 border border-white/5 px-4 py-2 rounded-xl uppercase tracking-wider cursor-not-allowed flex items-center gap-2 shadow-none';
-                    btnEditMain.onclick = () => window.showMessage("Aktivitas di hari ini sudah dimulai. Jadwal terkunci.");
-                } else {
-                    btnEditMain.innerHTML = '<i class="fas fa-pen"></i> Edit Jadwal';
-                    btnEditMain.className = 'text-[9px] font-bold text-blue-400 hover:text-white bg-blue-500/10 hover:bg-blue-500 border border-blue-500/20 px-4 py-2 rounded-xl uppercase tracking-wider transition-all shadow-lg flex items-center gap-2';
-                    btnEditMain.onclick = () => window.openBulkEdit('main');
-                }
-            }
-
-            if (btnEditExtra) {
-                if (hasActivity) {
-                    btnEditExtra.innerHTML = '<i class="fas fa-lock"></i> Terkunci';
-                    btnEditExtra.className = 'text-[9px] font-bold text-slate-500 bg-slate-800 border border-white/5 px-4 py-2 rounded-xl uppercase tracking-wider cursor-not-allowed flex items-center gap-2 shadow-none';
-                    btnEditExtra.onclick = () => window.showMessage("Aktivitas di hari ini sudah dimulai. Jadwal terkunci.");
-                } else {
-                    btnEditExtra.innerHTML = '<i class="fas fa-pen"></i> Edit Jadwal';
-                    btnEditExtra.className = 'text-[9px] font-bold text-emerald-400 hover:text-white bg-emerald-500/10 hover:bg-emerald-500 border border-emerald-500/20 px-4 py-2 rounded-xl uppercase tracking-wider transition-all shadow-lg flex items-center gap-2';
-                    btnEditExtra.onclick = () => window.openBulkEdit('extra');
-                }
-            }
+            // Kategori Default jika user belum mengatur
+            const defaultCategories = [
+                { id: 'main', name: 'Jadwal Utama', icon: 'fa-briefcase', color: 'blue' },
+                { id: 'extra', name: 'Rutin & Ibadah', icon: 'fa-leaf', color: 'emerald' }
+            ];
+            
+            // Memuat Kategori Dinamis dari Global Settings
+            const categories = (globalSettings && globalSettings.categories && globalSettings.categories.length > 0) ? globalSettings.categories : defaultCategories;
             
             const renderItems = (list, targetId) => {
                 const container = document.getElementById(targetId);
@@ -1102,17 +1126,62 @@
                 return done;
             };
 
-            const mainList = dayTasks.filter(t => t.category === "main");
-            const extraList = dayTasks.filter(t => t.category === "extra");
+            const dynContainer = document.getElementById('dynamicCategoriesContainer');
+            if (dynContainer) {
+                dynContainer.innerHTML = '';
+                let totalDone = 0;
+                let totalTasks = 0;
 
-            const mD = renderItems(mainList, 'taskList'), eD = renderItems(extraList, 'extraTaskList');
-            const totalTasks = mainList.length + extraList.length;
-            if(ui.score) ui.score.innerText = Math.round(((mD + eD) / (totalTasks || 1)) * 100) + '%';
+                categories.forEach((cat, index) => {
+                    const cColor = cat.color || 'blue';
+                    const cIcon = cat.icon || 'fa-list';
+                    
+                    // Definisi Tema Warna
+                    const theme = {
+                        blue: { text: 'text-blue-500', bgHover: 'hover:bg-blue-500', bgSoft: 'bg-blue-500/10', border: 'border-blue-500/20', textBtn: 'text-blue-400' },
+                        emerald: { text: 'text-emerald-500', bgHover: 'hover:bg-emerald-500', bgSoft: 'bg-emerald-500/10', border: 'border-emerald-500/20', textBtn: 'text-emerald-400' },
+                        amber: { text: 'text-amber-500', bgHover: 'hover:bg-amber-500', bgSoft: 'bg-amber-500/10', border: 'border-amber-500/20', textBtn: 'text-amber-400' },
+                        rose: { text: 'text-rose-500', bgHover: 'hover:bg-rose-500', bgSoft: 'bg-rose-500/10', border: 'border-rose-500/20', textBtn: 'text-rose-400' },
+                        purple: { text: 'text-purple-500', bgHover: 'hover:bg-purple-500', bgSoft: 'bg-purple-500/10', border: 'border-purple-500/20', textBtn: 'text-purple-400' },
+                        indigo: { text: 'text-indigo-500', bgHover: 'hover:bg-indigo-500', bgSoft: 'bg-indigo-500/10', border: 'border-indigo-500/20', textBtn: 'text-indigo-400' }
+                    }[cColor] || { text: 'text-slate-400', bgHover: 'hover:bg-slate-500', bgSoft: 'bg-slate-500/10', border: 'border-slate-500/20', textBtn: 'text-slate-300' };
+
+                    const catDiv = document.createElement('div');
+                    catDiv.className = index > 0 ? 'mt-10' : 'mt-0';
+                    
+                    let btnEditHTML = '';
+                    if (hasActivity) {
+                        btnEditHTML = `<button onclick="window.showMessage('Aktivitas di hari ini sudah dimulai. Jadwal terkunci.')" class="text-[9px] font-bold text-slate-500 bg-slate-800 border border-white/5 px-4 py-2 rounded-xl uppercase tracking-wider cursor-not-allowed flex items-center gap-2 shadow-none"><i class="fas fa-lock"></i> Terkunci</button>`;
+                    } else {
+                        btnEditHTML = `<button onclick="window.openBulkEdit('${cat.id}', '${cat.name}')" class="text-[9px] font-bold ${theme.textBtn} hover:text-white ${theme.bgSoft} ${theme.bgHover} border ${theme.border} px-4 py-2 rounded-xl uppercase tracking-wider transition-all shadow-lg flex items-center gap-2"><i class="fas fa-pen"></i> Edit Jadwal</button>`;
+                    }
+
+                    catDiv.innerHTML = `
+                        <div class="flex items-center justify-between mb-6 px-2">
+                            <h3 class="text-[12px] font-black ${theme.text} uppercase tracking-[4px] flex items-center gap-2">
+                                <i class="fas ${cIcon} text-slate-500"></i> ${cat.name}
+                            </h3>
+                            ${btnEditHTML}
+                        </div>
+                        <div id="taskList_${cat.id}" class="flex flex-col gap-3"></div>
+                    `;
+                    dynContainer.appendChild(catDiv);
+
+                    const catTasks = dayTasks.filter(t => t.category === cat.id);
+                    totalTasks += catTasks.length;
+                    const doneCount = renderItems(catTasks, `taskList_${cat.id}`);
+                    totalDone += doneCount;
+                });
+
+                if(ui.score) ui.score.innerText = Math.round((totalDone / (totalTasks || 1)) * 100) + '%';
+            }
 
             if (activeId) {
                 const el = document.getElementById(activeId);
                 if (el) { el.focus(); if (el.tagName === "TEXTAREA" && typeof el.setSelectionRange === "function") el.setSelectionRange(selectionStart, selectionEnd); }
             }
+            
+            window.updateCalendarView(false);
         };
 
         window.formatRupiah = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number || 0);
@@ -1489,9 +1558,92 @@
             `;
         };
 
-        window.openBulkEdit = (category) => {
+        window.openCategoryModal = () => {
+            const container = document.getElementById('categoryEditContainer');
+            container.innerHTML = '';
+            
+            // Render kategori yang ada
+            const cats = globalSettings.categories || [
+                { id: 'main', name: 'Jadwal Utama', icon: 'fa-briefcase', color: 'blue' }, 
+                { id: 'extra', name: 'Rutin & Ibadah', icon: 'fa-leaf', color: 'emerald' }
+            ];
+            
+            cats.forEach(c => window.addCategoryRow(c));
+            
+            document.getElementById('categoryModal').classList.remove('hidden');
+            document.getElementById('categoryModal').classList.add('flex');
+        };
+
+        window.closeCategoryModal = () => {
+            document.getElementById('categoryModal').classList.add('hidden');
+            document.getElementById('categoryModal').classList.remove('flex');
+        };
+
+        window.addCategoryRow = (cat = null) => {
+            const container = document.getElementById('categoryEditContainer');
+            const row = document.createElement('div');
+            row.className = "flex items-center gap-2 bg-[#0b101e] p-2 rounded-xl border border-white/5 category-row";
+            
+            const safeId = cat?.id || ('cat_' + Date.now() + Math.floor(Math.random()*1000));
+            
+            row.innerHTML = `
+                <input type="hidden" class="row-cat-id" value="${safeId}">
+                <input type="text" class="row-icon modal-input !w-[50px] !text-center !text-[11px]" placeholder="fa-list" value="${cat?.icon || 'fa-list'}">
+                <input type="text" class="row-name modal-input !flex-1 !text-[11px]" placeholder="Nama Kategori" value="${cat?.name || ''}">
+                <select class="row-color modal-input !w-[70px] !text-[11px] cursor-pointer">
+                    <option value="blue" ${cat?.color === 'blue' ? 'selected' : ''}>Biru</option>
+                    <option value="emerald" ${cat?.color === 'emerald' ? 'selected' : ''}>Hijau</option>
+                    <option value="amber" ${cat?.color === 'amber' ? 'selected' : ''}>Kuning</option>
+                    <option value="rose" ${cat?.color === 'rose' ? 'selected' : ''}>Merah</option>
+                    <option value="purple" ${cat?.color === 'purple' ? 'selected' : ''}>Ungu</option>
+                    <option value="indigo" ${cat?.color === 'indigo' ? 'selected' : ''}>Indigo</option>
+                </select>
+                <button onclick="this.parentElement.remove()" class="text-rose-500 w-8 flex items-center justify-center hover:scale-110 transition-transform"><i class="fas fa-trash text-[11px]"></i></button>
+            `;
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+        };
+
+        window.saveCategories = async () => {
+            const rows = document.querySelectorAll('.category-row');
+            let newCats = [];
+            rows.forEach(r => {
+                const nameVal = r.querySelector('.row-name').value.trim();
+                if(nameVal) {
+                    newCats.push({
+                        id: r.querySelector('.row-cat-id').value,
+                        icon: r.querySelector('.row-icon').value,
+                        name: nameVal,
+                        color: r.querySelector('.row-color').value
+                    });
+                }
+            });
+            
+            if (newCats.length === 0) return window.showMessage("Minimal harus ada 1 kategori!");
+
+            if (!globalSettings) globalSettings = { templateEveryday: null, templateDays: {} };
+            globalSettings.categories = newCats;
+            
+            if (isLocalMode || !auth.currentUser) {
+                localStorage.setItem('tracker_settings_global', JSON.stringify(globalSettings));
+            } else {
+                try {
+                    await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'settings', 'global'), globalSettings);
+                } catch(e) {
+                    console.error("Save Category Error:", e);
+                    window.showMessage("Gagal menyimpan ke Cloud. Tersimpan di Lokal.");
+                    localStorage.setItem('tracker_settings_global', JSON.stringify(globalSettings));
+                }
+            }
+            
+            window.closeCategoryModal();
+            window.renderDayTracker();
+            window.showMessage("Kategori berhasil disimpan!");
+        };
+
+        window.openBulkEdit = (category, catName) => {
             document.getElementById('bulkEditCategory').value = category;
-            document.getElementById('bulkEditTitle').innerText = category === 'main' ? "Atur Jadwal Utama" : "Atur Rutin & Ibadah";
+            document.getElementById('bulkEditTitle').innerText = "Atur " + catName;
             
             const container = document.getElementById('bulkEditContainer');
             container.innerHTML = '';

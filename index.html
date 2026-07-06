@@ -710,6 +710,8 @@
         let notesUnsubscribe = null, notesData = { notesList: [] };
         let settingsUnsubscribe = null, globalSettings = { templateEveryday: null, templateDays: {}, categories: null };
         window.openTimerPanels = {};
+        window.allCalendarData = {};
+        window.monthUnsubscribe = null;
 
         const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
         let particles = [], mouseX = -1000, mouseY = -1000;
@@ -757,6 +759,7 @@
             if(financeUnsubscribe) financeUnsubscribe(); 
             if(notesUnsubscribe) notesUnsubscribe();
             if(settingsUnsubscribe) settingsUnsubscribe();
+            if(window.monthUnsubscribe) { window.monthUnsubscribe(); window.monthUnsubscribe = null; }
             
             try { 
                 if(auth.currentUser) await signOut(auth); 
@@ -764,6 +767,7 @@
             
             cloudData = {}; financeData = {incomes:[], expenses:[], investments:[]}; notesData = {notesList: []};
             globalSettings = { templateEveryday: null, templateDays: {}, categories: null };
+            window.allCalendarData = {};
             isLocalMode = false; 
             isUserLoggedIn = false;
             
@@ -912,6 +916,15 @@
                 window.renderNotes();
             }, (err) => { console.error("Firebase Notes Sync Error:", err); });
 
+            // Sync Semua Jadwal (Untuk indikator kalender sebulan penuh)
+            if (!window.monthUnsubscribe) {
+                window.monthUnsubscribe = onSnapshot(collection(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'calendar'), (snap) => {
+                    window.allCalendarData = {};
+                    snap.forEach(docSnap => { window.allCalendarData[docSnap.id] = docSnap.data(); });
+                    window.updateCalendarView(false);
+                }, (err) => { console.error("Firebase All Calendar Sync Error:", err); });
+            }
+
             window.updateCalendarView();
         };
 
@@ -946,8 +959,11 @@
                 if (isLocalMode) {
                     const localDayData = localStorage.getItem(`tracker_data_${checkDocId}`);
                     if(localDayData && (localDayData.includes('"status":"done"') || localDayData.includes('"status":"fail"'))) hasProgress = true;
-                } else if(cloudData && isSelected) {
-                     Object.values(cloudData).forEach(item => { if(item && (item.status === 'done' || item.status === 'fail')) hasProgress = true; });
+                } else if (window.allCalendarData) {
+                    const dayData = window.allCalendarData[checkDocId];
+                    if (dayData) {
+                        Object.values(dayData).forEach(item => { if(item && (item.status === 'done' || item.status === 'fail')) hasProgress = true; });
+                    }
                 }
                 
                 if (hasProgress) {

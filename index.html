@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- PWA Setup Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Disipline Tracker">
@@ -21,7 +20,6 @@
 
     <title>Disipline Tracker 2026</title>
     
-    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -162,7 +160,6 @@
         <p class="text-white font-bold text-[10px]">MEMPROSES DATA...</p>
     </div>
 
-    <!-- PWA Install Guide for iOS -->
     <div id="iosInstallPrompt" class="hidden fixed bottom-24 left-4 right-4 z-[9000] bg-slate-900/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl flex-col gap-3">
         <div class="flex justify-between items-start">
             <h3 class="text-white font-bold text-sm">Install Aplikasi</h3>
@@ -185,7 +182,6 @@
         </div>
     </div>
 
-    <!-- MODAL RENCANA (CRUD) -->
     <div id="noteModal" class="hidden fixed inset-0 z-[30000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-4">
         <div class="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative">
             <button onclick="window.closeNoteModal()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-400 transition-colors"><i class="fas fa-times text-xl"></i></button>
@@ -211,7 +207,6 @@
         </div>
     </div>
 
-    <!-- MODAL BULK EDIT (JADWAL) -->
     <div id="bulkEditModal" class="hidden fixed inset-0 z-[30000] bg-black/90 backdrop-blur-md flex-col items-center justify-center p-2 sm:p-4">
         <div class="bg-slate-900 border border-blue-500/30 rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl relative flex flex-col max-h-[90vh]">
             <button onclick="window.closeBulkEdit()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-400 transition-colors"><i class="fas fa-times text-xl"></i></button>
@@ -253,11 +248,9 @@
     <header id="mainHeader" class="relative z-50 bg-[#050810]/90 backdrop-blur-xl p-3 sm:p-5 header-clean">
         <div class="max-w-7xl mx-auto flex flex-row items-center justify-between gap-2">
             
-            <!-- LEFT AREA: User & Actions -->
             <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0 z-10">
                 <div id="userInfo"></div>
                 
-                <!-- Action Buttons -->
                 <div id="notifWrapper" class="hidden flex items-center gap-1.5 sm:gap-2">
                     <button id="notifStatusBtn" onclick="window.requestNotifPermission()" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition-colors border border-white/5 shadow-lg group relative">
                         <i id="notifIcon" class="fas fa-bell text-[11px] text-slate-400 group-hover:text-white"></i>
@@ -266,7 +259,6 @@
                 </div>
             </div>
 
-            <!-- RIGHT AREA: Premium Logo & Install -->
             <div class="flex items-center gap-3 justify-end flex-shrink min-w-0 z-10">
                 
                 <div id="navWrapper" class="hidden">
@@ -276,10 +268,8 @@
                 </div>
 
                 <div id="headerBrand" class="hidden relative group pointer-events-auto transition-transform hover:scale-105 cursor-pointer">
-                    <!-- Glow Effect -->
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                     
-                    <!-- Logo Container -->
                     <div class="relative flex items-center gap-1.5 sm:gap-2 bg-[#0a0f1a] border border-blue-500/20 px-2 py-1.5 sm:px-3 sm:py-2 rounded-full shadow-2xl">
                         <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-[0_0_10px_rgba(59,130,246,0.6)] relative overflow-hidden flex-shrink-0">
                             <div class="absolute inset-0 bg-white/20 blur-[2px] rounded-full"></div>
@@ -298,7 +288,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto p-4 sm:p-8 pb-24">
-        <!-- Motivational Quote & Real-time Clock Area -->
         <div class="mb-10 text-center px-4 flex flex-col items-center">
             <p id="quoteText" class="text-sm sm:text-base text-slate-400 italic font-medium leading-relaxed max-w-2xl mx-auto">"Memuat motivasi harian kamu..."</p>
             <div class="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0a0f1a] border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] relative overflow-hidden group">
@@ -338,7 +327,6 @@
 
         <div id="dayTrackerArea" class="hidden opacity-0 transition-all duration-700">
             
-            <!-- TANGGAL/BULAN/TAHUN SELECTOR -->
             <div id="dateSelectorArea" class="flex items-center justify-center gap-3 mb-8 px-4 transition-all duration-300">
                 <div class="custom-select-wrapper max-w-[160px]">
                     <select id="monthSelect" class="header-select" onchange="window.updateCalendarView(true)"></select>
@@ -348,7 +336,6 @@
                 </div>
             </div>
 
-            <!-- TAB 1: JADWAL -->
             <div id="tabJadwalContent" class="block transition-all duration-500">
                 <div class="glass-card p-6 sm:p-10 rounded-[2.5rem] mb-14 shadow-2xl">
                     <div class="grid grid-cols-7 gap-3 sm:gap-5 text-center mb-6 font-black text-slate-500 text-[11px] uppercase tracking-widest">
@@ -396,72 +383,97 @@
                 </div>
             </div>
 
-            <!-- TAB 2: KEUANGAN (KOMPLEKS) -->
             <div id="tabKeuanganContent" class="hidden opacity-0 transition-all duration-500">
-                <div class="flex items-center gap-3 mb-6 px-2">
-                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center"><i class="fas fa-chart-pie text-blue-400 text-sm"></i></div>
-                    <h3 id="financeMonthLabel" class="text-[12px] font-black text-slate-300 uppercase tracking-[4px] leading-tight">Ringkasan Keuangan<br>Bulan Ini</h3>
-                </div>
+                <div class="glass-card p-5 sm:p-8 rounded-[2.5rem] mb-10 shadow-2xl border border-blue-500/20 flex flex-col gap-8 relative overflow-hidden">
+                    <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <!-- MASTER DASHBOARD RINGKASAN -->
-                <div class="glass-card p-4 sm:p-6 rounded-[2.5rem] mb-8 shadow-2xl border border-blue-500/10 flex flex-col gap-4 sm:gap-6 relative overflow-hidden">
-                    <!-- Subtle Glow Effect -->
-                    <div class="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
-
-                    <!-- 4 Stats Cards Grid -->
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative z-10">
-                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-blue-500/20 shadow-inner flex flex-col justify-center hover:border-blue-500/40 transition-colors">
-                            <p class="text-[9px] text-slate-400 font-black uppercase tracking-[3px] mb-2">Sisa Saldo</p>
-                            <p id="saldoTxt" class="text-xl sm:text-2xl font-black text-white" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-white/10 relative z-10">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-widest mb-2">
+                                <i class="fas fa-bolt"></i> Finance Command Center
+                            </div>
+                            <h3 id="financeMonthLabel" class="text-xl sm:text-2xl font-black text-white uppercase tracking-wider leading-none">Ringkasan Keuangan</h3>
                         </div>
-                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-emerald-500/10 shadow-inner flex flex-col justify-center hover:border-emerald-500/30 transition-colors">
-                            <p class="text-[9px] text-emerald-500/80 font-black uppercase tracking-[3px] mb-2">Pemasukan</p>
-                            <p id="totalIncomeTxt" class="text-xl sm:text-2xl font-black text-emerald-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                        </div>
-                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-rose-500/10 shadow-inner flex flex-col justify-center hover:border-rose-500/30 transition-colors">
-                            <p class="text-[9px] text-rose-500/80 font-black uppercase tracking-[3px] mb-2">Pengeluaran</p>
-                            <p id="totalExpenseTxt" class="text-xl sm:text-2xl font-black text-rose-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
-                        </div>
-                        <div class="bg-[#080b13] p-4 sm:p-5 rounded-[1.5rem] border border-indigo-500/10 shadow-inner flex flex-col justify-center hover:border-indigo-500/30 transition-colors">
-                            <p class="text-[9px] text-indigo-500/80 font-black uppercase tracking-[3px] mb-2">Investasi</p>
-                            <p id="totalInvestmentTxt" class="text-xl sm:text-2xl font-black text-indigo-400" style="font-family: 'JetBrains Mono', monospace;">Rp 0</p>
+                        <div class="bg-[#080b13]/80 p-4 sm:p-5 rounded-2xl border border-blue-500/30 shadow-inner w-full sm:w-auto text-right">
+                            <span class="text-[9px] text-slate-400 font-black uppercase tracking-[3px] block mb-1">Sisa Saldo Bersih</span>
+                            <span id="saldoTxt" class="text-2xl sm:text-3xl font-black text-white" style="font-family: 'JetBrains Mono', monospace;">Rp 0</span>
                         </div>
                     </div>
 
-                    <!-- Charts Area -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 relative z-10">
-                        <!-- Rasio Alokasi -->
-                        <div class="bg-[#080b13] p-5 sm:p-6 rounded-[1.5rem] border border-white/5 shadow-inner flex flex-col items-center justify-center min-h-[200px]">
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[3px] w-full text-left mb-4">Rasio Alokasi</p>
-                            <div class="w-[140px] h-[140px] relative">
-                                <canvas id="ratioChart"></canvas>
-                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
-                                    <span id="centerRatioText" class="text-2xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">0%</span>
-                                    <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Tersisa</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 relative z-10">
+                        <div class="bg-[#080b13]/60 p-4 rounded-2xl border border-emerald-500/20 flex items-center justify-between">
+                            <div>
+                                <span class="text-[9px] text-emerald-400 font-black uppercase tracking-widest block">Pemasukan (+)</span>
+                                <span id="totalIncomeTxt" class="text-lg font-black text-emerald-400 mt-1 block" style="font-family: 'JetBrains Mono', monospace;">Rp 0</span>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-lg shrink-0"><i class="fas fa-arrow-down"></i></div>
+                        </div>
+                        <div class="bg-[#080b13]/60 p-4 rounded-2xl border border-rose-500/20 flex items-center justify-between">
+                            <div>
+                                <span class="text-[9px] text-rose-400 font-black uppercase tracking-widest block">Pengeluaran (-)</span>
+                                <span id="totalExpenseTxt" class="text-lg font-black text-rose-400 mt-1 block" style="font-family: 'JetBrains Mono', monospace;">Rp 0</span>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 text-lg shrink-0"><i class="fas fa-arrow-up"></i></div>
+                        </div>
+                        <div class="bg-[#080b13]/60 p-4 rounded-2xl border border-indigo-500/20 flex items-center justify-between">
+                            <div>
+                                <span class="text-[9px] text-indigo-400 font-black uppercase tracking-widest block">Investasi (*)</span>
+                                <span id="totalInvestmentTxt" class="text-lg font-black text-indigo-400 mt-1 block" style="font-family: 'JetBrains Mono', monospace;">Rp 0</span>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-lg shrink-0"><i class="fas fa-seedling"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 pt-2">
+                        
+                        <div class="lg:col-span-5 bg-[#080b13]/80 p-5 sm:p-6 rounded-3xl border border-white/5 flex flex-col justify-between">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[3px] block mb-4">Rasio Alokasi Infografis</span>
+                            
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 my-auto py-2">
+                                <div class="w-[170px] h-[170px] relative shrink-0">
+                                    <canvas id="ratioChart" width="220" height="220"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span id="centerRatioText" class="text-xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">0%</span>
+                                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Tersisa</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-2.5 w-full">
+                                    <div class="flex items-center justify-between text-[11px] font-bold bg-slate-900/80 px-3 py-2 rounded-xl border border-white/5">
+                                        <span class="flex items-center gap-2 text-rose-400"><div class="w-2.5 h-2.5 rounded-full bg-[#f43f5e] shadow-[0_0_8px_#f43f5e]"></div> Keluar</span>
+                                        <span id="legExpPct" class="font-black text-white">0%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[11px] font-bold bg-slate-900/80 px-3 py-2 rounded-xl border border-white/5">
+                                        <span class="flex items-center gap-2 text-indigo-400"><div class="w-2.5 h-2.5 rounded-full bg-[#6366f1] shadow-[0_0_8px_#6366f1]"></div> Investasi</span>
+                                        <span id="legInvPct" class="font-black text-white">0%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[11px] font-bold bg-slate-900/80 px-3 py-2 rounded-xl border border-white/5">
+                                        <span class="flex items-center gap-2 text-emerald-400"><div class="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_8px_#10b981]"></div> Sisa</span>
+                                        <span id="legRemPct" class="font-black text-white">0%</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Tren Arus Kas -->
-                        <div class="bg-[#080b13] p-5 sm:p-6 rounded-[1.5rem] border border-white/5 shadow-inner min-h-[220px] flex flex-col lg:col-span-2">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 w-full">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-[3px]">Tren Arus Kas (Per Bulan)</span>
+                        <div class="lg:col-span-7 bg-[#080b13]/80 p-5 sm:p-6 rounded-3xl border border-white/5 flex flex-col justify-between">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[3px]">Tren Volatilitas Bulanan</span>
                                 <div class="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-widest">
-                                    <span class="text-emerald-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div> Masuk</span>
-                                    <span class="text-rose-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]"></div> Keluar</span>
-                                    <span class="text-indigo-500 flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_5px_#6366f1]"></div> Investasi</span>
+                                    <span class="text-emerald-400 flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Masuk</span>
+                                    <span class="text-rose-400 flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-rose-500"></div> Keluar</span>
+                                    <span class="text-indigo-400 flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-indigo-500"></div> Investasi</span>
                                 </div>
                             </div>
-                            <div class="w-full flex-1 relative min-h-[160px]">
+                            <div class="w-full h-[220px] relative">
                                 <canvas id="trendChart"></canvas>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
-                <!-- 3 Tabel Terpisah -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <!-- Pemasukan -->
                     <div class="glass-card p-4 sm:p-5 rounded-[2rem] border border-emerald-500/10 flex flex-col">
                         <h3 class="text-[11px] font-black text-emerald-500 uppercase tracking-[3px] mb-4 flex items-center gap-2"><i class="fas fa-arrow-down"></i> Pemasukan</h3>
                         <div class="flex flex-col sm:flex-row gap-2 mb-4">
@@ -474,7 +486,6 @@
                         <div id="incomeList" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2 max-h-[300px]"></div>
                     </div>
 
-                    <!-- Pengeluaran -->
                     <div class="glass-card p-4 sm:p-5 rounded-[2rem] border border-rose-500/10 flex flex-col">
                         <h3 class="text-[11px] font-black text-rose-500 uppercase tracking-[3px] mb-4 flex items-center gap-2"><i class="fas fa-arrow-up"></i> Pengeluaran</h3>
                         <div class="flex flex-col sm:flex-row gap-2 mb-4">
@@ -487,7 +498,6 @@
                         <div id="expenseList" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2 max-h-[300px]"></div>
                     </div>
 
-                    <!-- Investasi -->
                     <div class="glass-card p-4 sm:p-5 rounded-[2rem] border border-indigo-500/10 flex flex-col">
                         <h3 class="text-[11px] font-black text-indigo-400 uppercase tracking-[3px] mb-4 flex items-center gap-2"><i class="fas fa-seedling"></i> Investasi</h3>
                         <div class="flex flex-col sm:flex-row gap-2 mb-4">
@@ -502,7 +512,6 @@
                 </div>
             </div>
 
-            <!-- TAB 3: RENCANA (CRUD) -->
             <div id="tabRencanaContent" class="hidden opacity-0 transition-all duration-500">
                 <div class="flex items-center justify-between mb-8 px-2">
                     <h3 class="text-[12px] font-black text-amber-500 uppercase tracking-[4px] flex items-center gap-2">
@@ -514,14 +523,12 @@
                 </div>
                 
                 <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- List rencana akan dirender di sini -->
-                </div>
+                    </div>
             </div>
 
         </div>
     </main>
 
-    <!-- BOTTOM NAVIGATION -->
     <nav id="bottomNav" class="fixed bottom-0 left-0 w-full z-[100] bg-[#050810]/95 backdrop-blur-xl border-t border-white/5 nav-pb hidden transition-all duration-700 opacity-0 translate-y-full">
         <div class="max-w-md mx-auto flex justify-between items-center px-8">
             <button id="btnTabJadwal" onclick="window.switchTab('jadwal')" class="flex flex-col items-center gap-1 text-blue-500 w-16 transition-all transform scale-110 -translate-y-1">
@@ -1062,21 +1069,18 @@
 
                     card.innerHTML = `
                         <div class="flex flex-col gap-3 w-full">
-                            <!-- Bagian Atas: Waktu, Ikon & Judul -->
                             <div class="flex items-center gap-3">
                                 ${item.time ? `<div class="shrink-0"><span class="px-2.5 py-1.5 text-[10px] font-black text-blue-500 bg-blue-500/10 rounded-lg uppercase tracking-wider flex items-center justify-center">${item.time}</span></div>` : ''}
                                 <div class="shrink-0 w-5 flex justify-center"><i class="fas ${item.icon} text-[12px] text-slate-500"></i></div>
                                 <h3 class="text-[13px] font-bold ${status === 'done' ? 'task-done-text' : 'text-slate-100'} flex-1 leading-tight mb-0">${item.task}</h3>
                             </div>
                             
-                            <!-- Bagian Tengah: Catatan & Lampiran (Full Width) -->
                             <div class="flex flex-col gap-2 w-full mt-1">
                                 <textarea id="note-${item.id}" placeholder="Tambahkan rencana detail..." class="note-input w-full p-2.5 rounded-xl h-[42px] resize-y text-[10px] leading-relaxed transition-all focus:h-[60px] custom-scrollbar"></textarea>
                                 ${attHtml ? `<div class="flex flex-wrap gap-2">${attHtml}</div>` : ''}
                                 ${timerUI}
                             </div>
 
-                            <!-- Bagian Bawah: Aksi (Full Width dengan Garis Pemisah) -->
                             <div class="flex items-center justify-between w-full pt-3 mt-1 border-t border-white/5">
                                 <div class="flex items-center gap-2">
                                     <button onclick="window.triggerUpload('${item.id}')" class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 text-slate-400 hover:text-blue-400 hover:bg-slate-700 transition-colors flex items-center justify-center shadow" title="Lampiran"><i class="fas fa-paperclip text-[10px]"></i></button>
@@ -1137,6 +1141,11 @@
                         if(tab === 'rencana') btn.classList.add('text-amber-500');
                         btn.classList.add('scale-110', '-translate-y-1');
                     }
+
+                    // Trik agar Chart.js merender sempurna setelah kontainer terbuka penuh
+                    if (tab === 'keuangan') {
+                        setTimeout(() => window.renderFinance(), 100);
+                    }
                 } else {
                     content.classList.add('opacity-0');
                     setTimeout(() => content.classList.add('hidden'), 300);
@@ -1152,14 +1161,14 @@
         window.saveFinanceToFirestore = async () => {
             const finDocId = `finance-${selectedDate.getFullYear()}-${selectedDate.getMonth()}`;
             
-            // Explicit payload to prevent undefined arrays crashing Firebase
+            // Sanitasi Ekstrem: Pastikan HANYA array murni bersih yang dikirim ke Firebase
             const payload = {
-                incomes: financeData.incomes || [],
-                expenses: financeData.expenses || [],
-                investments: financeData.investments || []
+                incomes: (financeData.incomes || []).map(i => ({ id: i.id, desc: i.desc, amount: i.amount, date: i.date })),
+                expenses: (financeData.expenses || []).map(i => ({ id: i.id, desc: i.desc, amount: i.amount, date: i.date })),
+                investments: (financeData.investments || []).map(i => ({ id: i.id, desc: i.desc, amount: i.amount, date: i.date }))
             };
 
-            if (isLocalMode) { 
+            if (isLocalMode || !auth.currentUser) { 
                 localStorage.setItem(`tracker_fin_${finDocId}`, JSON.stringify(payload)); 
                 
                 let allFinLocal = {};
@@ -1174,12 +1183,24 @@
                 window.updateSyncUI(); 
                 return; 
             }
-            if (!auth.currentUser) return; 
+            
             try {
                 await setDoc(doc(db, 'artifacts', trackerId, 'users', auth.currentUser.uid, 'finance', finDocId), payload);
             } catch (err) {
                 console.error("Firebase Finance Save Error:", err);
-                window.showMessage("Gagal menyimpan keuangan ke Cloud!");
+                const errCode = err.code ? err.code : 'unknown';
+                window.showMessage(`Gagal Cloud! (${errCode}). Beralih ke Offline Lokal.`);
+                
+                localStorage.setItem(`tracker_fin_${finDocId}`, JSON.stringify(payload));
+                let allFinLocal = {};
+                for(let i=0; i<localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if(key.startsWith('tracker_fin_')) {
+                        const id = key.replace('tracker_fin_', '');
+                        allFinLocal[id] = JSON.parse(localStorage.getItem(key));
+                    }
+                }
+                window.processFinanceData(allFinLocal);
             }
         };
 
@@ -1191,7 +1212,6 @@
             
             if(!desc || isNaN(amt) || amt <= 0) return window.showMessage("Isi keterangan dan nominal yang valid!");
             
-            // Ensure arrays exist
             if(!financeData.incomes) financeData.incomes = [];
             if(!financeData.expenses) financeData.expenses = [];
             if(!financeData.investments) financeData.investments = [];
@@ -1219,7 +1239,7 @@
             const mNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const finTitle = document.getElementById('financeMonthLabel');
             if(finTitle) {
-                finTitle.innerHTML = `Ringkasan Keuangan<br>${mNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+                finTitle.innerHTML = `Ringkasan Keuangan • ${mNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
             }
 
             let tInc = 0, tExp = 0, tInv = 0;
@@ -1227,6 +1247,9 @@
             if(financeData.expenses) financeData.expenses.forEach(i => tExp += i.amount);
             if(financeData.investments) financeData.investments.forEach(i => tInv += i.amount);
             
+            // Sinkronisasi instan ke memori bulanan agar grafik langsung responsif
+            yearlyFinanceStats[selectedDate.getMonth()] = { inc: tInc, exp: tExp, inv: tInv };
+
             // Render lists terpisah
             const renderList = (data, containerId, colorCls, type) => {
                 const container = document.getElementById(containerId);
@@ -1265,76 +1288,87 @@
             const sisaDonut = Math.max(0, sisaSaldo);
             const totalOut = tExp + tInv + sisaDonut; 
             const sisaPct = tInc === 0 ? 0 : Math.round((sisaDonut / tInc) * 100);
+            const expPct = tInc === 0 ? 0 : Math.round((tExp / tInc) * 100);
+            const invPct = tInc === 0 ? 0 : Math.round((tInv / tInc) * 100);
             
             document.getElementById('centerRatioText').innerText = `${sisaPct}%`;
+            if(document.getElementById('legExpPct')) document.getElementById('legExpPct').innerText = `${expPct}%`;
+            if(document.getElementById('legInvPct')) document.getElementById('legInvPct').innerText = `${invPct}%`;
+            if(document.getElementById('legRemPct')) document.getElementById('legRemPct').innerText = `${sisaPct}%`;
 
-            // Chart.js Render: Rasio Presentase (Donut)
-            if (window.ratioChart) window.ratioChart.destroy();
-            const ctxRatio = document.getElementById('ratioChart').getContext('2d');
-            window.ratioChart = new Chart(ctxRatio, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Pengeluaran', 'Investasi', 'Tersisa'],
-                    datasets: [{
-                        data: [tExp, tInv, sisaDonut],
-                        backgroundColor: ['#f43f5e', '#6366f1', '#10b981'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: { label: function(context) { return context.label + ': ' + window.formatRupiah(context.raw); } } } }
-                }
-            });
+            // Chart.js Render: Rasio Presentase (Doughnut Bergaya Infografis)
+            if (window.ratioChart instanceof Chart) window.ratioChart.destroy();
+            const canvasRatio = document.getElementById('ratioChart');
+            if (canvasRatio) {
+                const ctxRatio = canvasRatio.getContext('2d');
+                window.ratioChart = new Chart(ctxRatio, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pengeluaran', 'Investasi', 'Tersisa'],
+                        datasets: [{
+                            data: [tExp, tInv, sisaDonut],
+                            backgroundColor: ['#f43f5e', '#6366f1', '#10b981'],
+                            borderWidth: 0,
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '72%',
+                        plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: { label: function(context) { return context.label + ': ' + window.formatRupiah(context.raw); } } } }
+                    }
+                });
+            }
 
-            // Chart.js Render: Tren Frekuensi Bulanan (Line Chart)
+            // Chart.js Render: Tren Volatilitas Bulanan (Gaya RSI Line Chart)
             const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
             const mInc = yearlyFinanceStats.map(s => s.inc);
             const mExp = yearlyFinanceStats.map(s => s.exp);
             const mInv = yearlyFinanceStats.map(s => s.inv);
 
-            if (window.trendChart) window.trendChart.destroy();
-            const ctxTrend = document.getElementById('trendChart').getContext('2d');
-            
-            let gradientInc = ctxTrend.createLinearGradient(0, 0, 0, 140);
-            gradientInc.addColorStop(0, 'rgba(16, 185, 129, 0.5)');
-            gradientInc.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-            
-            let gradientExp = ctxTrend.createLinearGradient(0, 0, 0, 140);
-            gradientExp.addColorStop(0, 'rgba(244, 63, 94, 0.5)');
-            gradientExp.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
+            if (window.trendChart instanceof Chart) window.trendChart.destroy();
+            const canvasTrend = document.getElementById('trendChart');
+            if (canvasTrend) {
+                const ctxTrend = canvasTrend.getContext('2d');
+                
+                let gradientInc = ctxTrend.createLinearGradient(0, 0, 0, 180);
+                gradientInc.addColorStop(0, 'rgba(16, 185, 129, 0.45)');
+                gradientInc.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+                
+                let gradientExp = ctxTrend.createLinearGradient(0, 0, 0, 180);
+                gradientExp.addColorStop(0, 'rgba(244, 63, 94, 0.45)');
+                gradientExp.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
 
-            let gradientInv = ctxTrend.createLinearGradient(0, 0, 0, 140);
-            gradientInv.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
-            gradientInv.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+                let gradientInv = ctxTrend.createLinearGradient(0, 0, 0, 180);
+                gradientInv.addColorStop(0, 'rgba(99, 102, 241, 0.45)');
+                gradientInv.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
-            window.trendChart = new Chart(ctxTrend, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Pengeluaran', data: mExp, borderColor: '#f43f5e', backgroundColor: gradientExp, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#f43f5e' },
-                        { label: 'Investasi', data: mInv, borderColor: '#6366f1', backgroundColor: gradientInv, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#6366f1' },
-                        { label: 'Pemasukan', data: mInc, borderColor: '#10b981', backgroundColor: gradientInc, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#10b981' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false }, 
-                        tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" }, bodyFont: { size: 11, family: "'JetBrains Mono', monospace", weight: 'bold' }, padding: 10, callbacks: { label: function(context) { return context.dataset.label + ': ' + window.formatRupiah(context.raw); } } } 
+                window.trendChart = new Chart(ctxTrend, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Pengeluaran', data: mExp, borderColor: '#f43f5e', backgroundColor: gradientExp, borderWidth: 2.5, fill: true, tension: 0.45, pointRadius: 2, pointHoverRadius: 6, pointBackgroundColor: '#f43f5e' },
+                            { label: 'Investasi', data: mInv, borderColor: '#6366f1', backgroundColor: gradientInv, borderWidth: 2.5, fill: true, tension: 0.45, pointRadius: 2, pointHoverRadius: 6, pointBackgroundColor: '#6366f1' },
+                            { label: 'Pemasukan', data: mInc, borderColor: '#10b981', backgroundColor: gradientInc, borderWidth: 2.5, fill: true, tension: 0.45, pointRadius: 2, pointHoverRadius: 6, pointBackgroundColor: '#10b981' }
+                        ]
                     },
-                    scales: {
-                        x: { display: true, grid: { display: false }, ticks: { color: '#64748b', font: { size: 9, weight: 'bold' } } },
-                        y: { display: false, beginAtZero: true } 
-                    },
-                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
-                }
-            });
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: false }, 
+                            tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15, 23, 42, 0.95)', titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" }, bodyFont: { size: 11, family: "'JetBrains Mono', monospace", weight: 'bold' }, padding: 10, callbacks: { label: function(context) { return context.dataset.label + ': ' + window.formatRupiah(context.raw); } } } 
+                        },
+                        scales: {
+                            x: { display: true, grid: { display: false }, ticks: { color: '#64748b', font: { size: 9, weight: 'bold' } } },
+                            y: { display: false, beginAtZero: true } 
+                        },
+                        interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                    }
+                });
+            }
         };
 
         window.saveNotesToFirestore = async () => {
